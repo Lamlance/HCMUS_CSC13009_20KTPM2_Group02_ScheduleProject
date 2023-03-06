@@ -10,8 +10,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
+
+import org.w3c.dom.Text;
 
 import java.util.Calendar;
 
@@ -67,6 +71,22 @@ public class CalendarFragment extends Fragment {
     CalendarRecyclerViewAdapter calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapter(getContext());
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
 
+    TextView txtSelectDate = getView().findViewById(R.id.txtSelectDate);
+    ((Button)getView().findViewById(R.id.btnIncreaseMonth)).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        calendarRecyclerViewAdapter.increaseMonth();
+        txtSelectDate.setText(calendarRecyclerViewAdapter.getSelectDateString());
+      }
+    });
+    ((Button)getView().findViewById(R.id.btnDecreaseMonth)).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        calendarRecyclerViewAdapter.decreaseMonth();
+        txtSelectDate.setText(calendarRecyclerViewAdapter.getSelectDateString());
+      }
+    });
 
+    (txtSelectDate).setText(calendarRecyclerViewAdapter.getSelectDateString());
   }
 }
