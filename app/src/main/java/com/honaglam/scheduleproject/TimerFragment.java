@@ -35,6 +35,8 @@ public class TimerFragment extends Fragment {
   private Button btnTimer;
   protected TimerService timerService;
   private long millisRemain = 1;
+
+  private Button btnTimerSettings;
   public synchronized void setMillisRemain(long millisRemain) {
     this.millisRemain = millisRemain;
   }
@@ -74,7 +76,7 @@ public class TimerFragment extends Fragment {
     ((MainActivity)getActivity()).bindTimerService(new TimerConnectionService());
 
 
-    btnTimer = getView().findViewById(R.id.btnTimerStart);
+    btnTimer = getView().findViewById(R.id.btnTimerSetting);
     btnTimer.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {

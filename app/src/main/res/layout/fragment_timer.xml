@@ -21,6 +21,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="START"/>
+      <Button
+          android:id="@+id/btnTimerSetting"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Settings"/>
   </LinearLayout>
+
+
+    <!-- TODO: Create a setting button to change time -->
+
+
 
 </FrameLayout>
