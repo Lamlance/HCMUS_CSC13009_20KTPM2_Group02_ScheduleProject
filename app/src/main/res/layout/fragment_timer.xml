@@ -16,7 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="25:00"
-        android:textSize="50sp"/>
+        android:textSize="50sp"
+        android:layout_marginTop="200dp"/>
     <Button
         android:id="@+id/btnTimerStart"
         android:layout_width="100dp"
@@ -27,7 +28,8 @@
         android:id="@+id/btnTimerPause"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:text="GIVE UP"/>
+        android:text="GIVE UP"
+        android:layout_marginTop="200dp"/>
 
   </LinearLayout>
 

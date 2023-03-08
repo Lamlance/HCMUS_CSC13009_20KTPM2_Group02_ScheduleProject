@@ -106,6 +106,10 @@ public class TimerService extends Service {
     timer.cancel();
   }
 
+  public void resetTimer() {
+
+  }
+
   @Override
   public void onDestroy() {
     timer.cancel();

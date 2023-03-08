@@ -96,6 +96,7 @@ public class TimerFragment extends Fragment {
     btnPause = getView().findViewById(R.id.btnTimerPause);
     btnPause.setBackgroundColor(Color.parseColor("#ffffff"));
     btnPause.setTextColor(Color.parseColor("#ba4949"));
+
     btnPause.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
