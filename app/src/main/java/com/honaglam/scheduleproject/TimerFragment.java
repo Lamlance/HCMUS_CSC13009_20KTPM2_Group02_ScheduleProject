@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
+import androidx.fragment.app.FragmentManager;
 import java.util.Locale;
 
 /**
@@ -36,7 +36,7 @@ public class TimerFragment extends Fragment {
   protected TimerService timerService;
   private long millisRemain = 1;
 
-  private Button btnTimerSettings;
+  private Button timerSetting;
   public synchronized void setMillisRemain(long millisRemain) {
     this.millisRemain = millisRemain;
   }
@@ -76,7 +76,7 @@ public class TimerFragment extends Fragment {
     ((MainActivity)getActivity()).bindTimerService(new TimerConnectionService());
 
 
-    btnTimer = getView().findViewById(R.id.btnTimerSetting);
+    btnTimer = getView().findViewById(R.id.btnTimerStart);
     btnTimer.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -86,6 +86,16 @@ public class TimerFragment extends Fragment {
         }
       }
     });
+
+    timerSetting = getView().findViewById(R.id.btnTimerSetting);
+    timerSetting.setOnClickListener(new View.OnClickListener(){
+
+      @Override
+      public void onClick(View view) {
+        ((MainActivity)getActivity()).switchFragment_TimerSetting();
+      }
+    });
+
 
 
   }
