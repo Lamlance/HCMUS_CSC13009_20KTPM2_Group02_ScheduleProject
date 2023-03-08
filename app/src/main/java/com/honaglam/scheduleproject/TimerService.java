@@ -62,7 +62,7 @@ public class TimerService extends Service {
   class Timer implements Runnable {
     @Override
     public void run() {
-      timer = new CountDownTimer(30*1000,1000) {
+      timer = new CountDownTimer(1500*1000,1000) {
         @Override
         public void onTick(long l) {
           millisRemain = l;

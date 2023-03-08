@@ -15,12 +15,20 @@
         android:id="@+id/txtTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Click start to start timer" />
+        android:text="25:00"
+        android:textSize="50sp"/>
     <Button
         android:id="@+id/btnTimerStart"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:text="START"/>
+        android:text="START"
+        android:layout_marginTop="10dp"/>
+    <Button
+        android:id="@+id/btnTimerPause"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="GIVE UP"/>
+
   </LinearLayout>
 
 </FrameLayout>

@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject;
 
 import android.content.ComponentName;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +35,7 @@ public class TimerFragment extends Fragment {
 
   private TextView txtTimer;
   private Button btnTimer;
+  private Button btnPause;
   protected TimerService timerService;
   private long millisRemain = 1;
   public synchronized void setMillisRemain(long millisRemain) {
@@ -71,10 +74,15 @@ public class TimerFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     txtTimer = getView().findViewById(R.id.txtTimer);
+    txtTimer.setTextColor(Color.parseColor("#ffffff"));
     ((MainActivity)getActivity()).bindTimerService(new TimerConnectionService());
-
+    view.setBackgroundColor(Color.parseColor("#c15c5c"));
 
     btnTimer = getView().findViewById(R.id.btnTimerStart);
+    btnTimer.setBackgroundColor(Color.parseColor("#ffffff"));
+    btnTimer.setTextColor(Color.parseColor("#ba4949"));
+
+
     btnTimer.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -85,13 +93,25 @@ public class TimerFragment extends Fragment {
       }
     });
 
+    btnPause = getView().findViewById(R.id.btnTimerPause);
+    btnPause.setBackgroundColor(Color.parseColor("#ffffff"));
+    btnPause.setTextColor(Color.parseColor("#ba4949"));
+    btnPause.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        timerService.stopTimer();
+      }
+    });
 
   }
 
   class UpdateTimeUI implements Runnable{
     @Override
     public void run() {
-      txtTimer.setText(String.format("%d",getMillisRemain()));
+      int seconds = ((int) getMillisRemain() / 1000) % 60;
+      int minutes = (int) getMillisRemain() / (60 * 1000);
+      txtTimer.setText(String.format("%d:%02d",minutes, seconds));
+      txtTimer.setTextSize(50);
       if(millisRemain > 0){
         txtTimer.postDelayed(new UpdateTimeUI(),1000);
       }else {
