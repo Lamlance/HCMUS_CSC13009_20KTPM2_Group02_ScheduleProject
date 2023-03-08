@@ -80,23 +80,26 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
   }
 
+
   public void increaseMonth(){
+    int size = getItemCount();
     calendar.add(Calendar.MONTH,1);
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH)
     );
     selectedDate = 1;
-    this.notifyDataSetChanged();
+    this.notifyItemRangeChanged(0,size);
   }
   public void decreaseMonth(){
+    int size = getItemCount();
     calendar.add(Calendar.MONTH,-1);
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH)
     );
     selectedDate = 1;
-    this.notifyDataSetChanged();
+    this.notifyItemRangeChanged(0,size);
   }
   public String getSelectDateString(){
     int month = calendar.get(Calendar.MONTH) + 1;
