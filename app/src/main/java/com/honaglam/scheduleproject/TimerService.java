@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,14 +12,15 @@ import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
+//import android.os.Looper;
 
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
+  private static final long START_TIME_IN_MILLIS = 1500*1000;
   long millisRemain = 0;
 
-  private static String CHANNEL_ID = "TimerNotificationChanel";
+  private static final String CHANNEL_ID = "TimerNotificationChanel";
   private static final int NOTIFICATION_ID=6969;
   public TimerTickCallBack tickCallBack = null;
   Intent timerIntent;
@@ -62,7 +64,8 @@ public class TimerService extends Service {
   class Timer implements Runnable {
     @Override
     public void run() {
-      timer = new CountDownTimer(1500*1000,1000) {
+      timer = new CountDownTimer(START_TIME_IN_MILLIS,1000) {
+        @SuppressLint("DefaultLocale")
         @Override
         public void onTick(long l) {
           millisRemain = l;
@@ -70,7 +73,9 @@ public class TimerService extends Service {
           if(tickCallBack != null){
             try {
               tickCallBack.call(millisRemain);
-            }catch (Exception e){}
+            }catch (Exception e){
+              e.printStackTrace();
+            }
           }
         }
 
@@ -80,7 +85,9 @@ public class TimerService extends Service {
           if(tickCallBack != null){
             try {
               tickCallBack.call(0);
-            }catch (Exception e){}
+            }catch (Exception e){
+              e.printStackTrace();
+            }
           }
         }
       };
@@ -102,12 +109,13 @@ public class TimerService extends Service {
     handler.post(new Timer());
   }
 
-  public void stopTimer(){
+  public void pauseTimer(){
     timer.cancel();
   }
 
   public void resetTimer() {
-
+    millisRemain = START_TIME_IN_MILLIS;
+    timer.cancel();
   }
 
   @Override

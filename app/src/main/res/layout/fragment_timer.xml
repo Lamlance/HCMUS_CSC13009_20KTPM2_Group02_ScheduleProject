@@ -25,7 +25,7 @@
         android:text="START"
         android:layout_marginTop="10dp"/>
     <Button
-        android:id="@+id/btnTimerPause"
+        android:id="@+id/btnTimerGiveUp"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="GIVE UP"

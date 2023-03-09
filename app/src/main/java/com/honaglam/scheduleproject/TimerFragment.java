@@ -9,17 +9,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.Handler;
+//import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.util.Log;
+//import android.os.Looper;
+//import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.Locale;
+//import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,9 +35,10 @@ public class TimerFragment extends Fragment {
 
   private TextView txtTimer;
   private Button btnTimer;
-  private Button btnPause;
+  private Button btnGiveUp;
   protected TimerService timerService;
   private long millisRemain = 1;
+
   public synchronized void setMillisRemain(long millisRemain) {
     this.millisRemain = millisRemain;
   }
@@ -93,14 +94,14 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    btnPause = getView().findViewById(R.id.btnTimerPause);
-    btnPause.setBackgroundColor(Color.parseColor("#ffffff"));
-    btnPause.setTextColor(Color.parseColor("#ba4949"));
+    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp.setBackgroundColor(Color.parseColor("#ffffff"));
+    btnGiveUp.setTextColor(Color.parseColor("#ba4949"));
 
-    btnPause.setOnClickListener(new View.OnClickListener() {
+    btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        timerService.stopTimer();
+        timerService.pauseTimer();
       }
     });
 
