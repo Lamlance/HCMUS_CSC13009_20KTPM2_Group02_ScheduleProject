@@ -52,7 +52,6 @@ public class TimerFragment extends Fragment {
   public static TimerFragment newInstance(String param1, String param2) {
     TimerFragment fragment = new TimerFragment();
     Bundle args = new Bundle();
-
     fragment.setArguments(args);
     return fragment;
   }
