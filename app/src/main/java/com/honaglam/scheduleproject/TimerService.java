@@ -18,7 +18,7 @@ public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
   private static final long START_TIME_IN_MILLIS = 1500*1000;
-  long millisRemain = 0;
+  long millisRemain = 1500*1000;
 
   private static final String CHANNEL_ID = "TimerNotificationChanel";
   private static final int NOTIFICATION_ID=6969;
@@ -81,7 +81,7 @@ public class TimerService extends Service {
 
         @Override
         public void onFinish() {
-          millisRemain = 0;
+          millisRemain = START_TIME_IN_MILLIS;
           if(tickCallBack != null){
             try {
               tickCallBack.call(0);

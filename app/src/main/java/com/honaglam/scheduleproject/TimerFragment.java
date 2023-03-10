@@ -37,7 +37,9 @@ public class TimerFragment extends Fragment {
   private Button btnTimer;
   private Button btnGiveUp;
   protected TimerService timerService;
-  private long millisRemain = 1;
+  private static final long START_TIME_IN_MILLIS = 1500*1000;
+
+  private long millisRemain = 1500*1000;
 
   public synchronized void setMillisRemain(long millisRemain) {
     this.millisRemain = millisRemain;
@@ -101,6 +103,8 @@ public class TimerFragment extends Fragment {
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
+        millisRemain = START_TIME_IN_MILLIS;
+        txtTimer.postDelayed(new UpdateTimeUI(),1000);
         timerService.pauseTimer();
       }
     });
@@ -117,7 +121,8 @@ public class TimerFragment extends Fragment {
       if(millisRemain > 0){
         txtTimer.postDelayed(new UpdateTimeUI(),1000);
       }else {
-        millisRemain = 1;
+        millisRemain = START_TIME_IN_MILLIS;
+        txtTimer.postDelayed(new UpdateTimeUI(),1000);
       }
     }
   }
