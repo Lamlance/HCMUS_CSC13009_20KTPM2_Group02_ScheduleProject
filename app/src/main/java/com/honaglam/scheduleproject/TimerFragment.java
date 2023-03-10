@@ -108,7 +108,6 @@ public class TimerFragment extends Fragment {
         timerService.pauseTimer();
       }
     });
-
   }
 
   class UpdateTimeUI implements Runnable{
