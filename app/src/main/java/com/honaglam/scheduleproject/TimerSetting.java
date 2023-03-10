@@ -2,11 +2,17 @@ package com.honaglam.scheduleproject;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.NumberPicker;
+
+import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,12 +23,14 @@ public class TimerSetting extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Button confirmButton;
+    private Button cancelButton;
+    private NumberPicker pomodoroTimePicker;
+    private int pomodoroTime;
+    private NumberPicker shortBreakPicker;
+    private int shortBreakTime;
+    private NumberPicker longBreakPicker;
+    private int longBreakTime;
 
     public TimerSetting() {
         // Required empty public constructor
@@ -40,25 +48,85 @@ public class TimerSetting extends Fragment {
     public static TimerSetting newInstance(String param1, String param2) {
         TimerSetting fragment = new TimerSetting();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
         }
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_timer_setting, container, false);
     }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        int minVal = 0;
+        int maxVal = 120;
+        // Set time for pomodoro work time and watch changed valued
+        pomodoroTimePicker = getView().findViewById(R.id.workTime);
+        pomodoroTimePicker.setMinValue(minVal);
+        pomodoroTimePicker.setMaxValue(maxVal);
+        pomodoroTimePicker.setValue(25);
+        pomodoroTimePicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+                pomodoroTime = pomodoroTimePicker.getValue();
+            }
+        });
+
+        // Set time for short break time and watch changed valued
+        shortBreakPicker = getView().findViewById(R.id.shortBreak);
+        shortBreakPicker.setMinValue(minVal);
+        shortBreakPicker.setMaxValue(maxVal);
+        shortBreakPicker.setValue(5);
+        shortBreakPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+                shortBreakTime = shortBreakPicker.getValue();
+            }
+        });
+
+        // Set time for long break time and watch changed valued
+        longBreakPicker = getView().findViewById(R.id.longBreak);
+        longBreakPicker.setMinValue(minVal);
+        longBreakPicker.setMaxValue(maxVal);
+        longBreakPicker.setValue(10);
+        longBreakPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+                longBreakTime = longBreakPicker.getValue();
+            }
+        });
+
+        // Pass the setting to the timer Fragment upon confirm pressed
+        confirmButton = getView().findViewById(R.id.confirmButton);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (view.getId() == R.id.confirmButton){
+                    int workTime = pomodoroTime;
+                    int shortBreak = shortBreakTime;
+                    int longBreak = longBreakTime;
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("workTime", workTime);
+                    bundle.putInt("shortBreakTime", shortBreak);
+                    bundle.putInt("longBreakTime", longBreak);
+                    TimerFragment timerFragment = new TimerFragment();
+                    timerFragment.setArguments(bundle);
+                }
+
+            }
+        });
+        cancelButton = getView().findViewById(R.id.cancelButton);
+
+    }
+
 }

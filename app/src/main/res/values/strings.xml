@@ -2,4 +2,10 @@
     <string name="app_name">ScheduleProject</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="confirm">Confirm</string>
+    <string name="pomodoro">Pomodoro</string>
+    <string name="pomodoro_settings">Pomodoro Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="short_break">Short Break</string>
+    <string name="long_break">Long Break</string>
 </resources>

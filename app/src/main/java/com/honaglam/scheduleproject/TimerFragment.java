@@ -89,7 +89,6 @@ public class TimerFragment extends Fragment {
 
     timerSetting = getView().findViewById(R.id.btnTimerSetting);
     timerSetting.setOnClickListener(new View.OnClickListener(){
-
       @Override
       public void onClick(View view) {
         ((MainActivity)getActivity()).switchFragment_TimerSetting();
