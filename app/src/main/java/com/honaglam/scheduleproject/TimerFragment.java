@@ -140,7 +140,6 @@ public class TimerFragment extends Fragment {
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-
     }
   }
 }
