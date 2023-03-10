@@ -102,7 +102,6 @@ public class TimerFragment extends Fragment {
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-
         millisRemain = START_TIME_IN_MILLIS;
         txtTimer.postDelayed(new UpdateTimeUI(),1000);
         timerService.pauseTimer();

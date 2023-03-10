@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +27,9 @@ public class TimerSetting extends Fragment {
     private Button confirmButton;
     private Button cancelButton;
     private NumberPicker pomodoroTimePicker;
-    private int pomodoroTime;
     private NumberPicker shortBreakPicker;
-    private int shortBreakTime;
     private NumberPicker longBreakPicker;
-    private int longBreakTime;
+
 
     public TimerSetting() {
         // Required empty public constructor
@@ -78,7 +77,7 @@ public class TimerSetting extends Fragment {
         pomodoroTimePicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                pomodoroTime = pomodoroTimePicker.getValue();
+                pomodoroTimePicker.setValue(i1);
             }
         });
 
@@ -90,7 +89,8 @@ public class TimerSetting extends Fragment {
         shortBreakPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                shortBreakTime = shortBreakPicker.getValue();
+                shortBreakPicker.setValue(i1);
+
             }
         });
 
@@ -102,7 +102,7 @@ public class TimerSetting extends Fragment {
         longBreakPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                longBreakTime = longBreakPicker.getValue();
+                longBreakPicker.setValue(i1);
             }
         });
 
@@ -112,20 +112,37 @@ public class TimerSetting extends Fragment {
             @Override
             public void onClick(View view) {
                 if (view.getId() == R.id.confirmButton){
-                    int workTime = pomodoroTime;
-                    int shortBreak = shortBreakTime;
-                    int longBreak = longBreakTime;
+                    int workTime = pomodoroTimePicker.getValue();
+                    int shortBreak = shortBreakPicker.getValue();
+                    int longBreak = longBreakPicker.getValue();
+                    //TODO: Parse all data through
                     Bundle bundle = new Bundle();
                     bundle.putInt("workTime", workTime);
-                    bundle.putInt("shortBreakTime", shortBreak);
-                    bundle.putInt("longBreakTime", longBreak);
+//                    bundle.putInt("shortBreakTime", shortBreak);
+//                    bundle.putInt("longBreakTime", shortBreak);
                     TimerFragment timerFragment = new TimerFragment();
                     timerFragment.setArguments(bundle);
-                }
 
+                    //TODO: DATA TRANSFERED TO TIMER FRAGMENT BUT COULD NOT GET DATA
+                    // TODO: GET THE DATA IN THE FILE TimerFragment.java and parse it to START_TIME_IN_MILLIS
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, timerFragment).commit();
+
+                    // Redirect to main Pomodoro Page
+                    ((MainActivity)getActivity()).switchFragment_Pomodoro();
+                }
             }
         });
+        // On click event for cancel button
+        // TODO: TRANSFER THIS TO TIMER FRAGMENT
         cancelButton = getView().findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: Add a variable to save the current setting?
+                // Redirect to main Pomodoro Page
+                ((MainActivity)getActivity()).switchFragment_Pomodoro();
+            }
+        });
 
     }
 
