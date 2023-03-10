@@ -20,7 +20,7 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder implements View.
   @Override
   public void onClick(View view) {
     int position = getAdapterPosition();
-    Toast.makeText(view.getContext(), "Da chon duoc ngay " + position, Toast.LENGTH_SHORT).show();
+    // Toast.makeText(view.getContext(), "Da chon duoc ngay " + position, Toast.LENGTH_SHORT).show();
   }
 }
 
