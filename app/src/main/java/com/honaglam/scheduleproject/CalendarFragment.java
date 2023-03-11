@@ -96,6 +96,7 @@ public class CalendarFragment extends Fragment {
       }
     });
     (txtSelectDate).setText(calendarRecyclerViewAdapter.getSelectDateString());
+
   }
 
 }

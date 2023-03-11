@@ -26,10 +26,8 @@ import android.widget.Toolbar;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
-
   public static final String FRAGMENT_TAG_TIMER = "pomodoro_timer";
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
-
   private Intent timerIntent;
   private ServiceConnection timerServiceConnection;
   private DrawerLayout drawerLayout;
@@ -38,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
-
+  private TimerSetting timerSettingFragment;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     fragmentManager = getSupportFragmentManager();
     calendarFragment = new CalendarFragment();
     timerFragment = new TimerFragment();
+    timerSettingFragment = new TimerSetting();
 
     fragmentManager
             .beginTransaction()
@@ -95,6 +94,19 @@ public class MainActivity extends AppCompatActivity {
             .commit();
     return true;
   }
+  public boolean switchFragment_TimerSetting(){
+    if (timerSettingFragment.isVisible()){
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView,timerSettingFragment,"SettingFragment")
+            .addToBackStack("SettingFragment")
+            .commit();
+    return true;
+  }
+
+
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
     @Override

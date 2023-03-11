@@ -2,21 +2,24 @@ package com.honaglam.scheduleproject;
 
 import android.content.ComponentName;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.Handler;
+//import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
+//import android.os.Looper;
+//import android.util.Log;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
+import androidx.fragment.app.FragmentManager;
 import java.util.Locale;
 
 /**
@@ -33,8 +36,11 @@ public class TimerFragment extends Fragment {
 
   private TextView txtTimer;
   private Button btnTimer;
+  private Button btnGiveUp;
+  private Button timerSetting;
   protected TimerService timerService;
-  private long millisRemain = 1;
+  private static final long START_TIME_IN_MILLIS = 1500*1000;
+  private long millisRemain = 1500*1000;
   public synchronized void setMillisRemain(long millisRemain) {
     this.millisRemain = millisRemain;
   }
@@ -46,7 +52,6 @@ public class TimerFragment extends Fragment {
   public static TimerFragment newInstance(String param1, String param2) {
     TimerFragment fragment = new TimerFragment();
     Bundle args = new Bundle();
-
     fragment.setArguments(args);
     return fragment;
   }
@@ -65,17 +70,18 @@ public class TimerFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     return inflater.inflate(R.layout.fragment_timer, container, false);
+
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+
     txtTimer = getView().findViewById(R.id.txtTimer);
     ((MainActivity)getActivity()).bindTimerService(new TimerConnectionService());
-
-
     btnTimer = getView().findViewById(R.id.btnTimerStart);
     btnTimer.setOnClickListener(new View.OnClickListener() {
+
       @Override
       public void onClick(View view) {
         if(timerService != null){
@@ -85,17 +91,36 @@ public class TimerFragment extends Fragment {
       }
     });
 
-
+    timerSetting = getView().findViewById(R.id.btnTimerSetting);
+    timerSetting.setOnClickListener(new View.OnClickListener(){
+      @Override
+      public void onClick(View view) {
+        ((MainActivity)getActivity()).switchFragment_TimerSetting();
+      }
+    });
+    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        millisRemain = START_TIME_IN_MILLIS;
+        txtTimer.postDelayed(new UpdateTimeUI(),1000);
+        timerService.pauseTimer();
+      }
+    });
   }
 
   class UpdateTimeUI implements Runnable{
     @Override
     public void run() {
-      txtTimer.setText(String.format("%d",getMillisRemain()));
+      int seconds = ((int) getMillisRemain() / 1000) % 60;
+      int minutes = (int) getMillisRemain() / (60 * 1000);
+      txtTimer.setText(String.format("%d:%02d",minutes, seconds));
+      txtTimer.setTextSize(50);
       if(millisRemain > 0){
         txtTimer.postDelayed(new UpdateTimeUI(),1000);
       }else {
-        millisRemain = 1;
+        millisRemain = START_TIME_IN_MILLIS;
+        txtTimer.postDelayed(new UpdateTimeUI(),1000);
       }
     }
   }
@@ -107,6 +132,7 @@ public class TimerFragment extends Fragment {
       timerService.tickCallBack = new TimerService.TimerTickCallBack() {
         @Override
         public void call(long remainMillis) throws Exception {
+
           setMillisRemain(remainMillis);
         }
       };
@@ -114,7 +140,6 @@ public class TimerFragment extends Fragment {
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-
     }
   }
 }
