@@ -47,7 +47,7 @@ public class CalendarFragment extends Fragment {
   Animation ani_month_r2l;
 
   // TODO: Rename and change types and number of parameters
-  public static CalendarFragment newInstance(String param1, String param2) {
+  public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
     Bundle args = new Bundle();
     fragment.setArguments(args);
