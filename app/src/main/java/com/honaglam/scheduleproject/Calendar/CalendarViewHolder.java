@@ -9,18 +9,30 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
 
-public class CalendarViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+import kotlin.NotImplementedError;
+
+public class CalendarViewHolder extends RecyclerView.ViewHolder {
   TextView txtDate;
-  public CalendarViewHolder(@NonNull View itemView) {
+  OnClickPositionCallBack clickPositionCallBack = null;
+  public interface OnClickPositionCallBack{
+    void clickAtPosition(int position) throws NotImplementedError;
+  }
+  public CalendarViewHolder(@NonNull View itemView,OnClickPositionCallBack callBack) {
     super(itemView);
-    itemView.setOnClickListener(this);
+    this.clickPositionCallBack = callBack;
     txtDate = itemView.findViewById(R.id.txtCalendarDateItem);
+    this.itemView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          int position = getAdapterPosition();
+          if(position >= 0){
+            clickPositionCallBack.clickAtPosition(position);
+          }
+        }catch (Exception e ){}
+      }
+    });
   }
 
-  @Override
-  public void onClick(View view) {
-    int position = getAdapterPosition();
-    Toast.makeText(view.getContext(), "Da chon duoc ngay " + position, Toast.LENGTH_SHORT).show();
-  }
 }
 
