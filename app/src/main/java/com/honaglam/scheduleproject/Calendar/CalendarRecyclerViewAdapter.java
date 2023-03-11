@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject.Calendar;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   public static int getFirstDayOfWeekOfMonth(int year, int month) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.YEAR, year);
-    calendar.set(Calendar.MONTH, month - 1);
+    calendar.set(Calendar.MONTH, month);
     calendar.set(Calendar.DAY_OF_MONTH, 1);
     return (calendar.get(Calendar.DAY_OF_WEEK) - 1);
   }
@@ -44,13 +45,16 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
   Context context;
 
+
   private static final String[] WEEKDAY_NAMES = new String[] {
       "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
   };
 
   public CalendarRecyclerViewAdapter(Context context) {
     this.context = context;
+    selectedDate = calendar.get(Calendar.DATE);
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth();
+
   }
 
   private int getDaysInMonths() {
@@ -73,6 +77,12 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     int date = position - 7 - weekDateOfFirstDayOfMoth + 1;
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
+
+    if(selectedDate == date){
+      holder.txtDate.setTextColor(Color.WHITE);
+      holder.txtDate.setBackgroundColor(Color.BLUE);
+    }
+
     holder.itemView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -86,5 +96,32 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   @Override
   public int getItemCount() {
     return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
+  }
+
+
+  public void increaseMonth(){
+    int size = getItemCount();
+    calendar.add(Calendar.MONTH,1);
+    weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH)
+    );
+    selectedDate = 1;
+    this.notifyItemRangeChanged(0,size);
+  }
+  public void decreaseMonth(){
+    int size = getItemCount();
+    calendar.add(Calendar.MONTH,-1);
+    weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH)
+    );
+    selectedDate = 1;
+    this.notifyItemRangeChanged(0,size);
+  }
+  public String getSelectDateString(){
+    int month = calendar.get(Calendar.MONTH) + 1;
+    int year = calendar.get(Calendar.YEAR);
+    return String.format(Locale.getDefault(),"%d/%d/%d",selectedDate,month,year);
   }
 }
