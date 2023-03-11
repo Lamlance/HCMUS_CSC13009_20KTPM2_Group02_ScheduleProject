@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#c15c5c"
     tools:context=".TimerFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -10,17 +11,54 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical"
-      android:gravity="center">
+      android:gravity="center"
+      tools:ignore="UselessParent">
     <TextView
         android:id="@+id/txtTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Click start to start timer" />
-    <Button
-        android:id="@+id/btnTimerStart"
-        android:layout_width="wrap_content"
+        android:text="25:00"
+        android:textColor="#ffffff"
+        android:textSize="50sp"
+        android:layout_marginTop="200dp"
+        tools:ignore="HardcodedText" />
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="START"/>
+        android:orientation="horizontal"
+        android:gravity="center">
+        <Button
+            android:id="@+id/btnTimerStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#ffffff"
+            android:textColor="#c15c5c"
+            android:layout_margin="5dp"
+            android:text="@string/start"
+            tools:ignore="ButtonStyle" />
+        <Button
+            android:id="@+id/btnTimerGiveUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#ffffff"
+            android:textColor="#c15c5c"
+            android:layout_margin="5dp"
+            android:text="@string/give_up"
+            tools:ignore="ButtonStyle" />
+    </LinearLayout>
+      <Button
+          android:id="@+id/btnTimerSetting"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:backgroundTint="#ffffff"
+          android:textColor="#c15c5c"
+          android:text="@string/settings"/>
+
   </LinearLayout>
+
+
+    <!-- TODO: Create a setting button to change time -->
+
+
 
 </FrameLayout>

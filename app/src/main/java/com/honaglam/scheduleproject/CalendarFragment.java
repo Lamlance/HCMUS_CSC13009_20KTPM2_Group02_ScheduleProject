@@ -66,7 +66,5 @@ public class CalendarFragment extends Fragment {
 
     CalendarRecyclerViewAdapter calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapter(getContext());
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
-
-
   }
 }
