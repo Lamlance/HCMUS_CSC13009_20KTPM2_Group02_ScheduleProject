@@ -38,18 +38,10 @@ public class TimerFragment extends Fragment {
   private Button btnTimer;
   private Button btnGiveUp;
   private Button timerSetting;
-  protected TimerService timerService;
-  private static final long START_TIME_IN_MILLIS = 1500*1000;
-  private long millisRemain = 1500*1000;
-  public synchronized void setMillisRemain(long millisRemain) {
-    this.millisRemain = millisRemain;
-  }
-  public synchronized long getMillisRemain(){
-    return millisRemain;
-  }
+
 
   // TODO: Rename and change types and number of parameters
-  public static TimerFragment newInstance(String param1, String param2) {
+  public static TimerFragment newInstance() {
     TimerFragment fragment = new TimerFragment();
     Bundle args = new Bundle();
     fragment.setArguments(args);
@@ -63,83 +55,58 @@ public class TimerFragment extends Fragment {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     return inflater.inflate(R.layout.fragment_timer, container, false);
-
   }
-
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
     txtTimer = getView().findViewById(R.id.txtTimer);
-    ((MainActivity)getActivity()).bindTimerService(new TimerConnectionService());
+    txtTimer.setTextSize(50);
+
     btnTimer = getView().findViewById(R.id.btnTimerStart);
     btnTimer.setOnClickListener(new View.OnClickListener() {
-
       @Override
       public void onClick(View view) {
-        if(timerService != null){
-          timerService.startTimer();
-          ((MainActivity)getActivity()).runOnUiThread(new UpdateTimeUI());
-        }
+        ((MainActivity)getActivity()).startTimer();
       }
     });
 
-    timerSetting = getView().findViewById(R.id.btnTimerSetting);
-    timerSetting.setOnClickListener(new View.OnClickListener(){
-      @Override
-      public void onClick(View view) {
-        ((MainActivity)getActivity()).switchFragment_TimerSetting();
-      }
-    });
     btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        millisRemain = START_TIME_IN_MILLIS;
-        txtTimer.postDelayed(new UpdateTimeUI(),1000);
-        timerService.pauseTimer();
+        ((MainActivity)getActivity()).resetTimer();
       }
     });
-  }
 
-  class UpdateTimeUI implements Runnable{
-    @Override
-    public void run() {
-      int seconds = ((int) getMillisRemain() / 1000) % 60;
-      int minutes = (int) getMillisRemain() / (60 * 1000);
-      txtTimer.setText(String.format("%d:%02d",minutes, seconds));
-      txtTimer.setTextSize(50);
-      if(millisRemain > 0){
-        txtTimer.postDelayed(new UpdateTimeUI(),1000);
-      }else {
-        millisRemain = START_TIME_IN_MILLIS;
-        txtTimer.postDelayed(new UpdateTimeUI(),1000);
+    ((MainActivity)getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
+      @Override
+      public void call(long remainMillis) throws Exception {
+       UpdateTimeUI(remainMillis);
       }
-    }
+    });
+
+    timerSetting = getView().findViewById(R.id.btnTimerSetting);
+    timerSetting.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        ((MainActivity) getActivity()).switchFragment_TimerSetting();
+      }
+    });
+
+    UpdateTimeUI(((MainActivity)getActivity()).getCurrentRemainMillis());
+
   }
 
-  class TimerConnectionService implements ServiceConnection{
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-      timerService = ((TimerService.LocalBinder)iBinder).getService();
-      timerService.tickCallBack = new TimerService.TimerTickCallBack() {
-        @Override
-        public void call(long remainMillis) throws Exception {
-
-          setMillisRemain(remainMillis);
-        }
-      };
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-    }
+  public void UpdateTimeUI(long millisRemain) {
+    int seconds = ((int) millisRemain / 1000) % 60;
+    int minutes = (int) millisRemain / (60 * 1000);
+    txtTimer.setText(String.format("%d:%02d", minutes, seconds));
   }
 }
+

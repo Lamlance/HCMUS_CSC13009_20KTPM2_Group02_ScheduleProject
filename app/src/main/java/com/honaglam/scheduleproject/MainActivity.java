@@ -30,9 +30,13 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
   private Intent timerIntent;
   private ServiceConnection timerServiceConnection;
+  protected TimerService timerService;
+
+
   private DrawerLayout drawerLayout;
   private NavigationView sideNavView;
   private Button toolbarBtn;
+
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     timerIntent = new Intent(this,TimerService.class);
+    bindService(timerIntent,new TimerConnectionService(),Context.BIND_AUTO_CREATE);
 
     setSupportActionBar((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar));
 
@@ -60,9 +65,9 @@ public class MainActivity extends AppCompatActivity {
     });
 
     fragmentManager = getSupportFragmentManager();
-    calendarFragment = new CalendarFragment();
-    timerFragment = new TimerFragment();
-    timerSettingFragment = new TimerSetting();
+    calendarFragment = CalendarFragment.newInstance();
+    timerFragment = TimerFragment.newInstance();
+    timerSettingFragment = TimerSetting.newInstance();
 
     fragmentManager
             .beginTransaction()
@@ -82,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
             .commit();
     return true;
   }
-
   public boolean switchFragment_Schedule(){
     if(calendarFragment.isVisible()){
       return false;
@@ -106,7 +110,47 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
-
+  //Timer Service
+  public boolean startTimer(){
+    if(timerService != null){
+      timerService.startTimer();
+      return true;
+    }
+    return false;
+  }
+  public boolean pauseTimer(){
+    if(timerService != null){
+      timerService.pauseTimer();
+    }
+    return false;
+  }
+  public boolean resetTimer(){
+    if(timerService != null){
+      timerService.resetTimer();
+      return true;
+    }
+    return false;
+  }
+  public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack){
+    if(timerService != null){
+      timerService.tickCallBack = tickCallBack;
+      return true;
+    }
+    return false;
+  }
+  public boolean setTimerTime(long workTime, long shortBreakTime,long longBreakTime){
+    if(timerService != null){
+      timerService.setStateTime(workTime,shortBreakTime,longBreakTime);
+    }
+    return false;
+  }
+  public long getCurrentRemainMillis(){
+    if (timerService != null){
+      return timerService.millisRemain;
+    }
+    return -1;
+  }
+  //===
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
     @Override
@@ -124,8 +168,13 @@ public class MainActivity extends AppCompatActivity {
       return false;
     }
   }
-  public void bindTimerService(ServiceConnection serviceConnection){
-    timerServiceConnection = serviceConnection;
-    bindService(timerIntent,timerServiceConnection, Context.BIND_AUTO_CREATE);
+  class TimerConnectionService implements ServiceConnection{
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+      timerService = ((TimerService.LocalBinder)iBinder).getService();
+    }
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+    }
   }
 }
