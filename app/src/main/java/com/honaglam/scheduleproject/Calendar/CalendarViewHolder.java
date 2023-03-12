@@ -3,13 +3,11 @@ package com.honaglam.scheduleproject.Calendar;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.honaglam.scheduleproject.R;
-
 import kotlin.NotImplementedError;
+
 
 public class CalendarViewHolder extends RecyclerView.ViewHolder {
   TextView txtDate;
@@ -19,7 +17,9 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
   }
   public CalendarViewHolder(@NonNull View itemView,OnClickPositionCallBack callBack) {
     super(itemView);
+
     this.clickPositionCallBack = callBack;
+
     txtDate = itemView.findViewById(R.id.txtCalendarDateItem);
     this.itemView.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -33,6 +33,5 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
       }
     });
   }
-
 }
 
