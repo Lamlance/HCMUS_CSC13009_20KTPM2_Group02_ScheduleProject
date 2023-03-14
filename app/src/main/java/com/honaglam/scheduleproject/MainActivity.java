@@ -9,12 +9,16 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,14 +28,28 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
+import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
+import com.honaglam.scheduleproject.Reminder.ReminderData;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_TIMER = "pomodoro_timer";
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
+
+  private static final String UUID_KEY = "SchedulerKey";
+  private String userDBUuid = null;;
+  //Timer
   private Intent timerIntent;
   private ServiceConnection timerServiceConnection;
   protected TimerService timerService;
+  ///======
 
+  //Reminder
+  public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
+  //========
 
   private DrawerLayout drawerLayout;
   private NavigationView sideNavView;
@@ -46,6 +64,15 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
+    SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
+    userDBUuid = sPrefs.getString(UUID_KEY,null);
+    if(userDBUuid == null){
+     userDBUuid =  UUID.randomUUID().toString();
+     SharedPreferences.Editor editor = sPrefs.edit();
+     editor.putString(UUID_KEY, userDBUuid);
+     editor.apply();
+    }
 
     timerIntent = new Intent(this,TimerService.class);
     bindService(timerIntent,new TimerConnectionService(),Context.BIND_AUTO_CREATE);
@@ -151,6 +178,17 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
   //===
+
+  //Reminder Service
+  public void addReminder(long time){
+    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE );
+    alarmManager.setExact(AlarmManager.RTC,time,pendingIntent);
+  }
+
+  //================
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
     @Override

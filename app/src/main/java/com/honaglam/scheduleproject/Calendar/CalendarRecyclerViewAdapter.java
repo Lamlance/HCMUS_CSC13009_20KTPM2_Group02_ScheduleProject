@@ -47,7 +47,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
   private int clickedPos = -1;
   private int weekDateOfFirstDayOfMoth;
-  public SelectDateCallBackInterface selectDateCallBack = null;
+  private SelectDateCallBackInterface selectDateCallBack = null;
   public Calendar calendar = Calendar.getInstance();
 
   Context context;
@@ -62,6 +62,19 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth();
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
+  }
+
+  public void setSelectDateCallBack(SelectDateCallBackInterface callBack){
+    this.selectDateCallBack = callBack;
+    if(this.selectDateCallBack != null){
+      try {
+        int date = calendar.get(Calendar.DATE);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        this.selectDateCallBack.clickDate(date,month,year);
+      }catch (Exception ignore){}
+    }
   }
 
   private int getDaysInMonths() {
