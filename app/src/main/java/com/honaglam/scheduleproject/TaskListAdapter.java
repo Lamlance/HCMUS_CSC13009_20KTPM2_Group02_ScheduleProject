@@ -31,18 +31,18 @@ public class TaskListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return data[i];
     }
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return i;
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(int i, View view, ViewGroup parent) {
         if (view == null) {
-            view = inflater.inflate(R.layout.task_item, viewGroup, false);
+            view = inflater.inflate(R.layout.task_item, parent, false);
         } else {
             TextView txtTaskName = (TextView) view.findViewById(R.id.txtTaskName);
             TextView txtCountPomodoro = (TextView) view.findViewById(R.id.txtCountPomodoro);

@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,9 +19,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
+
+import com.honaglam.scheduleproject.Model.TaskData;
 
 import java.util.Locale;
 
@@ -39,6 +45,16 @@ public class TimerFragment extends Fragment {
     private Button btnTimer;
     private Button btnGiveUp;
     private Button timerSetting;
+
+    private Context context = null;
+
+    // Hardcode data need to be test the function
+    TaskData[] tasks = {new TaskData("Học tiếng anh"),
+            new TaskData("Học tiếng việt"),
+            new TaskData("Học tiếng việt"),
+            new TaskData("Học tiếng việt"),
+            new TaskData("Học tiếng việt")
+    };
 
 
     // TODO: Rename and change types and number of parameters
@@ -60,7 +76,13 @@ public class TimerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_timer, container, false);
+        FrameLayout timerLayout = (FrameLayout) inflater.inflate(R.layout.fragment_timer, container, false);
+        ListView taskListView = (ListView) timerLayout.findViewById(R.id.lstViewTask);
+
+        TaskListAdapter adapter = new TaskListAdapter(context, inflater, tasks);
+        taskListView.setAdapter(adapter);
+
+        return timerLayout;
     }
 
     @Override
