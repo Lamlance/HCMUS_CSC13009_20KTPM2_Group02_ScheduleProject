@@ -13,9 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.honaglam.scheduleproject.Model.TaskData;
 import com.honaglam.scheduleproject.R;
 
+import java.util.ArrayList;
+
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder> {
 
-    private TaskData[] data;
+    private ArrayList<TaskData> data;
     Context context;
     LayoutInflater inflater;
 
@@ -32,8 +34,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         }
     }
 
-
-    public TaskRecyclerViewAdapter(Context context, TaskData[] data) {
+    public TaskRecyclerViewAdapter(Context context, ArrayList<TaskData> data) {
         this.context = context;
         this.data = data;
     }
@@ -50,9 +51,9 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        holder.txtTaskName.setText(data[position].taskName);
-        holder.txtCountPomodoro.setText(data[position].numberCompletedPomodoros + "/ " + data[position].numberPomodoros);
-        holder.checkBoxCompleteTask.setChecked(data[position].isCompleted);
+        holder.txtTaskName.setText(data.get(position).taskName);
+        holder.txtCountPomodoro.setText(data.get(position).numberCompletedPomodoros + "/ " + data.get(position).numberPomodoros);
+        holder.checkBoxCompleteTask.setChecked(data.get(position).isCompleted);
     }
 
     @Override
@@ -62,6 +63,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public int getItemCount() {
-        return data.length;
+        return data.size();
     }
 }

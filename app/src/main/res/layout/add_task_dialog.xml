@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <EditText
+        android:id="@+id/editTxtTaskName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="What are you working on?"
@@ -29,16 +30,18 @@
         android:gravity="center_vertical">
 
         <EditText
+            android:id="@+id/editTxtCountPomodoro"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:inputType="number"
             android:background="#DFDFDF"
             android:text="1"
             android:textAlignment="viewEnd"
-            android:padding="5dp"
+            android:padding="10dp"
             android:layout_marginRight="10dp"/>
 
         <Button
+            android:id="@+id/btnUp"
             android:text="Up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,6 +51,7 @@
             />
 
         <Button
+            android:id="@+id/btnDown"
             android:text="Down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,10 +65,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical|end"
+        android:gravity="center_vertical | end"
         android:background="#DFDFDF">
 
         <Button
+            android:id="@+id/btnCancelAddTask"
             android:text="Cancel"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
@@ -76,6 +81,7 @@
             />
 
         <Button
+            android:id="@+id/btnSaveTask"
             android:text="Save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -84,9 +90,5 @@
             android:layout_margin="5dp"
             android:layout_gravity=""
             />
-
     </LinearLayout>
-
-
-
 </LinearLayout>
