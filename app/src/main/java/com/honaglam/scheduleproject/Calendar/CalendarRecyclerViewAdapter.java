@@ -19,7 +19,6 @@ import kotlin.NotImplementedError;
 
 public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
 
-    // Return first day of week of a identified month and year
     public static int getFirstDayOfWeekOfMonth(int year, int month) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
@@ -28,7 +27,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
         return (calendar.get(Calendar.DAY_OF_WEEK) - 1);
     }
 
-    // Return first day of week of current month
     public static int getFirstDayOfWeekOfMonth() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);

@@ -1,9 +1,6 @@
 package com.honaglam.scheduleproject;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,24 +8,21 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 //import android.os.Handler;
-import android.os.IBinder;
 //import android.os.Looper;
 //import android.util.Log;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.Model.TaskData;
-
-import java.util.Locale;
+import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,6 +39,7 @@ public class TimerFragment extends Fragment {
     private Button btnTimer;
     private Button btnGiveUp;
     private Button timerSetting;
+    private RecyclerView recyclerTask;
 
     private Context context = null;
 
@@ -76,11 +71,11 @@ public class TimerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout timerLayout = (FrameLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-        ListView taskListView = (ListView) timerLayout.findViewById(R.id.lstViewTask);
-
-        TaskListAdapter adapter = new TaskListAdapter(context, inflater, tasks);
-        taskListView.setAdapter(adapter);
+        LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
+        recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
+        recyclerTask.setLayoutManager(new LinearLayoutManager(context));
+        TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, tasks);
+        recyclerTask.setAdapter(adapter);
 
         return timerLayout;
     }

@@ -1,82 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#c15c5c"
+    android:orientation="vertical"
+    android:weightSum="10"
     tools:context=".TimerFragment">
 
     <!-- TODO: Update blank fragment layout -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerTask"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7"
+        android:padding="20dp" />
+
+    <TextView
+        android:id="@+id/txtTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="0dp"
+        android:layout_weight="1"
+        android:text="25:00"
+        android:textColor="#ffffff"
+        android:textSize="50sp"
+        tools:ignore="HardcodedText" />
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity=""
-        android:orientation="vertical"
-        android:weightSum="10"
-        tools:ignore="UselessParent">
-
-
-        <ListView
-            android:id="@+id/lstViewTask"
-            android:padding="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="7"/>
-
-        <TextView
-            android:id="@+id/txtTimer"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="0dp"
-            android:text="25:00"
-            android:textColor="#ffffff"
-            android:textSize="50sp"
-            tools:ignore="HardcodedText"
-            android:layout_weight="1"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:layout_weight="1">
-
-            <Button
-                android:id="@+id/btnTimerStart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:backgroundTint="#ffffff"
-                android:text="@string/start"
-                android:textColor="#c15c5c"
-                tools:ignore="ButtonStyle" />
-
-            <Button
-                android:id="@+id/btnTimerGiveUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:backgroundTint="#ffffff"
-                android:text="@string/give_up"
-                android:textColor="#c15c5c"
-                tools:ignore="ButtonStyle" />
-        </LinearLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnTimerSetting"
+            android:id="@+id/btnTimerStart"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
             android:backgroundTint="#ffffff"
-            android:text="@string/settings"
+            android:text="@string/start"
             android:textColor="#c15c5c"
-            android:layout_weight="1"/>
+            tools:ignore="ButtonStyle" />
 
+        <Button
+            android:id="@+id/btnTimerGiveUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:backgroundTint="#ffffff"
+            android:text="@string/give_up"
+            android:textColor="#c15c5c"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 
-
+    <Button
+        android:id="@+id/btnTimerSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:backgroundTint="#ffffff"
+        android:text="@string/settings"
+        android:textColor="#c15c5c" />
     <!-- TODO: Create a setting button to change time -->
 
-
-</FrameLayout>
+</LinearLayout>
