@@ -36,7 +36,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   }
 
   public interface SelectDateCallBackInterface {
-    void clickDate(int date,int month,int year) throws NotImplementedError;
+    void clickDate(int date,int month,int year,int weekDay) throws NotImplementedError;
   }
 
   /*
@@ -53,10 +53,15 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   Context context;
 
 
-  private static final String[] WEEKDAY_NAMES = new String[] {
+  public static final String[] WEEKDAY_NAMES = new String[] {
       "SU", "MO", "TU", "WE", "TH", "FR", "SA"
   };
-
+  public static final String[] WEEKDAY_NAMES_MEDIUM = new String[] {
+          "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
+  };
+  public static final String[] WEEKDAY_NAMES_FULL = new String[] {
+          "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"
+  };
   public CalendarRecyclerViewAdapter(Context context) {
     this.context = context;
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
@@ -68,11 +73,11 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     this.selectDateCallBack = callBack;
     if(this.selectDateCallBack != null){
       try {
-        int date = calendar.get(Calendar.DATE);
-        int month = calendar.get(Calendar.MONTH);
-        int year = calendar.get(Calendar.YEAR);
-
-        this.selectDateCallBack.clickDate(date,month,year);
+        this.selectDateCallBack.clickDate(
+                calendar.get(Calendar.DATE),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.DAY_OF_WEEK));
       }catch (Exception ignore){}
     }
   }
@@ -105,7 +110,11 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       notifyItemChanged(clickedPos);
       if(selectDateCallBack != null){
         try {
-          selectDateCallBack.clickDate(date,calendar.get(Calendar.MONTH),calendar.get(Calendar.YEAR));
+          selectDateCallBack.clickDate(
+                  date,
+                  calendar.get(Calendar.MONTH),
+                  calendar.get(Calendar.YEAR),
+                  calendar.get(Calendar.DAY_OF_WEEK));
         }catch (Exception e){}
       }
     }
@@ -147,7 +156,20 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
     int newSize = getItemCount();
     clickedPos = dateToPos(1);
+
+    if(selectDateCallBack != null){
+      try{
+        selectDateCallBack.clickDate(
+                calendar.get(Calendar.DATE),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.DAY_OF_WEEK)
+        );
+      }catch (Exception ignore){}
+    }
+
     this.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
+
   }
   public void decreaseMonth(){
     int oldSize = getItemCount();
@@ -156,11 +178,19 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH));
     int newSize = getItemCount();
     clickedPos = dateToPos(1);
+
+    if(selectDateCallBack != null){
+      try{
+        selectDateCallBack.clickDate(
+                calendar.get(Calendar.DATE),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.DAY_OF_WEEK)
+        );
+      }catch (Exception ignore){}
+    }
+
     this.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
   }
-  public String getSelectDateString(){
-    int month = calendar.get(Calendar.MONTH) + 1;
-    int year = calendar.get(Calendar.YEAR);
-    return String.format(Locale.getDefault(),"%d/%d/%d",posToDate(clickedPos),month,year);
-  }
+
 }

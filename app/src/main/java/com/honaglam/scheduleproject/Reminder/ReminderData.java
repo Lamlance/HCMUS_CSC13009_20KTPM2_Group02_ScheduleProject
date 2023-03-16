@@ -1,9 +1,11 @@
 package com.honaglam.scheduleproject.Reminder;
 
-public class ReminderData {
+import java.io.Serializable;
+
+public class ReminderData implements Serializable {
   public String Name;
   public long RemindTime;
-  ReminderData(String name, long time){
+  public ReminderData(String name, long time){
     this.Name = name;
     this.RemindTime = time;
   }

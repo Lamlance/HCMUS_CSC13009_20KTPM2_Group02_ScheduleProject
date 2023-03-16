@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,8 +32,16 @@ import com.google.android.material.navigation.NavigationView;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
   //Reminder
   public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
+  private static final String REMINDER_FILE_NAME = "ScheduleReminder";
+  File reminderFile = null;
   //========
 
   private DrawerLayout drawerLayout;
@@ -64,7 +75,14 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    reminderFile = new File(getFilesDir(), REMINDER_FILE_NAME);
+    LoadLocalReminder();
 
+    Toast.makeText(this, String.format("Length %d",reminderDataList.size()), Toast.LENGTH_SHORT).show();
+    if(reminderDataList.size() == 0){
+      reminderDataList.add(new ReminderData("POI",1));
+    }
+    /*
     SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
     userDBUuid = sPrefs.getString(UUID_KEY,null);
     if(userDBUuid == null){
@@ -72,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
      SharedPreferences.Editor editor = sPrefs.edit();
      editor.putString(UUID_KEY, userDBUuid);
      editor.apply();
-    }
+    }*/
 
     timerIntent = new Intent(this,TimerService.class);
     bindService(timerIntent,new TimerConnectionService(),Context.BIND_AUTO_CREATE);
@@ -180,12 +198,59 @@ public class MainActivity extends AppCompatActivity {
   //===
 
   //Reminder Service
-  public void addReminder(long time){
+  @Override
+  protected void onDestroy() {
+    SaveLocalReminder();
+    super.onDestroy();
+  }
+
+  private boolean CreateLocalReminderFile(){
+    if(reminderFile.exists()){
+      return true;
+    }
+    try {
+      if(reminderFile.createNewFile()){
+        reminderDataList = new LinkedList<ReminderData>();
+        return true;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  private boolean LoadLocalReminder(){
+    if(!CreateLocalReminderFile()){
+      return false;
+    }
+    try(ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(reminderFile.toPath()))) {
+      reminderDataList = (LinkedList<ReminderData>) ois.readObject();
+    } catch (IOException | ClassNotFoundException e) {
+      return false;
+    }
+    return true;
+  }
+  private  boolean SaveLocalReminder(){
+    if(!CreateLocalReminderFile()){
+      return false;
+    }
+
+    try(ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(reminderFile.toPath()))) {
+      oos.writeObject(reminderDataList);
+    } catch (IOException e) {
+      return false;
+    }
+
+    return true;
+  }
+  public int addReminder(long time){
+    reminderDataList.add(new ReminderData(String.format(Locale.getDefault(),"Remind at%d",time),time));
+    /*
     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
     PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
             PendingIntent.FLAG_IMMUTABLE );
-    alarmManager.setExact(AlarmManager.RTC,time,pendingIntent);
+    alarmManager.setExact(AlarmManager.RTC,time,pendingIntent);*/
+    return reminderDataList.size();
   }
 
   //================

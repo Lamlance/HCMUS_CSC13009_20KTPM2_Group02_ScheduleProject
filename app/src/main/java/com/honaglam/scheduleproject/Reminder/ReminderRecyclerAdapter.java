@@ -11,31 +11,38 @@ import com.honaglam.scheduleproject.R;
 
 import java.util.List;
 
+import kotlin.NotImplementedError;
+
 public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHolder> {
 
-  Context context;
-  List<ReminderData> reminderDataList;
+  public interface ReminderListGetter{
+    List<ReminderData> get() throws NotImplementedError;
+  }
 
-  public ReminderRecyclerAdapter(Context context, List<ReminderData> reminderData){
+  Context context;
+  ReminderListGetter reminderListGetter = null;
+
+  public ReminderRecyclerAdapter(Context context, ReminderListGetter getter){
     this.context = context;
-    this.reminderDataList = reminderData;
+    this.reminderListGetter = getter;
   }
 
   @NonNull
   @Override
   public ReminderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     ReminderViewHolder reminderViewHolder = new ReminderViewHolder(
-            LayoutInflater.from(context).inflate(R.layout.reminder_recycler_item, parent, false));
+            LayoutInflater.from(parent.getContext()).inflate(R.layout.reminder_recycler_item, parent, false));
     return reminderViewHolder;
   }
 
   @Override
   public void onBindViewHolder(@NonNull ReminderViewHolder holder, int position) {
-    holder.txtId.setText(reminderDataList.get(position).Name);
+    ReminderData data = reminderListGetter.get().get(position);
+    holder.txtId.setText(data.Name);
   }
 
   @Override
   public int getItemCount() {
-    return reminderDataList.size();
+    return reminderListGetter.get().size();
   }
 }
