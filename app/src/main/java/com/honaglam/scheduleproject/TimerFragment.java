@@ -44,12 +44,7 @@ public class TimerFragment extends Fragment {
     private Context context = null;
 
     // Hardcode data need to be test the function
-    TaskData[] tasks = {new TaskData("Học tiếng anh"),
-            new TaskData("Học tiếng việt"),
-            new TaskData("Học tiếng việt"),
-            new TaskData("Học tiếng việt"),
-            new TaskData("Học tiếng việt")
-    };
+    TaskData[] tasks = {new TaskData("Học tiếng anh"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt")};
 
 
     // TODO: Rename and change types and number of parameters
@@ -119,7 +114,6 @@ public class TimerFragment extends Fragment {
         });
 
         UpdateTimeUI(((MainActivity) getActivity()).getCurrentRemainMillis());
-
     }
 
     public void UpdateTimeUI(long millisRemain) {
