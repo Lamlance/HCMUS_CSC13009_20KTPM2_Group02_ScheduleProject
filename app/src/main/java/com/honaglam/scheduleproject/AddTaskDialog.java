@@ -73,7 +73,10 @@ public class AddTaskDialog extends Dialog {
                 String taskName = editTxtTaskName.getText().toString();
                 int countPomodoro = Integer.parseInt(editTextCountPomodoro.getText().toString());
 
-                // TODO: Validate data before send back to Fragment
+                if (taskName.equals("")) {
+                    dismiss();
+                    return;
+                }
 
                 tempData.taskName = taskName;
                 tempData.numberPomodoros = countPomodoro;
