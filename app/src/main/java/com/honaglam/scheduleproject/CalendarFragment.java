@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,8 +61,9 @@ public class CalendarFragment extends Fragment {
   int selectedYear = -1;
   int selectedHour = -1;
   int selectedMinute = -1;
-
   int selectedWeekDay = -1;
+
+
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
     Bundle args = new Bundle();
@@ -127,6 +129,8 @@ public class CalendarFragment extends Fragment {
     });
     reminderRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
     reminderRecycler.setAdapter(reminderRecyclerAdapter);
+    ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
+    helper.attachToRecyclerView(reminderRecycler);
 
     TimePickerDialog timePickerDialog = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
       @Override
@@ -160,7 +164,7 @@ public class CalendarFragment extends Fragment {
             Locale.getDefault(), "%d/%d/%d",selectedDate,selectedMonth+1,selectedYear);
     txtSelectDate.setText(dateStr);
     txtBigDate.setText(String.format(Locale.getDefault(),"%d",selectedDate));
-    txtBigWeekDate.setText(CalendarRecyclerViewAdapter.WEEKDAY_NAMES_MEDIUM[selectedWeekDay]);
+    txtBigWeekDate.setText(CalendarRecyclerViewAdapter.WEEKDAY_NAMES_MEDIUM[selectedWeekDay-1]);
 
   }
 
@@ -175,4 +179,22 @@ public class CalendarFragment extends Fragment {
       updateDateUI();
     }
   }
+
+  ItemTouchHelper.SimpleCallback recyclerReminderSwipeHelper = new ItemTouchHelper.SimpleCallback(
+          0,
+          ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+    @Override
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+      return false;
+    }
+
+    @Override
+    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+      int pos = reminderRecyclerAdapter.selectedItemPos;
+      mainActivity.reminderDataList.remove(pos);
+      reminderRecyclerAdapter.notifyItemRemoved(pos);
+      Toast.makeText(context, String.format(Locale.getDefault(),"Delete %d ",pos), Toast.LENGTH_SHORT).show();
+    }
+  };
+
 }

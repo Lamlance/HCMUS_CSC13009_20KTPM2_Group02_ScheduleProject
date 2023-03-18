@@ -178,7 +178,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH));
     int newSize = getItemCount();
     clickedPos = dateToPos(1);
-
     if(selectDateCallBack != null){
       try{
         selectDateCallBack.clickDate(

@@ -40,6 +40,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.UUID;
@@ -79,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
     LoadLocalReminder();
 
     Toast.makeText(this, String.format("Length %d",reminderDataList.size()), Toast.LENGTH_SHORT).show();
-    if(reminderDataList.size() == 0){
-      reminderDataList.add(new ReminderData("POI",1));
-    }
     /*
     SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
     userDBUuid = sPrefs.getString(UUID_KEY,null);
