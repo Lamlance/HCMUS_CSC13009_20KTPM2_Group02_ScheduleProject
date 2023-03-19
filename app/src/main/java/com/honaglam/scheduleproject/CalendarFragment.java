@@ -133,18 +133,17 @@ public class CalendarFragment extends Fragment {
     ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
     helper.attachToRecyclerView(reminderRecycler);
 
-    TimePickerDialog timePickerDialog = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
-      @Override
-      public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-        selectedHour = hour;
-        selectedMinute = minute;
-        AddReminder();
-      }
-    },0,0,true);
     ((Button)view.findViewById(R.id.btnSetReminder)).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ReminderAddDialog reminderAddDialog = new ReminderAddDialog(context);
+        ReminderAddDialog reminderAddDialog = new ReminderAddDialog(context, new ReminderAddDialog.ReminderDataCallBack() {
+          @Override
+          public void onSubmit(String name, int hour24h, int minute) throws NotImplementedError {
+            selectedHour = hour24h;
+            selectedMinute = minute;
+            AddReminder(name);
+          }
+        });
         reminderAddDialog.show();
       }
     });
@@ -152,12 +151,12 @@ public class CalendarFragment extends Fragment {
     updateDateUI();
   }
 
-  private void AddReminder(){
+  private void AddReminder(String name){
     Calendar calendar = Calendar.getInstance();
     calendar.set(selectedYear,selectedMonth,selectedDate,selectedHour,selectedMinute,0);
     long remindTime = calendar.getTimeInMillis();
     Log.d("DATE",String.format("%d",remindTime));
-    int size = mainActivity.addReminder(remindTime);
+    int size = mainActivity.addReminder(name,remindTime);
     reminderRecyclerAdapter.notifyItemInserted(size-1);
   }
 

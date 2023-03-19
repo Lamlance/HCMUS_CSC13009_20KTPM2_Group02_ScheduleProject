@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -10,6 +11,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -240,14 +242,28 @@ public class MainActivity extends AppCompatActivity {
 
     return true;
   }
-  public int addReminder(long time){
-    reminderDataList.add(new ReminderData(String.format(Locale.getDefault(),"Remind at%d",time),time));
-    /*
+
+  public static final String NOTIFICATION_CHANEL_ID = "ReminderNotificationChanel";
+  NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this,NOTIFICATION_CHANEL_ID)
+          .setSmallIcon(R.drawable.baseline_notifications_active_24)
+          .setContentTitle("Reminder notification")
+          .setContentText("Reminding")
+          .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+  public int addReminder(String name , long time){
+    reminderDataList.add(new ReminderData(name,time));
+
+    notificationBuilder.setContentText(name);
+    Notification notification = notificationBuilder.build();
+
     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+    intent.putExtra(ReminderBroadcastReceiver.NAME_TAG,name);
+    intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY,notification);
+    intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY,1);
+
     PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE );
-    alarmManager.setExact(AlarmManager.RTC,time,pendingIntent);*/
+            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+    alarmManager.setExact(AlarmManager.RTC,time,pendingIntent);
     return reminderDataList.size();
   }
 

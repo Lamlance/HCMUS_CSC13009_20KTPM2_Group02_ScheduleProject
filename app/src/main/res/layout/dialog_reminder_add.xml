@@ -16,20 +16,29 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content" />
   <EditText
+      android:id="@+id/txtEditNameReminder"
+      android:maxLength="20"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"/>
+  <TimePicker
+      android:id="@+id/timeReminderDialog"
+      android:timePickerMode="spinner"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
   <LinearLayout
       android:gravity="end"
       android:orientation="horizontal"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
     <Button
+        android:id="@+id/btnAddReminderDialog"
         android:layout_marginHorizontal="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add" />
     <Button
-        android:layout_marginRight="10dp"
+        android:id="@+id/btnCancelReminderDialog"
+        android:layout_marginEnd="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Cancel" />
