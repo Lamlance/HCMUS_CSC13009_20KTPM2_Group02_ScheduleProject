@@ -94,18 +94,40 @@ public class TimerService extends Service {
     @Override
     public void run() {
       timer = new CountDownTimer(millisRemain,1000) {
+
         @Override
-        public void onTick(long l) {
-          millisRemain = l;
-          updateServiceNotification(makeServiceNotification(String.format("%d",l)));
-          if(tickCallBack != null){
-            try {
-              tickCallBack.call(millisRemain);
-            }catch (Exception e){
-              e.printStackTrace();
-            }
-          }
+        public void run() {
+            runningState = WORK_STATE;
+            timer = new CountDownTimer(millisRemain, 1000) {
+                @Override
+                public void onTick(long l) {
+                    millisRemain = l;
+                    updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+                    if (tickCallBack != null) {
+                        try {
+                            tickCallBack.call(millisRemain);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFinish() {
+                    millisRemain = 0;
+                    runningState = NONE_STATE;
+                    if (tickCallBack != null) {
+                        try {
+                            tickCallBack.call(0);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+            timer.start();
         }
+    }
 
         @Override
         public void onFinish() {
@@ -118,20 +140,63 @@ public class TimerService extends Service {
             }
             runningState = NONE_STATE;
           }
-        }
-      };
-      timer.start();
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        startForeground(NOTIFICATION_ID, makeServiceNotification("Hello !"));
+        updateServiceNotification(makeServiceNotification("Hello User"));
+
+        return super.onStartCommand(intent, flags, startId);
     }
-  }
 
+    public void startTimer() {
+        if (runningState == NONE_STATE) {
+            millisRemain = workMillis;
+            timerRunnable = new Timer();
+            timerHandler = new Handler();
+            timerHandler.post(timerRunnable);
+        }
 
-  @Override
-  public int onStartCommand(Intent intent, int flags, int startId) {
-    startForeground(NOTIFICATION_ID,makeServiceNotification("Hello !"));
-    updateServiceNotification(makeServiceNotification("Hello User"));
+    }
 
-    return super.onStartCommand(intent, flags, startId);
-  }
+    public void pauseTimer() {
+        if (runningState != NONE_STATE && timer != null) {
+            timer.cancel();
+            runningState = NONE_STATE;
+            if (tickCallBack != null) {
+                try {
+                    tickCallBack.call(millisRemain);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    public void resetTimer() {
+        millisRemain = workMillis;
+        if (runningState != NONE_STATE && timer != null) {
+            timer.cancel();
+            timerHandler.removeCallbacks(timerRunnable);
+            if (tickCallBack != null) {
+                try {
+                    tickCallBack.call(millisRemain);
+                } catch (Exception e) {
+                }
+            }
+            runningState = NONE_STATE;
+        }
+
+    }
+
+    public void setStateTime(long workTime, long shortBreakTime, long longBreakTime) {
+        if (runningState != NONE_STATE) {
+            timer.cancel();
+            runningState = NONE_STATE;
+        }
+        workMillis = workTime;
+        shortBreakMillis = shortBreakTime;
+        longBreakMillis = longBreakTime;
+        millisRemain = workTime;
 
   public void switchState(){
     timerCount += 1;
@@ -176,21 +241,24 @@ public class TimerService extends Service {
         } catch (Exception ignored) {}
       }
     }
-  }
-  public void resetTimer() {
-    millisRemain = workMillis;
-    if(runningState != NONE_STATE && timer != null){
-      timer.cancel();
-      timerHandler.removeCallbacks(timerRunnable);
-      if(tickCallBack != null){
-        try {
-          tickCallBack.call(millisRemain);
-        } catch (Exception e) {}
-      }
-      runningState = NONE_STATE;
+
+    @Override
+    public void onDestroy() {
+        timer.cancel();
+        super.onDestroy();
     }
 
-  }
+    @Override
+    public boolean onUnbind(Intent intent) {
+        tickCallBack = null;
+        return super.onUnbind(intent);
+    }
+
+ @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        return binder;
+
 
   public void skipTimer() {
 
@@ -208,39 +276,17 @@ public class TimerService extends Service {
     if(runningState != NONE_STATE){
       timer.cancel();
       runningState = NONE_STATE;
+   
     }
-    workMillis = workTime;
-    shortBreakMillis = shortBreakTime;
-    longBreakMillis = longBreakTime;
-    millisRemain = workTime;
 
-  }
-
-  @Override
-  public void onDestroy() {
-    timer.cancel();
-    super.onDestroy();
-  }
-
-  @Override
-  public boolean onUnbind(Intent intent) {
-    tickCallBack = null;
-    return super.onUnbind(intent);
-  }
-
-  @Override
-  public IBinder onBind(Intent intent) {
-    // TODO: Return the communication channel to the service.
-    return binder;
-  }
-  public class LocalBinder extends Binder {
-    TimerService getService() {
-      return TimerService.this;
+    public class LocalBinder extends Binder {
+        TimerService getService() {
+            return TimerService.this;
+        }
     }
-  }
 
-  public interface TimerTickCallBack{
-    void call(long remainMillis) throws Exception;
-  }
+    public interface TimerTickCallBack {
+        void call(long remainMillis) throws Exception;
+    }
 
 }
