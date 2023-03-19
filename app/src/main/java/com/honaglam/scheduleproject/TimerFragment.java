@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 //import android.os.Handler;
 //import android.os.Looper;
 //import android.util.Log;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,100 +39,98 @@ import java.util.List;
 public class TimerFragment extends Fragment {
 
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    // TODO: Rename and change types of parameters
+  // TODO: Rename parameter arguments, choose names that match
+  // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+  // TODO: Rename and change types of parameters
 
-    private TextView txtTimer;
-    private Button btnTimer;
-    private Button btnGiveUp;
-    private Button btnSkip;
+  private TextView txtTimer;
+  private Button btnTimer;
+  private Button btnGiveUp;
+  private Button btnSkip;
 
-    private  Button btnAddTask;
-    private Button timerSetting;
-    private RecyclerView recyclerTask;
-    private Context context = null;
+  private  Button btnAddTask;
+  private Button timerSetting;
+  private RecyclerView recyclerTask;
+  private Context context = null;
 
-    // TODO: Hardcode data need to be test the function, move this to MainActivity in future
-    TaskData[] taskArray = {new TaskData("Học tiếng anh"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt")};
-    ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
+  // TODO: Hardcode data need to be test the function, move this to MainActivity in future
+  TaskData[] taskArray = {new TaskData("Học tiếng anh"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt")};
+  ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
 
-    // TODO: Rename and change types and number of parameters
-    public static TimerFragment newInstance() {
-        TimerFragment fragment = new TimerFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+  // TODO: Rename and change types and number of parameters
+  public static TimerFragment newInstance() {
+    TimerFragment fragment = new TimerFragment();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+    return fragment;
+  }
 
-    public TimerFragment() {
-        // Required empty public constructor
-    }
+  public TimerFragment() {
+    // Required empty public constructor
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-        recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
-        recyclerTask.setLayoutManager(new LinearLayoutManager(context));
-        TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, tasks);
-        recyclerTask.setAdapter(adapter);
-        return timerLayout;
-    }
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
+    recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
+    recyclerTask.setLayoutManager(new LinearLayoutManager(context));
+    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, tasks);
+    recyclerTask.setAdapter(adapter);
+    return timerLayout;
+  }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
 
-        txtTimer = getView().findViewById(R.id.txtTimer);
-        txtTimer.setTextSize(50);
+    txtTimer = getView().findViewById(R.id.txtTimer);
+    txtTimer.setTextSize(50);
 
-        btnTimer = getView().findViewById(R.id.btnTimerStart);
-        btnTimer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ((MainActivity) getActivity()).startTimer();
-            }
-        });
+    btnTimer = getView().findViewById(R.id.btnTimerStart);
+    btnTimer.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        ((MainActivity) getActivity()).startTimer();
+      }
+    });
 
-        btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
-        btnGiveUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ((MainActivity) getActivity()).resetTimer();
-            }
-        });
+    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        ((MainActivity) getActivity()).resetTimer();
+      }
+    });
 
+    btnAddTask = getView().findViewById(R.id.btnAddTask);
+    btnAddTask.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        showAddTaskDialog();
+      }
+    });
 
-        btnAddTask = getView().findViewById(R.id.btnAddTask);
-        btnAddTask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: Add function onClick
-                showAddTaskDialog();
-            }
-        });
+    ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
+      @Override
+      public void call(long remainMillis) {
+        UpdateTimeUI(remainMillis);
+      }
+    });
 
-        ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
-            @Override
-            public void call(long remainMillis) throws Exception {
-                UpdateTimeUI(remainMillis);
-            }
-        });
+    timerSetting = getView().findViewById(R.id.btnTimerSetting);
+    timerSetting.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        ((MainActivity) getActivity()).switchFragment_TimerSetting();
+      }
+    });
 
-        timerSetting = getView().findViewById(R.id.btnTimerSetting);
-        timerSetting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ((MainActivity) getActivity()).switchFragment_TimerSetting();
-            }
-        });
-
-btnSkip = getView().findViewById((R.id.btnSkip));
+    btnSkip = getView().findViewById((R.id.btnSkip));
     btnSkip.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -143,26 +142,28 @@ btnSkip = getView().findViewById((R.id.btnSkip));
       }
     });
 
-        UpdateTimeUI(((MainActivity) getActivity()).getCurrentRemainMillis());
-    }
+    long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
+    UpdateTimeUI(cur);
+    Log.d("Cur",String.valueOf(cur));
+  }
 
-    private void showAddTaskDialog() {
-        AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
-        dialog.show();
-    }
+  private void showAddTaskDialog() {
+    AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
+    dialog.show();
+  }
 
-    public void UpdateTimeUI(long millisRemain) {
-        int seconds = ((int) millisRemain / 1000) % 60;
-        int minutes = (int) millisRemain / (60 * 1000);
-        txtTimer.setText(String.format("%d:%02d", minutes, seconds));
-    }
+  public void UpdateTimeUI(long millisRemain) {
+    int seconds = ((int) millisRemain / 1000) % 60;
+    int minutes = (int) millisRemain / (60 * 1000);
+    txtTimer.setText(String.format("%d:%02d", minutes, seconds));
+  }
 
-    class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
-        @Override
-        public void onDataPassed(TaskData taskData) {
-            tasks.add(taskData);
-        }
+  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
+    @Override
+    public void onDataPassed(TaskData taskData) {
+      tasks.add(taskData);
     }
+  }
 
 }
 

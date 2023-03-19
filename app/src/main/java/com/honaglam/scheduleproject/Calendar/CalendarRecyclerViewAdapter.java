@@ -35,7 +35,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   }
 
   public interface SelectDateCallBackInterface {
-    void clickDate(int date,int month,int year,int weekDay) throws NotImplementedError;
+    void clickDate(int date, int month, int year, int weekDay) throws NotImplementedError;
   }
 
   /*
@@ -52,16 +52,16 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   Context context;
 
 
-
-  public static final String[] WEEKDAY_NAMES = new String[] {
-      "SU", "MO", "TU", "WE", "TH", "FR", "SA"
+  public static final String[] WEEKDAY_NAMES = new String[]{
+          "SU", "MO", "TU", "WE", "TH", "FR", "SA"
   };
-  public static final String[] WEEKDAY_NAMES_MEDIUM = new String[] {
+  public static final String[] WEEKDAY_NAMES_MEDIUM = new String[]{
           "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
   };
-  public static final String[] WEEKDAY_NAMES_FULL = new String[] {
+  public static final String[] WEEKDAY_NAMES_FULL = new String[]{
           "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"
   };
+
   public CalendarRecyclerViewAdapter(Context context) {
     this.context = context;
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
@@ -69,16 +69,17 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
   }
 
-  public void setSelectDateCallBack(SelectDateCallBackInterface callBack){
+  public void setSelectDateCallBack(SelectDateCallBackInterface callBack) {
     this.selectDateCallBack = callBack;
-    if(this.selectDateCallBack != null){
+    if (this.selectDateCallBack != null) {
       try {
         this.selectDateCallBack.clickDate(
                 calendar.get(Calendar.DATE),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.DAY_OF_WEEK));
-      }catch (Exception ignore){}
+      } catch (Exception ignore) {
+      }
     }
   }
 
@@ -96,6 +97,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
     return viewHolder;
   }
+
   class OnClickAtPosition implements CalendarViewHolder.OnClickPositionCallBack {
     @Override
     public void clickAtPosition(int position) throws NotImplementedError {
@@ -120,59 +122,62 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       }
     }
   }
+
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
-        holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
-        holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.BLUE : Color.WHITE);
+    holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
+    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.BLUE : Color.WHITE);
 
-        if (position < 7) {
-            holder.txtDate.setText(WEEKDAY_NAMES[position]);
-            return;
-        }
-        int date = posToDate(position);
-        String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
-        holder.txtDate.setText(dateStr);
+    if (position < 7) {
+      holder.txtDate.setText(WEEKDAY_NAMES[position]);
+      return;
+    }
+    int date = posToDate(position);
+    String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
+    holder.txtDate.setText(dateStr);
 
   }
 
-  private int dateToPos(int date){
+  private int dateToPos(int date) {
     int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
     return pos;
   }
-    private int posToDate(int pos) {
-        int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
-        return date;
-    }
 
-    @Override
-    public int getItemCount() {
-        return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
-    }
+  private int posToDate(int pos) {
+    int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
+    return date;
+  }
 
-    public void increaseMonth() {
-        int oldSize = getItemCount();
-        calendar.add(Calendar.MONTH, 1);
-        calendar.set(Calendar.DATE, 1);
-        weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
-        int newSize = getItemCount();
-        clickedPos = dateToPos(1);
-        this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
-    }
+  @Override
+  public int getItemCount() {
+    return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
+  }
 
-    public void decreaseMonth() {
-        int oldSize = getItemCount();
-        calendar.add(Calendar.MONTH, -1);
-        calendar.set(Calendar.DATE, 1);
-        weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
-        int newSize = getItemCount();
-        clickedPos = dateToPos(1);
-        this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
-    }
+  public void increaseMonth() {
+    int oldSize = getItemCount();
+    calendar.add(Calendar.MONTH, 1);
+    calendar.set(Calendar.DATE, 1);
+    weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
+    int newSize = getItemCount();
+    clickedPos = dateToPos(1);
+    this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+  }
 
-    public String getSelectDateString() {
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int year = calendar.get(Calendar.YEAR);
-        return String.format(Locale.getDefault(), "%d/%d/%d", posToDate(clickedPos), month, year);
-    }
+  public void decreaseMonth() {
+    int oldSize = getItemCount();
+    calendar.add(Calendar.MONTH, -1);
+    calendar.set(Calendar.DATE, 1);
+    weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
+    int newSize = getItemCount();
+    clickedPos = dateToPos(1);
+    this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+  }
+
+  public String getSelectDateString() {
+    int month = calendar.get(Calendar.MONTH) + 1;
+    int year = calendar.get(Calendar.YEAR);
+    return String.format(Locale.getDefault(), "%d/%d/%d", posToDate(clickedPos), month, year);
+  }
+}
 
 

@@ -93,122 +93,103 @@ public class TimerService extends Service {
   class Timer implements Runnable {
     @Override
     public void run() {
-      timer = new CountDownTimer(millisRemain,1000) {
-
+      runningState = WORK_STATE;
+      timer = new CountDownTimer(millisRemain, 1000) {
         @Override
-        public void run() {
-            runningState = WORK_STATE;
-            timer = new CountDownTimer(millisRemain, 1000) {
-                @Override
-                public void onTick(long l) {
-                    millisRemain = l;
-                    updateServiceNotification(makeServiceNotification(String.format("%d", l)));
-                    if (tickCallBack != null) {
-                        try {
-                            tickCallBack.call(millisRemain);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                @Override
-                public void onFinish() {
-                    millisRemain = 0;
-                    runningState = NONE_STATE;
-                    if (tickCallBack != null) {
-                        try {
-                            tickCallBack.call(0);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            };
-            timer.start();
+        public void onTick(long l) {
+          millisRemain = l;
+          updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+          if (tickCallBack != null) {
+            try {
+              tickCallBack.call(millisRemain);
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
         }
-    }
 
         @Override
         public void onFinish() {
-          if(tickCallBack != null){
-            try {
-              switchState();
-              tickCallBack.call(millisRemain);
-            }catch (Exception e){
-              e.printStackTrace();
-            }
-            runningState = NONE_STATE;
+          millisRemain = 0;
+          switchState();
+          runningState = NONE_STATE;
+
+          if(tickCallBack == null){
+            return;
           }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(NOTIFICATION_ID, makeServiceNotification("Hello !"));
-        updateServiceNotification(makeServiceNotification("Hello User"));
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    public void startTimer() {
-        if (runningState == NONE_STATE) {
-            millisRemain = workMillis;
-            timerRunnable = new Timer();
-            timerHandler = new Handler();
-            timerHandler.post(timerRunnable);
+          try {
+            tickCallBack.call(millisRemain);
+          } catch (Exception ignore) {}
         }
-
+      };
+      timer.start();
     }
+  }
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+    startForeground(NOTIFICATION_ID, makeServiceNotification("Hello !"));
+    updateServiceNotification(makeServiceNotification("Hello User"));
+    return super.onStartCommand(intent, flags, startId);
+  }
 
-    public void pauseTimer() {
-        if (runningState != NONE_STATE && timer != null) {
-            timer.cancel();
-            runningState = NONE_STATE;
-            if (tickCallBack != null) {
-                try {
-                    tickCallBack.call(millisRemain);
-                } catch (Exception ignored) {
-                }
-            }
-        }
+  public void startTimer() {
+    if (runningState == NONE_STATE) {
+      timerRunnable = new Timer();
+      timerHandler = new Handler();
+      timerHandler.post(timerRunnable);
     }
+  }
 
-    public void resetTimer() {
-        millisRemain = workMillis;
-        if (runningState != NONE_STATE && timer != null) {
-            timer.cancel();
-            timerHandler.removeCallbacks(timerRunnable);
-            if (tickCallBack != null) {
-                try {
-                    tickCallBack.call(millisRemain);
-                } catch (Exception e) {
-                }
-            }
-            runningState = NONE_STATE;
-        }
-
+  public void pauseTimer() {
+    if (runningState != NONE_STATE && timer != null) {
+      timer.cancel();
+      runningState = NONE_STATE;
     }
+    if (tickCallBack == null) {
+      return;
+    }
+    try {
+      tickCallBack.call(millisRemain);
+    } catch (Exception ignored) {}
+  }
 
-    public void setStateTime(long workTime, long shortBreakTime, long longBreakTime) {
-        if (runningState != NONE_STATE) {
-            timer.cancel();
-            runningState = NONE_STATE;
-        }
-        workMillis = workTime;
-        shortBreakMillis = shortBreakTime;
-        longBreakMillis = longBreakTime;
-        millisRemain = workTime;
+  public void resetTimer() {
+    millisRemain = workMillis;
+    if (runningState != NONE_STATE && timer != null) {
+      timer.cancel();
+      timerHandler.removeCallbacks(timerRunnable);
 
-  public void switchState(){
+      if(tickCallBack == null){
+        return;
+      }
+
+      try {
+        tickCallBack.call(millisRemain);
+      } catch (Exception e) {}
+    }
+    runningState = NONE_STATE;
+  }
+  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime) {
+    if (runningState != NONE_STATE) {
+      timer.cancel();
+      runningState = NONE_STATE;
+    }
+    workMillis = workTime;
+    shortBreakMillis = shortBreakTime;
+    longBreakMillis = longBreakTime;
+    millisRemain = workTime;
+  }
+  public void switchState () {
     timerCount += 1;
-    cycleCount += (timerCount  % 2 == 0) ? 1 : 0;
+    cycleCount += (timerCount % 2 == 0) ? 1 : 0;
 
-    if(timerCount % 2 == 0){
+    if (timerCount % 2 == 0) {
       runningState = WORK_STATE;
       millisRemain = workMillis;
     } else if (timerCount % 2 == 1 && timerCount != 7) {
       runningState = SHORT_BREAK_STATE;
       millisRemain = shortBreakMillis;
-    }else {
+    } else {
       runningState = LONG_BREAK_STATE;
       timerCount = -1;
       millisRemain = longBreakMillis;
@@ -219,46 +200,22 @@ public class TimerService extends Service {
     Log.d("Cycle count", String.valueOf(cycleCount));
   }
 
-  public void startTimer() {
-    if(runningState == NONE_STATE){
-      //runningState = currentState;
-
-      timerRunnable = new Timer();
-      timerHandler = new Handler();
-      timerHandler.post(timerRunnable);
-
-
-
-    }
+  @Override
+  public void onDestroy() {
+    timer.cancel();
+    super.onDestroy();
   }
-  public void pauseTimer(){
-    if(runningState != NONE_STATE && timer != null){
-      timer.cancel();
-      runningState = NONE_STATE;
-      if(tickCallBack != null){
-        try {
-          tickCallBack.call(millisRemain);
-        } catch (Exception ignored) {}
-      }
-    }
 
-    @Override
-    public void onDestroy() {
-        timer.cancel();
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        tickCallBack = null;
-        return super.onUnbind(intent);
-    }
+  @Override
+  public boolean onUnbind(Intent intent) {
+    tickCallBack = null;
+    return super.onUnbind(intent);
+  }
 
  @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        return binder;
-
+ public IBinder onBind(Intent intent) {
+   return binder;
+ }
 
   public void skipTimer() {
 
@@ -272,21 +229,15 @@ public class TimerService extends Service {
       tickCallBack.call(millisRemain);
     } catch (Exception ignore) {}
   }
-  public void setStateTime(long workTime,long shortBreakTime, long longBreakTime){
-    if(runningState != NONE_STATE){
-      timer.cancel();
-      runningState = NONE_STATE;
-   
-    }
 
-    public class LocalBinder extends Binder {
-        TimerService getService() {
+  public class LocalBinder extends Binder {
+    TimerService getService() {
             return TimerService.this;
         }
-    }
+  }
 
-    public interface TimerTickCallBack {
+  public interface TimerTickCallBack {
         void call(long remainMillis) throws Exception;
-    }
+  }
 
 }
