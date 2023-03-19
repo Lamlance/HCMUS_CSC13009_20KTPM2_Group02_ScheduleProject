@@ -4,24 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -30,13 +26,19 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
   private Intent timerIntent;
   private ServiceConnection timerServiceConnection;
+  protected TimerService timerService;
+
+
   private DrawerLayout drawerLayout;
   private NavigationView sideNavView;
   private Button toolbarBtn;
+
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
   private TimerSetting timerSettingFragment;
+
+  private MediaPlayer mediaPlayer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     timerIntent = new Intent(this,TimerService.class);
+    bindService(timerIntent,new TimerConnectionService(),Context.BIND_AUTO_CREATE);
 
     setSupportActionBar((androidx.appcompat.widget.Toolbar)findViewById(R.id.toolbar));
 
@@ -60,9 +63,9 @@ public class MainActivity extends AppCompatActivity {
     });
 
     fragmentManager = getSupportFragmentManager();
-    calendarFragment = new CalendarFragment();
-    timerFragment = new TimerFragment();
-    timerSettingFragment = new TimerSetting();
+    calendarFragment = CalendarFragment.newInstance();
+    timerFragment = TimerFragment.newInstance();
+    timerSettingFragment = TimerSetting.newInstance();
 
     fragmentManager
             .beginTransaction()
@@ -82,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
             .commit();
     return true;
   }
-
   public boolean switchFragment_Schedule(){
     if(calendarFragment.isVisible()){
       return false;
@@ -106,8 +108,54 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
-
-
+  //Timer Service
+  public boolean startTimer(){
+    if(timerService != null){
+      timerService.startTimer();
+      return true;
+    }
+    return false;
+  }
+  public boolean pauseTimer(){
+    if(timerService != null){
+      timerService.pauseTimer();
+    }
+    return false;
+  }
+  public boolean resetTimer(){
+    if(timerService != null){
+      timerService.resetTimer();
+      return true;
+    }
+    return false;
+  }
+  public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack){
+    if(timerService != null){
+      timerService.tickCallBack = tickCallBack;
+      return true;
+    }
+    return false;
+  }
+  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound){
+    if(timerService != null){
+      timerService.setStateTime(workTime,shortBreakTime,longBreakTime, alarmSound);
+    }
+    return false;
+  }
+  public long getCurrentRemainMillis(){
+    if (timerService != null){
+      return timerService.millisRemain;
+    }
+    return -1;
+  }
+  //===
+  // Create a countdown sound
+  public void playCountDown(){
+    if (mediaPlayer == null){
+      mediaPlayer = MediaPlayer.create(this, R.raw.count_down_sound);
+      mediaPlayer.start();
+    }
+  }
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -124,8 +172,13 @@ public class MainActivity extends AppCompatActivity {
       return false;
     }
   }
-  public void bindTimerService(ServiceConnection serviceConnection){
-    timerServiceConnection = serviceConnection;
-    bindService(timerIntent,timerServiceConnection, Context.BIND_AUTO_CREATE);
+  class TimerConnectionService implements ServiceConnection{
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+      timerService = ((TimerService.LocalBinder)iBinder).getService();
+    }
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+    }
   }
 }

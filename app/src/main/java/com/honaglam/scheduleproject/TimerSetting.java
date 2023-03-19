@@ -1,9 +1,20 @@
 package com.honaglam.scheduleproject;
 
+import static android.app.Activity.RESULT_OK;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -12,138 +23,139 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.RadioButton;
+import android.widget.TextView;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.widget.Toast;
 
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
+
+import java.net.URI;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link TimerSetting#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TimerSetting extends Fragment {
+public class TimerSetting extends DialogFragment {
+  // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+  private Button confirmButton;
+  private Button cancelButton;
+  private NumberPicker pomodoroTimePicker;
+  private NumberPicker shortBreakPicker;
+  private NumberPicker longBreakPicker;
+  private TextView soundPicker;
+  private Uri selectedUri;
+  private ActivityResultLauncher<Intent> soundPickerLauncher;
+  private static final int DEFAULT_SOUND_PICKER_REQUEST_CODE = 1;
+  private static final int CUSTOM_SOUND_PICKER_REQUEST_CODE = 2;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private Button confirmButton;
-    private Button cancelButton;
-    private NumberPicker pomodoroTimePicker;
-    private NumberPicker shortBreakPicker;
-    private NumberPicker longBreakPicker;
+  public TimerSetting() {
+    // Required empty public constructor
+  }
 
+  // TODO: Rename and change types and number of parameters
+  public static TimerSetting newInstance() {
+    TimerSetting fragment = new TimerSetting();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+    return fragment;
+  }
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    if (getArguments() != null) {
 
-    public TimerSetting() {
-        // Required empty public constructor
     }
+  }
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                           Bundle savedInstanceState) {
+    // Inflate the layout for this fragment
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TimerSetting.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TimerSetting newInstance(String param1, String param2) {
-        TimerSetting fragment = new TimerSetting();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+    return inflater.inflate(R.layout.fragment_timer_setting, container, false);
+  }
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    int minVal = 0;
+    int maxVal = 120;
+    // Set time for pomodoro work time and watch changed valued
+    pomodoroTimePicker = getView().findViewById(R.id.workTime);
+    pomodoroTimePicker.setMinValue(minVal);
+    pomodoroTimePicker.setMaxValue(maxVal);
+    pomodoroTimePicker.setValue(25);
 
+    // Set time for short break time and watch changed valued
+    shortBreakPicker = getView().findViewById(R.id.shortBreak);
+    shortBreakPicker.setMinValue(minVal);
+    shortBreakPicker.setMaxValue(maxVal);
+    shortBreakPicker.setValue(5);
+
+    // Set time for long break time and watch changed valued
+    longBreakPicker = getView().findViewById(R.id.longBreak);
+    longBreakPicker.setMinValue(minVal);
+    longBreakPicker.setMaxValue(maxVal);
+    longBreakPicker.setValue(10);
+
+    // Set sound for timer notifications
+    soundPicker = getView().findViewById(R.id.soundPicker);
+    Uri defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+    Ringtone defaultRingtone = RingtoneManager.getRingtone(getContext(), defaultUri);
+    String defaultName = defaultRingtone.getTitle(getContext());
+    soundPicker.setText(defaultName);
+    selectedUri = defaultUri;
+    soundPicker.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, defaultUri);
+        soundPickerLauncher.launch(intent);
+      }
+    });
+
+    // Initialize the ActivityResultLauncher to handle the result from the sound picker
+    // TODO: CREATE A HANDLER TO GRANT PERMISSION TO OPEN CUSTOM RINGTONE
+    soundPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+      public void onActivityResult(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK) {
+          Uri uri = result.getData().getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+          if (uri == null) {
+            // If the user didn't pick a ringtone, use the default ringtone
+            uri = defaultUri;
+          }
+          selectedUri = uri;
+          Ringtone ringtone = RingtoneManager.getRingtone(getContext(), uri);
+          String name = ringtone.getTitle(getContext());
+          soundPicker.setText(name);
         }
-    }
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-
-        return inflater.inflate(R.layout.fragment_timer_setting, container, false);
-    }
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        int minVal = 0;
-        int maxVal = 120;
-        // Set time for pomodoro work time and watch changed valued
-        pomodoroTimePicker = getView().findViewById(R.id.workTime);
-        pomodoroTimePicker.setMinValue(minVal);
-        pomodoroTimePicker.setMaxValue(maxVal);
-        pomodoroTimePicker.setValue(25);
-        pomodoroTimePicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                pomodoroTimePicker.setValue(i1);
-            }
-        });
-
-        // Set time for short break time and watch changed valued
-        shortBreakPicker = getView().findViewById(R.id.shortBreak);
-        shortBreakPicker.setMinValue(minVal);
-        shortBreakPicker.setMaxValue(maxVal);
-        shortBreakPicker.setValue(5);
-        shortBreakPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                shortBreakPicker.setValue(i1);
-
-            }
-        });
-
-        // Set time for long break time and watch changed valued
-        longBreakPicker = getView().findViewById(R.id.longBreak);
-        longBreakPicker.setMinValue(minVal);
-        longBreakPicker.setMaxValue(maxVal);
-        longBreakPicker.setValue(10);
-        longBreakPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                longBreakPicker.setValue(i1);
-            }
-        });
-
-        // Pass the setting to the timer Fragment upon confirm pressed
-        confirmButton = getView().findViewById(R.id.confirmButton);
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (view.getId() == R.id.confirmButton){
-                    int workTime = pomodoroTimePicker.getValue();
-                    int shortBreak = shortBreakPicker.getValue();
-                    int longBreak = longBreakPicker.getValue();
-                    //TODO: Parse all data through
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("workTime", workTime);
-//                    bundle.putInt("shortBreakTime", shortBreak);
-//                    bundle.putInt("longBreakTime", shortBreak);
-                    TimerFragment timerFragment = new TimerFragment();
-                    timerFragment.setArguments(bundle);
-
-                    //TODO: DATA TRANSFERED TO TIMER FRAGMENT BUT COULD NOT GET DATA
-                    // TODO: GET THE DATA IN THE FILE TimerFragment.java and parse it to START_TIME_IN_MILLIS
-                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, timerFragment).commit();
-
-                    // Redirect to main Pomodoro Page
-                    ((MainActivity)getActivity()).switchFragment_Pomodoro();
-                }
-            }
-        });
-        // On click event for cancel button
-        // TODO: TRANSFER THIS TO TIMER FRAGMENT
-        cancelButton = getView().findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: Add a variable to save the current setting?
-                // Redirect to main Pomodoro Page
-                ((MainActivity)getActivity()).switchFragment_Pomodoro();
-            }
-        });
-
-    }
-
+      }
+    });
+    // Pass the setting to the timer Fragment upon confirm pressed
+    confirmButton = getView().findViewById(R.id.confirmButton);
+    confirmButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        long workTime = pomodoroTimePicker.getValue() * (long)1000;
+        long shortBreak = shortBreakPicker.getValue() * (long)1000;
+        long longBreak = longBreakPicker.getValue() * (long)1000;
+        Uri final_uri = selectedUri;
+        Log.d("URI", "onClick: " + selectedUri.toString());
+        ((MainActivity)getActivity()).setTimerTime(workTime,shortBreak,longBreak, final_uri);
+        ((MainActivity)getActivity()).switchFragment_Pomodoro();
+      }
+    });
+    cancelButton = getView().findViewById(R.id.cancelButton);
+    cancelButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        //TODO: Add a variable to save the current setting?
+        // Redirect to main Pomodoro Page
+        ((MainActivity)getActivity()).switchFragment_Pomodoro();
+      }
+    });
+  }
 }

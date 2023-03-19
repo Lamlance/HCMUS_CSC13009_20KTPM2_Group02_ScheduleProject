@@ -1,6 +1,5 @@
 package com.honaglam.scheduleproject;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,25 +7,42 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+
+import androidx.core.app.NotificationCompat;
 //import android.os.Looper;
 
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
-  private static final long START_TIME_IN_MILLIS = 1500*1000;
-  long millisRemain = 1500*1000;
+  private static final long DEFAULT_WORK_TIME = 25000; //25second
+  private static final long DEFAULT_SHORT_BREAK_TIME = 5000; //5second
+  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //10second
 
+  private static final int NONE_STATE = 0;
+  private static final int WORK_STATE = 1;
+  private static final int SHORT_BREAK_STATE = 2;
+  private static final int LONG_BREAK_STATE = 3;
+
+  long millisRemain = 0;
+  long workMillis = 0;
+  long shortBreakMillis = 0;
+  long longBreakMillis = 0;
+  Uri alarmUri;
   private static final String CHANNEL_ID = "TimerNotificationChanel";
   private static final int NOTIFICATION_ID=6969;
   public TimerTickCallBack tickCallBack = null;
   Intent timerIntent;
-
   NotificationChannel notificationChannel;
-
+  Handler timerHandler;
+  Runnable timerRunnable;
+  int runningState = NONE_STATE;
+  NotificationCompat.Builder  notificationBuilder;
   public TimerService() {
   }
 
@@ -34,26 +50,33 @@ public class TimerService extends Service {
   public void onCreate() {
     super.onCreate();
     Context context = getApplicationContext();
+
+    workMillis = DEFAULT_WORK_TIME;
+    shortBreakMillis = DEFAULT_SHORT_BREAK_TIME;
+    longBreakMillis = DEFAULT_LONG_BREAK_TIME;
+    millisRemain = DEFAULT_WORK_TIME;
+
     timerIntent = new Intent(context,TimerService.class); // Build the intent for the service
     context.startForegroundService(timerIntent);
 
     notificationChannel = new NotificationChannel(CHANNEL_ID,"Timer", NotificationManager.IMPORTANCE_DEFAULT);
     notificationChannel.setDescription("Notification for pomodoro timer service");
+
     NotificationManager notificationManager = getSystemService(NotificationManager.class);
     notificationManager.createNotificationChannel(notificationChannel);
 
-
+    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, timerIntent, PendingIntent.FLAG_IMMUTABLE);
+    notificationBuilder = new NotificationCompat.Builder(this,CHANNEL_ID)
+            .setContentTitle("Pomodoro timer")
+            .setContentText("Welcome to pomodoro")
+            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setContentIntent(pendingIntent)
+            .setOnlyAlertOnce(true);
   }
 
   public Notification makeServiceNotification(String detail){
-    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, timerIntent, PendingIntent.FLAG_IMMUTABLE);
-    Notification notification = new Notification.Builder(this,CHANNEL_ID)
-            .setContentTitle("Pomodoro timer")
-            .setContentText(detail)
-            .setSmallIcon(R.mipmap.ic_launcher_round)
-            .setContentIntent(pendingIntent)
-            .build();
-    return notification;
+    notificationBuilder.setContentText(detail);
+    return notificationBuilder.build();
   }
 
   public void updateServiceNotification(Notification notification){
@@ -62,18 +85,40 @@ public class TimerService extends Service {
   }
 
   class Timer implements Runnable {
+    private MediaPlayer alarmMediaPlayer;
+    private MediaPlayer tickingMediaPlayer;
+    private final int SOUND_DURATION = 15000; // 15 seconds in milliseconds
+
     @Override
     public void run() {
-      timer = new CountDownTimer(START_TIME_IN_MILLIS,1000) {
-        @SuppressLint("DefaultLocale")
+      runningState = WORK_STATE;
+      try {
+        tickingMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.count_down_sound);
+      } catch (Exception e) {
+        // Handle exception
+        e.printStackTrace();
+      }
+
+      timer = new CountDownTimer(millisRemain, 1000) {
         @Override
         public void onTick(long l) {
           millisRemain = l;
-          updateServiceNotification(makeServiceNotification(String.format("%d",l)));
-          if(tickCallBack != null){
+          updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+          try {
+            if (tickingMediaPlayer != null && !tickingMediaPlayer.isPlaying() && millisRemain < 4000) {
+              //Start tickling sound
+              tickingMediaPlayer.start();
+            }
+          } catch (Exception e) {
+            // Handle exception
+            e.printStackTrace();
+          }
+
+          if (tickCallBack != null) {
             try {
               tickCallBack.call(millisRemain);
-            }catch (Exception e){
+            } catch (Exception e) {
+              // Handle exception
               e.printStackTrace();
             }
           }
@@ -81,11 +126,44 @@ public class TimerService extends Service {
 
         @Override
         public void onFinish() {
-          millisRemain = START_TIME_IN_MILLIS;
-          if(tickCallBack != null){
+          millisRemain = 0;
+          runningState = NONE_STATE;
+          try {
+            if (tickingMediaPlayer != null) {
+              // Stop the tickling sound and release media player
+              tickingMediaPlayer.stop();
+              tickingMediaPlayer.release();
+              tickingMediaPlayer = null;
+            }
+
+            alarmMediaPlayer = MediaPlayer.create(getApplicationContext(), alarmUri);
+            if (alarmMediaPlayer != null) {
+              alarmMediaPlayer.start();
+              // Play it for 20 seconds
+              Handler handler = new Handler();
+              handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                  if (alarmMediaPlayer != null && alarmMediaPlayer.isPlaying()) {
+                    alarmMediaPlayer.stop();
+                  }
+                  if (alarmMediaPlayer != null) {
+                    alarmMediaPlayer.release();
+                    alarmMediaPlayer = null;
+                  }
+                }
+              }, SOUND_DURATION);
+            }
+          } catch (Exception e) {
+            // Handle exception
+            e.printStackTrace();
+          }
+
+          if (tickCallBack != null) {
             try {
               tickCallBack.call(0);
-            }catch (Exception e){
+            } catch (Exception e) {
+              // Handle exception
               e.printStackTrace();
             }
           }
@@ -105,17 +183,49 @@ public class TimerService extends Service {
   }
 
   public void startTimer(){
-    Handler handler = new Handler();
-    handler.post(new Timer());
-  }
+    if(runningState == NONE_STATE){
+      millisRemain = workMillis;
+      timerRunnable = new Timer();
+      timerHandler = new Handler();
+      timerHandler.post(timerRunnable);
+    }
 
+  }
   public void pauseTimer(){
-    timer.cancel();
+    if(runningState != NONE_STATE && timer != null){
+      timer.cancel();
+      runningState = NONE_STATE;
+      if(tickCallBack != null){
+        try {
+          tickCallBack.call(millisRemain);
+        } catch (Exception ignored) {}
+      }
+    }
   }
-
   public void resetTimer() {
-    millisRemain = START_TIME_IN_MILLIS;
-    timer.cancel();
+    millisRemain = workMillis;
+    if(runningState != NONE_STATE && timer != null){
+      timer.cancel();
+      timerHandler.removeCallbacks(timerRunnable);
+      if(tickCallBack != null){
+        try {
+          tickCallBack.call(millisRemain);
+        } catch (Exception e) {}
+      }
+      runningState = NONE_STATE;
+    }
+
+  }
+  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound){
+    if(runningState != NONE_STATE){
+      timer.cancel();
+      runningState = NONE_STATE;
+    }
+    workMillis = workTime;
+    shortBreakMillis = shortBreakTime;
+    longBreakMillis = longBreakTime;
+    millisRemain = workTime;
+    alarmUri = alarmSound;
   }
 
   @Override
