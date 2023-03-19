@@ -64,6 +64,7 @@
             tools:ignore="ButtonStyle" />
     </LinearLayout>
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -76,6 +77,13 @@
             android:backgroundTint="#ffffff"
             android:text="@string/settings"
             android:textColor="#c15c5c" />
+      <Button
+          android:id="@+id/btnSkip"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:backgroundTint="#ffffff"
+          android:textColor="#c15c5c"
+          android:text="Skip"/>
     </LinearLayout>
     <!-- TODO: Create a setting button to change time -->
 

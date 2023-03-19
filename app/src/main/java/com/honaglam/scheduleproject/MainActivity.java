@@ -211,6 +211,19 @@ public class MainActivity extends AppCompatActivity {
     super.onDestroy();
   }
 
+  public boolean skip() throws Exception {
+    if (timerService != null) {
+      timerService.skipTimer();
+      return true;
+    }
+    return false;
+  }
+  
+  public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack){
+    if(timerService != null){
+      timerService.tickCallBack = tickCallBack;
+      }
+      }
   private boolean CreateLocalReminderFile(){
     if(reminderFile.exists()){
       return true;
@@ -236,6 +249,25 @@ public class MainActivity extends AppCompatActivity {
     }
     return true;
   }
+ 
+
+
+  class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+      int id = item.getItemId();
+
+      switch (id){
+        case R.id.nav_timer:
+          Toast.makeText(MainActivity.this, "Select Timer", Toast.LENGTH_SHORT).show();
+          return switchFragment_Pomodoro();
+        case R.id.nav_schedule:
+          Toast.makeText(MainActivity.this, "Select schedule", Toast.LENGTH_SHORT).show();
+          return switchFragment_Schedule();
+      }
+      }}
+
+    
   private  boolean SaveLocalReminder(){
     if(!CreateLocalReminderFile()){
       return false;

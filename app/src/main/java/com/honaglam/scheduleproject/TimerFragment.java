@@ -37,6 +37,7 @@ import java.util.List;
  */
 public class TimerFragment extends Fragment {
 
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     // TODO: Rename and change types of parameters
@@ -44,6 +45,7 @@ public class TimerFragment extends Fragment {
     private TextView txtTimer;
     private Button btnTimer;
     private Button btnGiveUp;
+    private Button btnSkip;
 
     private  Button btnAddTask;
     private Button timerSetting;
@@ -128,6 +130,18 @@ public class TimerFragment extends Fragment {
                 ((MainActivity) getActivity()).switchFragment_TimerSetting();
             }
         });
+
+btnSkip = getView().findViewById((R.id.btnSkip));
+    btnSkip.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          ((MainActivity) getActivity()).skip();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
 
         UpdateTimeUI(((MainActivity) getActivity()).getCurrentRemainMillis());
     }
