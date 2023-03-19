@@ -35,7 +35,7 @@ import java.util.List;
  * Use the {@link TimerFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TimerFragment extends Fragment implements AddTaskDialog.AddTaskDialogListener {
+public class TimerFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -133,7 +133,7 @@ public class TimerFragment extends Fragment implements AddTaskDialog.AddTaskDial
     }
 
     private void showAddTaskDialog() {
-        AddTaskDialog dialog = new AddTaskDialog(getContext(), this);
+        AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
         dialog.show();
     }
 
@@ -143,9 +143,12 @@ public class TimerFragment extends Fragment implements AddTaskDialog.AddTaskDial
         txtTimer.setText(String.format("%d:%02d", minutes, seconds));
     }
 
-    @Override
-    public void onDataPassed(TaskData taskData) {
-        tasks.add(taskData);
+    class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
+        @Override
+        public void onDataPassed(TaskData taskData) {
+            tasks.add(taskData);
+        }
     }
+
 }
 
