@@ -24,6 +24,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
+import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Reminder.ReminderRecyclerAdapter;
 
@@ -143,7 +144,8 @@ public class CalendarFragment extends Fragment {
     ((Button)view.findViewById(R.id.btnSetReminder)).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        timePickerDialog.show();
+        ReminderAddDialog reminderAddDialog = new ReminderAddDialog(context);
+        reminderAddDialog.show();
       }
     });
 
