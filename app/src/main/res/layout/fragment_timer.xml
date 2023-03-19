@@ -53,7 +53,13 @@
           android:backgroundTint="#ffffff"
           android:textColor="#c15c5c"
           android:text="@string/settings"/>
-
+      <Button
+          android:id="@+id/btnSkip"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:backgroundTint="#ffffff"
+          android:textColor="#c15c5c"
+          android:text="Skip"/>
   </LinearLayout>
 
 

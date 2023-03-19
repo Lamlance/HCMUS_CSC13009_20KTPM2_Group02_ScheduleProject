@@ -18,7 +18,7 @@ import java.util.Locale;
 import kotlin.NotImplementedError;
 
 public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
-  
+
   // Return first day of week of a identified month and year
   public static int getFirstDayOfWeekOfMonth(int year, int month) {
     Calendar calendar = Calendar.getInstance();
@@ -54,7 +54,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
 
   private static final String[] WEEKDAY_NAMES = new String[] {
-      "SU", "MO", "TU", "WE", "TH", "FR", "SA"
+          "SU", "MO", "TU", "WE", "TH", "FR", "SA"
   };
 
   public CalendarRecyclerViewAdapter(Context context) {

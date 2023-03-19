@@ -131,6 +131,15 @@ public class MainActivity extends AppCompatActivity {
     }
     return false;
   }
+
+  public boolean skip() throws Exception {
+    if (timerService != null) {
+      timerService.skipTimer();
+      return true;
+    }
+    return false;
+  }
+  //===
   public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack){
     if(timerService != null){
       timerService.tickCallBack = tickCallBack;
@@ -150,7 +159,8 @@ public class MainActivity extends AppCompatActivity {
     }
     return -1;
   }
-  //===
+
+
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
     @Override

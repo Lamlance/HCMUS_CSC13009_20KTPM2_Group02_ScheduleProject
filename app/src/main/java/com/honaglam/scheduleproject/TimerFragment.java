@@ -37,8 +37,8 @@ public class TimerFragment extends Fragment {
   private TextView txtTimer;
   private Button btnTimer;
   private Button btnGiveUp;
+  private Button btnSkip;
   private Button timerSetting;
-
 
   // TODO: Rename and change types and number of parameters
   public static TimerFragment newInstance() {
@@ -96,6 +96,18 @@ public class TimerFragment extends Fragment {
       @Override
       public void onClick(View view) {
         ((MainActivity) getActivity()).switchFragment_TimerSetting();
+      }
+    });
+
+    btnSkip = getView().findViewById((R.id.btnSkip));
+    btnSkip.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          ((MainActivity) getActivity()).skip();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       }
     });
 

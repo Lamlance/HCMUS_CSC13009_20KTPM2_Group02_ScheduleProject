@@ -12,6 +12,7 @@ import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 //import android.os.Looper;
@@ -19,9 +20,9 @@ import androidx.core.app.NotificationCompat;
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
-  private static final long DEFAULT_WORK_TIME = 25000; //25second
-  private static final long DEFAULT_SHORT_BREAK_TIME = 5000; //5second
-  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //10second
+  private static final long DEFAULT_WORK_TIME = 5000; //5second
+  private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
+  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
 
   private static final int NONE_STATE = 0;
   private static final int WORK_STATE = 1;
@@ -40,7 +41,14 @@ public class TimerService extends Service {
   NotificationChannel notificationChannel;
   Handler timerHandler;
   Runnable timerRunnable;
+
   int runningState = NONE_STATE;
+  int timerCount = 0;
+  int cycleCount = 0;
+  //private static int currentState = 1; //1. WORK - SHORT - LONG
+  //private static int countCycle = 0;
+  private static final int COMPLETE_CYCLE = 7;
+
   NotificationCompat.Builder  notificationBuilder;
   public TimerService() {
   }
@@ -84,10 +92,12 @@ public class TimerService extends Service {
     notificationManager.notify(NOTIFICATION_ID,notification);
   }
 
+
   class Timer implements Runnable {
     @Override
     public void run() {
-      runningState = WORK_STATE;
+      //currentState = WORK_STATE;
+      //runningState = currentState;
       timer = new CountDownTimer(millisRemain,1000) {
         @Override
         public void onTick(long l) {
@@ -104,14 +114,51 @@ public class TimerService extends Service {
 
         @Override
         public void onFinish() {
-          millisRemain = 0;
-          runningState = NONE_STATE;
           if(tickCallBack != null){
             try {
-              tickCallBack.call(0);
+              /*
+              countCycle++;
+              if (countCycle < completedCycle) {
+                if (countCycle % 2 == 0) {
+                  countCycle = 0;
+                  currentState = WORK_STATE;
+                  runningState = currentState;
+                  millisRemain = workMillis;
+                }
+                else {
+                  currentState = SHORT_BREAK_STATE;
+                  runningState = currentState;
+                  millisRemain = shortBreakMillis;
+                }
+                Log.d("State", String.valueOf(runningState));
+                Log.d("millis", String.valueOf(millisRemain));
+                Log.d("Count", String.valueOf(countCycle));
+              }
+              else if (countCycle == completedCycle) {
+                currentState = LONG_BREAK_STATE;
+                runningState = currentState;
+                millisRemain = longBreakMillis;
+                Log.d("State", String.valueOf(runningState));
+                Log.d("millis", String.valueOf(millisRemain));
+                Log.d("Count", String.valueOf(countCycle));
+              }
+              else {
+                countCycle = 0;
+                currentState = WORK_STATE;
+                runningState = currentState;
+                millisRemain = workMillis;
+                Log.d("State", String.valueOf(runningState));
+                Log.d("millis", String.valueOf(millisRemain));
+                Log.d("Count", String.valueOf(countCycle));
+              }
+              */
+              //tickCallBack.call(millisRemain);
+              switchState();
+              tickCallBack.call(millisRemain);
             }catch (Exception e){
               e.printStackTrace();
             }
+            runningState = NONE_STATE;
           }
         }
       };
@@ -128,14 +175,38 @@ public class TimerService extends Service {
     return super.onStartCommand(intent, flags, startId);
   }
 
-  public void startTimer(){
-    if(runningState == NONE_STATE){
+  public void switchState(){
+    timerCount += 1;
+    cycleCount += (timerCount  % 2 == 0) ? 1 : 0;
+
+    if(timerCount % 2 == 0){
+      runningState = WORK_STATE;
       millisRemain = workMillis;
+    } else if (timerCount % 2 == 1 && timerCount != 7) {
+      runningState = SHORT_BREAK_STATE;
+      millisRemain = shortBreakMillis;
+    }else {
+      runningState = LONG_BREAK_STATE;
+      timerCount = -1;
+      millisRemain = longBreakMillis;
+    }
+
+    Log.d("Running state", String.valueOf(runningState));
+    Log.d("Timer count", String.valueOf(timerCount));
+    Log.d("Cycle count", String.valueOf(cycleCount));
+  }
+
+  public void startTimer() {
+    if(runningState == NONE_STATE){
+      //runningState = currentState;
+
       timerRunnable = new Timer();
       timerHandler = new Handler();
       timerHandler.post(timerRunnable);
-    }
 
+
+
+    }
   }
   public void pauseTimer(){
     if(runningState != NONE_STATE && timer != null){
@@ -161,6 +232,47 @@ public class TimerService extends Service {
       runningState = NONE_STATE;
     }
 
+  }
+
+  public void skipTimer() {
+
+    if(runningState != NONE_STATE && timer != null){
+      timer.cancel();
+    }
+
+    switchState();
+    runningState = NONE_STATE;
+    try {
+      tickCallBack.call(millisRemain);
+    } catch (Exception ignore) {}
+
+//    if (runningState != NONE_STATE && timer != null && tickCallBack != null) {
+//      if (runningState == WORK_STATE && countCycle < completedCycle) {
+//        countCycle++;
+//        runningState = SHORT_BREAK_STATE;
+//        millisRemain = shortBreakMillis;
+//        tickCallBack.call(millisRemain);
+//        Log.d("State", String.valueOf(runningState));
+//        Log.d("millis", String.valueOf(millisRemain));
+//      }
+//      else if (runningState == SHORT_BREAK_STATE && countCycle < completedCycle) {
+//        countCycle++;
+//        runningState = WORK_STATE;
+//        millisRemain = workMillis;
+//        tickCallBack.call(millisRemain);
+//
+//        Log.d("State", String.valueOf(runningState));
+//        Log.d("millis", String.valueOf(millisRemain));
+//      }
+//      else if (runningState == SHORT_BREAK_STATE && countCycle == completedCycle) {
+//        countCycle++;
+//        runningState = LONG_BREAK_STATE;
+//        millisRemain = longBreakMillis;
+//        tickCallBack.call(millisRemain);
+//        Log.d("State", String.valueOf(runningState));
+//        Log.d("millis", String.valueOf(millisRemain));
+//      }
+//    }
   }
   public void setStateTime(long workTime,long shortBreakTime, long longBreakTime){
     if(runningState != NONE_STATE){
