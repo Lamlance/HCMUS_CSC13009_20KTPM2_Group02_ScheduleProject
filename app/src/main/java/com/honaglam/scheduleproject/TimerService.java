@@ -45,9 +45,6 @@ public class TimerService extends Service {
   int runningState = NONE_STATE;
   int timerCount = 0;
   int cycleCount = 0;
-  //private static int currentState = 1; //1. WORK - SHORT - LONG
-  //private static int countCycle = 0;
-  private static final int COMPLETE_CYCLE = 7;
 
   NotificationCompat.Builder  notificationBuilder;
   public TimerService() {
@@ -96,8 +93,6 @@ public class TimerService extends Service {
   class Timer implements Runnable {
     @Override
     public void run() {
-      //currentState = WORK_STATE;
-      //runningState = currentState;
       timer = new CountDownTimer(millisRemain,1000) {
         @Override
         public void onTick(long l) {
@@ -116,43 +111,6 @@ public class TimerService extends Service {
         public void onFinish() {
           if(tickCallBack != null){
             try {
-              /*
-              countCycle++;
-              if (countCycle < completedCycle) {
-                if (countCycle % 2 == 0) {
-                  countCycle = 0;
-                  currentState = WORK_STATE;
-                  runningState = currentState;
-                  millisRemain = workMillis;
-                }
-                else {
-                  currentState = SHORT_BREAK_STATE;
-                  runningState = currentState;
-                  millisRemain = shortBreakMillis;
-                }
-                Log.d("State", String.valueOf(runningState));
-                Log.d("millis", String.valueOf(millisRemain));
-                Log.d("Count", String.valueOf(countCycle));
-              }
-              else if (countCycle == completedCycle) {
-                currentState = LONG_BREAK_STATE;
-                runningState = currentState;
-                millisRemain = longBreakMillis;
-                Log.d("State", String.valueOf(runningState));
-                Log.d("millis", String.valueOf(millisRemain));
-                Log.d("Count", String.valueOf(countCycle));
-              }
-              else {
-                countCycle = 0;
-                currentState = WORK_STATE;
-                runningState = currentState;
-                millisRemain = workMillis;
-                Log.d("State", String.valueOf(runningState));
-                Log.d("millis", String.valueOf(millisRemain));
-                Log.d("Count", String.valueOf(countCycle));
-              }
-              */
-              //tickCallBack.call(millisRemain);
               switchState();
               tickCallBack.call(millisRemain);
             }catch (Exception e){
@@ -245,34 +203,6 @@ public class TimerService extends Service {
     try {
       tickCallBack.call(millisRemain);
     } catch (Exception ignore) {}
-
-//    if (runningState != NONE_STATE && timer != null && tickCallBack != null) {
-//      if (runningState == WORK_STATE && countCycle < completedCycle) {
-//        countCycle++;
-//        runningState = SHORT_BREAK_STATE;
-//        millisRemain = shortBreakMillis;
-//        tickCallBack.call(millisRemain);
-//        Log.d("State", String.valueOf(runningState));
-//        Log.d("millis", String.valueOf(millisRemain));
-//      }
-//      else if (runningState == SHORT_BREAK_STATE && countCycle < completedCycle) {
-//        countCycle++;
-//        runningState = WORK_STATE;
-//        millisRemain = workMillis;
-//        tickCallBack.call(millisRemain);
-//
-//        Log.d("State", String.valueOf(runningState));
-//        Log.d("millis", String.valueOf(millisRemain));
-//      }
-//      else if (runningState == SHORT_BREAK_STATE && countCycle == completedCycle) {
-//        countCycle++;
-//        runningState = LONG_BREAK_STATE;
-//        millisRemain = longBreakMillis;
-//        tickCallBack.call(millisRemain);
-//        Log.d("State", String.valueOf(runningState));
-//        Log.d("millis", String.valueOf(millisRemain));
-//      }
-//    }
   }
   public void setStateTime(long workTime,long shortBreakTime, long longBreakTime){
     if(runningState != NONE_STATE){
