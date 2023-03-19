@@ -97,30 +97,32 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
     return viewHolder;
   }
-  class OnClickAtPosition implements CalendarViewHolder.OnClickPositionCallBack{
+  class OnClickAtPosition implements CalendarViewHolder.OnClickPositionCallBack {
     @Override
     public void clickAtPosition(int position) throws NotImplementedError {
       int oldPos = clickedPos;
       int date = posToDate(position);
-      if(date <= 0){
+      if (date <= 0) {
         return;
       }
       clickedPos = position;
-      calendar.set(Calendar.DATE,date);
+      calendar.set(Calendar.DATE, date);
       notifyItemChanged(oldPos);
       notifyItemChanged(clickedPos);
-      if(selectDateCallBack != null){
+      if (selectDateCallBack != null) {
         try {
           selectDateCallBack.clickDate(
                   date,
                   calendar.get(Calendar.MONTH),
                   calendar.get(Calendar.YEAR),
                   calendar.get(Calendar.DAY_OF_WEEK));
-        }catch (Exception e){}
+        } catch (Exception e) {
+        }
       }
-      
-     @Override
-    public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
+    }
+  }
+  @Override
+  public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
         holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
         holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.BLUE : Color.WHITE);
 
@@ -132,9 +134,12 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
         String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
         holder.txtDate.setText(dateStr);
 
-    }
-    
+  }
 
+  private int dateToPos(int date){
+    int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
+    return pos;
+  }
     private int posToDate(int pos) {
         int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
         return date;

@@ -167,7 +167,12 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
+  public long getCurrentRemainMillis(){
+    if (timerService != null){
+      return timerService.millisRemain;
+    }
+    return -1;
+  }
     public boolean pauseTimer() {
         if (timerService != null) {
             timerService.pauseTimer();
