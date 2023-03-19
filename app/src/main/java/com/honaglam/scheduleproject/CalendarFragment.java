@@ -40,15 +40,24 @@ import kotlin.NotImplementedError;
  * create an instance of this fragment.
  */
 public class CalendarFragment extends Fragment {
+
   public CalendarFragment() {
     // Required empty public constructor
   }
 
-  RecyclerView recyclerCalendar;
-  CalendarRecyclerViewAdapter calendarRecyclerViewAdapter;
-  TextView txtSelectDate;
-  Animation ani_month_l2r;
-  Animation ani_month_r2l;
+    RecyclerView recyclerCalendar;
+    CalendarRecyclerViewAdapter calendarRecyclerViewAdapter;
+    TextView txtSelectDate;
+    Animation ani_month_l2r;
+    Animation ani_month_r2l;
+
+    // TODO: Rename and change types and number of parameters
+    public static CalendarFragment newInstance() {
+        CalendarFragment fragment = new CalendarFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
   TextView txtBigDate;
   TextView txtBigWeekDate;
@@ -71,14 +80,14 @@ public class CalendarFragment extends Fragment {
     fragment.setArguments(args);
     return fragment;
   }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    if (getArguments() != null) {
-
+        }
     }
-  }
+
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -197,5 +206,4 @@ public class CalendarFragment extends Fragment {
       Toast.makeText(context, String.format(Locale.getDefault(),"Delete %d ",pos), Toast.LENGTH_SHORT).show();
     }
   };
-
 }

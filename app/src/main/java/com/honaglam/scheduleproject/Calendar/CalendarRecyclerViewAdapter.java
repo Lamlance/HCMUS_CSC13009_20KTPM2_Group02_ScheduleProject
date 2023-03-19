@@ -18,6 +18,7 @@ import java.util.Locale;
 import kotlin.NotImplementedError;
 
 public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
+
   
   // Return first day of week of a identified month and year
   public static int getFirstDayOfWeekOfMonth(int year, int month) {
@@ -117,79 +118,57 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
                   calendar.get(Calendar.DAY_OF_WEEK));
         }catch (Exception e){}
       }
+      
+     @Override
+    public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
+        holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
+        holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.BLUE : Color.WHITE);
+
+        if (position < 7) {
+            holder.txtDate.setText(WEEKDAY_NAMES[position]);
+            return;
+        }
+        int date = posToDate(position);
+        String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
+        holder.txtDate.setText(dateStr);
+
     }
-  }
+    
 
-  @Override
-  public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
-    holder.txtDate.setTextColor( (clickedPos == position) ? Color.WHITE : Color.BLACK);
-    holder.txtDate.setBackgroundColor( (clickedPos == position) ? Color.BLUE : Color.WHITE);
-
-    if (position < 7) {
-      holder.txtDate.setText(WEEKDAY_NAMES[position]);
-      return;
-    }
-    int date = posToDate(position);
-    String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
-    holder.txtDate.setText(dateStr);
-
-  }
-
-
-  private int dateToPos(int date){
-    int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
-    return pos;
-  }
-
-  private int posToDate(int pos){
-    int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
-    return date;
-  }
-  @Override
-  public int getItemCount() {
-    return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
-  }
-  public void increaseMonth(){
-    int oldSize = getItemCount();
-    calendar.add(Calendar.MONTH,1);
-    calendar.set(Calendar.DATE,1);
-    weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
-    int newSize = getItemCount();
-    clickedPos = dateToPos(1);
-
-    if(selectDateCallBack != null){
-      try{
-        selectDateCallBack.clickDate(
-                calendar.get(Calendar.DATE),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.DAY_OF_WEEK)
-        );
-      }catch (Exception ignore){}
+    private int posToDate(int pos) {
+        int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
+        return date;
     }
 
-    this.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
-
-  }
-  public void decreaseMonth(){
-    int oldSize = getItemCount();
-    calendar.add(Calendar.MONTH,-1);
-    calendar.set(Calendar.DATE,1);
-    weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH));
-    int newSize = getItemCount();
-    clickedPos = dateToPos(1);
-    if(selectDateCallBack != null){
-      try{
-        selectDateCallBack.clickDate(
-                calendar.get(Calendar.DATE),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.DAY_OF_WEEK)
-        );
-      }catch (Exception ignore){}
+    @Override
+    public int getItemCount() {
+        return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
     }
 
-    this.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
-  }
+    public void increaseMonth() {
+        int oldSize = getItemCount();
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DATE, 1);
+        weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
+        int newSize = getItemCount();
+        clickedPos = dateToPos(1);
+        this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+    }
+
+    public void decreaseMonth() {
+        int oldSize = getItemCount();
+        calendar.add(Calendar.MONTH, -1);
+        calendar.set(Calendar.DATE, 1);
+        weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
+        int newSize = getItemCount();
+        clickedPos = dateToPos(1);
+        this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+    }
+
+    public String getSelectDateString() {
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int year = calendar.get(Calendar.YEAR);
+        return String.format(Locale.getDefault(), "%d/%d/%d", posToDate(clickedPos), month, year);
+    }
 
 }
