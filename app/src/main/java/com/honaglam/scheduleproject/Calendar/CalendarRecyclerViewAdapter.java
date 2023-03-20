@@ -54,7 +54,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   Context context;
 
 
-
   public static final String[] WEEKDAY_NAMES = new String[]{
           "SU", "MO", "TU", "WE", "TH", "FR", "SA"
   };
@@ -152,16 +151,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     return date;
   }
 
-
-  private int dateToPos(int date){
-    int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
-    return pos;
-  }
-
-  private int posToDate(int pos){
-    int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
-    return date;
-  }
   @Override
   public int getItemCount() {
     return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
@@ -192,3 +181,4 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     int year = calendar.get(Calendar.YEAR);
     return String.format(Locale.getDefault(), "%d/%d/%d", posToDate(clickedPos), month, year);
   }
+}

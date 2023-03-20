@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     LoadLocalReminder();
 
     Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
+
     /*
     SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
     userDBUuid = sPrefs.getString(UUID_KEY,null);
@@ -161,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
 
   //Timer Service
 
-
   public boolean startTimer() {
     if (timerService != null) {
       timerService.startTimer();
@@ -179,27 +179,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack) {
-    if (timerService != null) {
-      timerService.tickCallBack = tickCallBack;
-      return false;
-    }
-    return true;
-  }
-
-  public boolean setTimerTime(long workTime, long shortBreakTime,long longBreakTime){
-    if(timerService != null){
-      timerService.setStateTime(workTime,shortBreakTime,longBreakTime);
-    }
-    return false;
-  }
-
-  public long getCurrentRemainMillis() {
-    if (timerService != null) {
-      return timerService.millisRemain;
-    }
-    return -1;
-  }
 
   public boolean pauseTimer() {
     if (timerService != null) {
@@ -207,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
     }
     return false;
   }
-
 
   public boolean resetTimer() {
     if (timerService != null) {
@@ -236,22 +214,12 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
   //===
-  // Create a countdown sound
-  public void playCountDown(){
-    if (mediaPlayer == null){
-      mediaPlayer = MediaPlayer.create(this, R.raw.count_down_sound);
-      mediaPlayer.start();
-    }
-  }
-  class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener{
 
-  //Reminder Service
   @Override
   protected void onDestroy() {
     SaveLocalReminder();
     super.onDestroy();
   }
-
 
   private boolean CreateLocalReminderFile() {
     if (reminderFile.exists()) {

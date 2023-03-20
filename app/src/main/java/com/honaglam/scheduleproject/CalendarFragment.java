@@ -1,6 +1,5 @@
 package com.honaglam.scheduleproject;
 
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -20,8 +19,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
@@ -67,11 +64,7 @@ public class CalendarFragment extends Fragment {
   int selectedMinute = -1;
   int selectedWeekDay = -1;
 
-  RecyclerView recyclerCalendar;
-  CalendarRecyclerViewAdapter calendarRecyclerViewAdapter;
-  TextView txtSelectDate;
-  Animation ani_month_l2r;
-  Animation ani_month_r2l;
+
 
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
@@ -82,9 +75,6 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-
-        }
     }
 
 
@@ -114,14 +104,14 @@ public class CalendarFragment extends Fragment {
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
     calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
 
-    ((ImageButton) view.findViewById(R.id.btnIncreaseMonth)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnIncreaseMonth).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         calendarRecyclerViewAdapter.increaseMonth();
         recyclerCalendar.startAnimation(ani_month_r2l);
       }
     });
-    ((ImageButton) view.findViewById(R.id.btnDecreaseMonth)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnDecreaseMonth).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         calendarRecyclerViewAdapter.decreaseMonth();

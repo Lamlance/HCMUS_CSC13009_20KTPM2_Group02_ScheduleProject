@@ -55,7 +55,13 @@ public class TimerFragment extends Fragment {
   private Context context = null;
 
   // TODO: Hardcode data need to be test the function, move this to MainActivity in future
-  TaskData[] taskArray = {new TaskData("Học tiếng anh"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt")};
+  TaskData[] taskArray = {
+          new TaskData("Học tiếng anh"),
+          new TaskData("Học tiếng việt"),
+          new TaskData("Học tiếng việt"),
+          new TaskData("Học tiếng việt"),
+          new TaskData("Học tiếng việt")
+  };
   ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
 
   // TODO: Rename and change types and number of parameters

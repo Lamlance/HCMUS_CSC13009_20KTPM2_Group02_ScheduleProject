@@ -62,6 +62,7 @@ public class TimerSetting extends DialogFragment {
     fragment.setArguments(args);
     return fragment;
   }
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -69,6 +70,7 @@ public class TimerSetting extends DialogFragment {
 
     }
   }
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
@@ -76,6 +78,7 @@ public class TimerSetting extends DialogFragment {
 
     return inflater.inflate(R.layout.fragment_timer_setting, container, false);
   }
+
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
@@ -117,7 +120,6 @@ public class TimerSetting extends DialogFragment {
       }
     });
 
-    // Initialize the ActivityResultLauncher to handle the result from the sound picker
     // TODO: CREATE A HANDLER TO GRANT PERMISSION TO OPEN CUSTOM RINGTONE
     soundPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
       public void onActivityResult(ActivityResult result) {
@@ -139,22 +141,21 @@ public class TimerSetting extends DialogFragment {
     confirmButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        long workTime = pomodoroTimePicker.getValue() * (long)1000;
-        long shortBreak = shortBreakPicker.getValue() * (long)1000;
-        long longBreak = longBreakPicker.getValue() * (long)1000;
+        long workTime = pomodoroTimePicker.getValue() * (long) 1000;
+        long shortBreak = shortBreakPicker.getValue() * (long) 1000;
+        long longBreak = longBreakPicker.getValue() * (long) 1000;
         Uri final_uri = selectedUri;
         Log.d("URI", "onClick: " + selectedUri.toString());
-        ((MainActivity)getActivity()).setTimerTime(workTime,shortBreak,longBreak, final_uri);
-        ((MainActivity)getActivity()).switchFragment_Pomodoro();
+        ((MainActivity) getActivity()).setTimerTime(workTime, shortBreak, longBreak, final_uri);
+        ((MainActivity) getActivity()).switchFragment_Pomodoro();
       }
     });
     cancelButton = getView().findViewById(R.id.cancelButton);
     cancelButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        //TODO: Add a variable to save the current setting?
-        // Redirect to main Pomodoro Page
-        ((MainActivity)getActivity()).switchFragment_Pomodoro();
+        ((MainActivity) getActivity()).switchFragment_Pomodoro();
       }
     });
   }
+}
