@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.CountDownTimer;
@@ -140,10 +141,14 @@ public class TimerService extends Service {
             tickingMediaPlayer = null;
           }
 
+          if(alarmUri == null){
+            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+          }
           alarmMediaPlayer = MediaPlayer.create(getApplicationContext(), alarmUri);
+
           if (alarmMediaPlayer != null) {
-            alarmMediaPlayer.start();
-            // Play it for 20 seconds
+            PlayLoopSound playLoopSound = new PlayLoopSound(5000,1000,alarmMediaPlayer);
+            playLoopSound.start();
           }
 
           switchState();
@@ -153,6 +158,32 @@ public class TimerService extends Service {
       };
       timer.start();
 
+    }
+  }
+
+  class PlayLoopSound extends CountDownTimer {
+    MediaPlayer player;
+    public PlayLoopSound(long millisInFuture, long countDownInterval,MediaPlayer mediaPlayer) {
+      super(millisInFuture, countDownInterval);
+      player = mediaPlayer;
+      try {
+        player.setLooping(true);
+        player.start();
+      }catch (Exception ignore){player = null;}
+    }
+
+    @Override
+    public void onTick(long l) {
+
+    }
+
+    @Override
+    public void onFinish() {
+      if(player == null){return;}
+      try {
+        player.stop();
+        player.release();
+      }catch (Exception ignore){}
     }
   }
 
