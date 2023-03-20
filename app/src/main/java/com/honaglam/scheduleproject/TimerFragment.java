@@ -50,11 +50,18 @@ public class TimerFragment extends Fragment {
 
   private  Button btnAddTask;
   private Button timerSetting;
+
   private RecyclerView recyclerTask;
   private Context context = null;
 
   // TODO: Hardcode data need to be test the function, move this to MainActivity in future
-  TaskData[] taskArray = {new TaskData("Học tiếng anh"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt")};
+  TaskData[] taskArray = {
+          new TaskData("Học tiếng anh"),
+          new TaskData("Học tiếng việt"),
+          new TaskData("Học tiếng việt"),
+          new TaskData("Học tiếng việt"),
+          new TaskData("Học tiếng việt")
+  };
   ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
 
   // TODO: Rename and change types and number of parameters
@@ -76,6 +83,7 @@ public class TimerFragment extends Fragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
     recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
     recyclerTask.setLayoutManager(new LinearLayoutManager(context));
@@ -83,7 +91,6 @@ public class TimerFragment extends Fragment {
     recyclerTask.setAdapter(adapter);
     return timerLayout;
   }
-
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
@@ -157,6 +164,7 @@ public class TimerFragment extends Fragment {
     int minutes = (int) millisRemain / (60 * 1000);
     txtTimer.setText(String.format("%d:%02d", minutes, seconds));
   }
+  
 
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
     @Override

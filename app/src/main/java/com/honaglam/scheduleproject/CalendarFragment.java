@@ -1,6 +1,5 @@
 package com.honaglam.scheduleproject;
 
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -18,15 +17,15 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.TimePicker;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Reminder.ReminderRecyclerAdapter;
+
 
 import java.util.Calendar;
 import java.util.List;
@@ -66,6 +65,7 @@ public class CalendarFragment extends Fragment {
   int selectedWeekDay = -1;
 
 
+
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
     Bundle args = new Bundle();
@@ -75,9 +75,6 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-
-        }
     }
 
 
@@ -107,14 +104,14 @@ public class CalendarFragment extends Fragment {
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
     calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
 
-    ((ImageButton) view.findViewById(R.id.btnIncreaseMonth)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnIncreaseMonth).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         calendarRecyclerViewAdapter.increaseMonth();
         recyclerCalendar.startAnimation(ani_month_r2l);
       }
     });
-    ((ImageButton) view.findViewById(R.id.btnDecreaseMonth)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnDecreaseMonth).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         calendarRecyclerViewAdapter.decreaseMonth();

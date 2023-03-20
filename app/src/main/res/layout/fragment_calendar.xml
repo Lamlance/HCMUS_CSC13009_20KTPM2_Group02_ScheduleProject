@@ -9,9 +9,7 @@
 
   <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:columnCount="4"
-      android:rowCount="1">
+      android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"

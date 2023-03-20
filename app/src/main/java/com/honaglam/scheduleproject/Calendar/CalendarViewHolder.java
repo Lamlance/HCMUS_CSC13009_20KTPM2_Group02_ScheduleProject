@@ -6,13 +6,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.honaglam.scheduleproject.R;
+import kotlin.NotImplementedError;
+
 
 import kotlin.NotImplementedError;
 
 
 public class CalendarViewHolder extends RecyclerView.ViewHolder {
+
     TextView txtDate;
     OnClickPositionCallBack clickPositionCallBack = null;
 
