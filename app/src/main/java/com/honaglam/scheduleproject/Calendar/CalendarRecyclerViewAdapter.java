@@ -18,6 +18,7 @@ import java.util.Locale;
 import kotlin.NotImplementedError;
 
 public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
+
   // Return first day of week of a identified month and year
   public static int getFirstDayOfWeekOfMonth(int year, int month) {
     Calendar calendar = Calendar.getInstance();
@@ -35,6 +36,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   }
 
   public interface SelectDateCallBackInterface {
+
     void clickDate(int date, int month, int year, int weekDay) throws NotImplementedError;
   }
 
@@ -50,6 +52,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   public Calendar calendar = Calendar.getInstance();
 
   Context context;
+
 
 
   public static final String[] WEEKDAY_NAMES = new String[]{
@@ -103,6 +106,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     public void clickAtPosition(int position) throws NotImplementedError {
       int oldPos = clickedPos;
       int date = posToDate(position);
+
       if (date <= 0) {
         return;
       }
@@ -125,6 +129,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
+
     holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
     holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.BLUE : Color.WHITE);
 
@@ -135,7 +140,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     int date = posToDate(position);
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
-
   }
 
   private int dateToPos(int date) {
@@ -148,6 +152,16 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     return date;
   }
 
+
+  private int dateToPos(int date){
+    int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
+    return pos;
+  }
+
+  private int posToDate(int pos){
+    int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
+    return date;
+  }
   @Override
   public int getItemCount() {
     return (getDaysInMonths() + weekDateOfFirstDayOfMoth + 7);
@@ -178,6 +192,3 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     int year = calendar.get(Calendar.YEAR);
     return String.format(Locale.getDefault(), "%d/%d/%d", posToDate(clickedPos), month, year);
   }
-}
-
-

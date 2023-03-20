@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -27,6 +28,7 @@ import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Reminder.ReminderRecyclerAdapter;
+
 
 import java.util.Calendar;
 import java.util.List;
@@ -65,6 +67,11 @@ public class CalendarFragment extends Fragment {
   int selectedMinute = -1;
   int selectedWeekDay = -1;
 
+  RecyclerView recyclerCalendar;
+  CalendarRecyclerViewAdapter calendarRecyclerViewAdapter;
+  TextView txtSelectDate;
+  Animation ani_month_l2r;
+  Animation ani_month_r2l;
 
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
