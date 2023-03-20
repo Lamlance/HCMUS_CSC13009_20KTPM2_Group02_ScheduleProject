@@ -14,26 +14,32 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 
+import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 //import android.os.Looper;
 
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
-  private static final long DEFAULT_WORK_TIME = 25000; //25second
-  private static final long DEFAULT_SHORT_BREAK_TIME = 5000; //5second
-  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //10second
+
+  private static final long DEFAULT_WORK_TIME = 5000; //5second
+  private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
+  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
 
   private static final int NONE_STATE = 0;
   private static final int WORK_STATE = 1;
   private static final int SHORT_BREAK_STATE = 2;
   private static final int LONG_BREAK_STATE = 3;
 
+
   long millisRemain = 0;
   long workMillis = 0;
   long shortBreakMillis = 0;
   long longBreakMillis = 0;
+  
   Uri alarmUri;
+  
   private static final String CHANNEL_ID = "TimerNotificationChanel";
   private static final int NOTIFICATION_ID=6969;
   public TimerTickCallBack tickCallBack = null;
@@ -41,7 +47,12 @@ public class TimerService extends Service {
   NotificationChannel notificationChannel;
   Handler timerHandler;
   Runnable timerRunnable;
+
+
   int runningState = NONE_STATE;
+  int timerCount = 0;
+  int cycleCount = 0;
+
   NotificationCompat.Builder  notificationBuilder;
   public TimerService() {
   }
@@ -84,6 +95,7 @@ public class TimerService extends Service {
     notificationManager.notify(NOTIFICATION_ID,notification);
   }
 
+
   class Timer implements Runnable {
     private MediaPlayer alarmMediaPlayer;
     private MediaPlayer tickingMediaPlayer;
@@ -95,7 +107,6 @@ public class TimerService extends Service {
       try {
         tickingMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.count_down_sound);
       } catch (Exception e) {
-        // Handle exception
         e.printStackTrace();
       }
 
@@ -104,6 +115,7 @@ public class TimerService extends Service {
         public void onTick(long l) {
           millisRemain = l;
           updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+          
           try {
             if (tickingMediaPlayer != null && !tickingMediaPlayer.isPlaying() && millisRemain < 4000) {
               //Start tickling sound
@@ -114,11 +126,11 @@ public class TimerService extends Service {
             e.printStackTrace();
           }
 
+
           if (tickCallBack != null) {
             try {
               tickCallBack.call(millisRemain);
             } catch (Exception e) {
-              // Handle exception
               e.printStackTrace();
             }
           }
@@ -166,25 +178,30 @@ public class TimerService extends Service {
               // Handle exception
               e.printStackTrace();
             }
+          switchState();
+          runningState = NONE_STATE;
+
+          if(tickCallBack == null){
+            return;
           }
+          try {
+            tickCallBack.call(millisRemain);
+          } catch (Exception ignore) {}
         }
       };
       timer.start();
     }
   }
-
-
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    startForeground(NOTIFICATION_ID,makeServiceNotification("Hello !"));
+    startForeground(NOTIFICATION_ID, makeServiceNotification("Hello !"));
     updateServiceNotification(makeServiceNotification("Hello User"));
-
     return super.onStartCommand(intent, flags, startId);
   }
 
-  public void startTimer(){
-    if(runningState == NONE_STATE){
-      millisRemain = workMillis;
+
+  public void startTimer() {
+    if (runningState == NONE_STATE) {
       timerRunnable = new Timer();
       timerHandler = new Handler();
       timerHandler.post(timerRunnable);
@@ -201,6 +218,20 @@ public class TimerService extends Service {
         } catch (Exception ignored) {}
       }
     }
+
+  }
+
+  public void pauseTimer() {
+    if (runningState != NONE_STATE && timer != null) {
+      timer.cancel();
+      runningState = NONE_STATE;
+    }
+    if (tickCallBack == null) {
+      return;
+    }
+    try {
+      tickCallBack.call(millisRemain);
+    } catch (Exception ignored) {}
   }
   public void resetTimer() {
     millisRemain = workMillis;
@@ -214,10 +245,10 @@ public class TimerService extends Service {
       }
       runningState = NONE_STATE;
     }
-
   }
-  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound){
-    if(runningState != NONE_STATE){
+
+  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime) {
+    if (runningState != NONE_STATE && timer != null) {
       timer.cancel();
       runningState = NONE_STATE;
     }
@@ -226,6 +257,27 @@ public class TimerService extends Service {
     longBreakMillis = longBreakTime;
     millisRemain = workTime;
     alarmUri = alarmSound;
+  }
+  
+  public void switchState () {
+    timerCount += 1;
+    cycleCount += (timerCount % 2 == 0) ? 1 : 0;
+
+    if (timerCount % 2 == 0) {
+      runningState = WORK_STATE;
+      millisRemain = workMillis;
+    } else if (timerCount % 2 == 1 && timerCount != 7) {
+      runningState = SHORT_BREAK_STATE;
+      millisRemain = shortBreakMillis;
+    } else {
+      runningState = LONG_BREAK_STATE;
+      timerCount = -1;
+      millisRemain = longBreakMillis;
+    }
+
+    Log.d("Running state", String.valueOf(runningState));
+    Log.d("Timer count", String.valueOf(timerCount));
+    Log.d("Cycle count", String.valueOf(cycleCount));
   }
 
   @Override
@@ -240,19 +292,32 @@ public class TimerService extends Service {
     return super.onUnbind(intent);
   }
 
-  @Override
-  public IBinder onBind(Intent intent) {
-    // TODO: Return the communication channel to the service.
-    return binder;
-  }
-  public class LocalBinder extends Binder {
-    TimerService getService() {
-      return TimerService.this;
+ @Override
+ public IBinder onBind(Intent intent) {
+   return binder;
+ }
+
+  public void skipTimer() {
+
+    if(runningState != NONE_STATE && timer != null){
+      timer.cancel();
     }
+
+    switchState();
+    runningState = NONE_STATE;
+    try {
+      tickCallBack.call(millisRemain);
+    } catch (Exception ignore) {}
   }
 
-  public interface TimerTickCallBack{
-    void call(long remainMillis) throws Exception;
+  public class LocalBinder extends Binder {
+    TimerService getService() {
+           return TimerService.this;
+        }
+  }
+
+  public interface TimerTickCallBack {
+        void call(long remainMillis) throws Exception;
   }
 
 }

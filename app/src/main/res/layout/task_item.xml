@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:weightSum="10">
+
+
+    <TextView
+        android:id="@+id/txtTaskName"
+        android:text="Task name"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:textSize="25sp"
+        android:padding="8dp"
+        android:layout_weight="7"/>
+
+    <TextView
+        android:id="@+id/txtCountPomodoro"
+        android:text="1/1"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"/>
+
+    <CheckBox
+        android:id="@+id/checkBoxCompleteTask"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"/>
+</LinearLayout>

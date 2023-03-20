@@ -158,4 +158,3 @@ public class TimerSetting extends DialogFragment {
       }
     });
   }
-}

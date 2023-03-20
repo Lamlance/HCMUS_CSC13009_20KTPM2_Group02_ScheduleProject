@@ -1,8 +1,6 @@
 package com.honaglam.scheduleproject;
 
-import android.content.ComponentName;
-import android.content.ServiceConnection;
-import android.graphics.Color;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,25 +8,36 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 //import android.os.Handler;
-import android.os.IBinder;
 //import android.os.Looper;
 //import android.util.Log;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.fragment.app.FragmentManager;
-import java.util.Locale;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.honaglam.scheduleproject.Model.TaskData;
+import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link TimerFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
  */
 public class TimerFragment extends Fragment {
+
 
   // TODO: Rename parameter arguments, choose names that match
   // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,8 +46,17 @@ public class TimerFragment extends Fragment {
   private TextView txtTimer;
   private Button btnTimer;
   private Button btnGiveUp;
+  private Button btnSkip;
+
+  private  Button btnAddTask;
   private Button timerSetting;
 
+  private RecyclerView recyclerTask;
+  private Context context = null;
+
+  // TODO: Hardcode data need to be test the function, move this to MainActivity in future
+  TaskData[] taskArray = {new TaskData("Học tiếng anh"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt"), new TaskData("Học tiếng việt")};
+  ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
 
   // TODO: Rename and change types and number of parameters
   public static TimerFragment newInstance() {
@@ -59,7 +77,13 @@ public class TimerFragment extends Fragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_timer, container, false);
+
+    LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
+    recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
+    recyclerTask.setLayoutManager(new LinearLayoutManager(context));
+    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, tasks);
+    recyclerTask.setAdapter(adapter);
+    return timerLayout;
   }
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -72,7 +96,7 @@ public class TimerFragment extends Fragment {
     btnTimer.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ((MainActivity)getActivity()).startTimer();
+        ((MainActivity) getActivity()).startTimer();
       }
     });
 
@@ -80,14 +104,22 @@ public class TimerFragment extends Fragment {
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ((MainActivity)getActivity()).resetTimer();
+        ((MainActivity) getActivity()).resetTimer();
       }
     });
 
-    ((MainActivity)getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
+    btnAddTask = getView().findViewById(R.id.btnAddTask);
+    btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void call(long remainMillis) throws Exception {
-       UpdateTimeUI(remainMillis);
+      public void onClick(View view) {
+        showAddTaskDialog();
+      }
+    });
+
+    ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
+      @Override
+      public void call(long remainMillis) {
+        UpdateTimeUI(remainMillis);
       }
     });
 
@@ -99,8 +131,26 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    UpdateTimeUI(((MainActivity)getActivity()).getCurrentRemainMillis());
+    btnSkip = getView().findViewById((R.id.btnSkip));
+    btnSkip.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          ((MainActivity) getActivity()).skip();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
 
+    long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
+    UpdateTimeUI(cur);
+    Log.d("Cur",String.valueOf(cur));
+  }
+
+  private void showAddTaskDialog() {
+    AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
+    dialog.show();
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -108,5 +158,14 @@ public class TimerFragment extends Fragment {
     int minutes = (int) millisRemain / (60 * 1000);
     txtTimer.setText(String.format("%d:%02d", minutes, seconds));
   }
+  
+
+  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
+    @Override
+    public void onDataPassed(TaskData taskData) {
+      tasks.add(taskData);
+    }
+  }
+
 }
 
