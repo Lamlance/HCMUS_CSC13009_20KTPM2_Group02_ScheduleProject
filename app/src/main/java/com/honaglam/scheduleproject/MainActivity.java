@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.Reminder.ReminderTaskDB;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,6 +41,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
   public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
   private static final String REMINDER_FILE_NAME = "ScheduleReminder";
   File reminderFile = null;
+  ReminderTaskDB taskDb;
   //========
 
   private DrawerLayout drawerLayout;
@@ -82,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
     LoadLocalReminder();
 
     Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
+
+    taskDb = new ReminderTaskDB(this);
 
     /*
     SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
@@ -270,11 +275,15 @@ public class MainActivity extends AppCompatActivity {
           .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
   public int addReminder(String name, long time) {
-    reminderDataList.add(new ReminderData(name, time));
+    ReminderData reminderData = new ReminderData(name, time);
+    reminderDataList.add(reminderData);
+    boolean result = taskDb.addReminder(reminderData);
+    Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
 
     notificationBuilder.setContentText(name);
     Notification notification = notificationBuilder.build();
 
+    /*
     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
     intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
@@ -284,7 +293,21 @@ public class MainActivity extends AppCompatActivity {
     PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
     alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
+    */
+
     return reminderDataList.size();
+  }
+
+  public int getReminderAt(int date,int month,int year){
+    List<ReminderData> data = taskDb.getReminderAt(date,month,year);
+    Log.d("DataLength", String.valueOf(data.size()));
+
+    int oldSize = reminderDataList.size();
+    reminderDataList.clear();
+    reminderDataList.addAll(data);
+    int newSize = reminderDataList.size();
+
+    return Math.max(oldSize,newSize);
   }
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener {
