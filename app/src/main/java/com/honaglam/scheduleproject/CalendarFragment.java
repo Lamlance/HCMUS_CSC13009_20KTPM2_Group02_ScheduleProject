@@ -199,7 +199,7 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
       int pos = reminderRecyclerAdapter.selectedItemPos;
-      mainActivity.reminderDataList.remove(pos);
+      mainActivity.removeReminder(pos);
       reminderRecyclerAdapter.notifyItemRemoved(pos);
       Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
     }

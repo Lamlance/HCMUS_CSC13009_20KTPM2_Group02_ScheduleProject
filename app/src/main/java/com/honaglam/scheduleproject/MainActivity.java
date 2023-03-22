@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    reminderFile = new File(getFilesDir(), REMINDER_FILE_NAME);
-    LoadLocalReminder();
+    //reminderFile = new File(getFilesDir(), REMINDER_FILE_NAME);
+    //LoadLocalReminder();
 
     Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
 
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
-  public boolean skip()  {
+  public boolean skip() {
     if (timerService != null) {
       timerService.skipTimer();
       return true;
@@ -199,21 +199,24 @@ public class MainActivity extends AppCompatActivity {
     }
     return false;
   }
-  public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack){
-    if(timerService != null){
+
+  public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack) {
+    if (timerService != null) {
       timerService.tickCallBack = tickCallBack;
       return true;
     }
     return false;
   }
-  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound){
-    if(timerService != null){
-      timerService.setStateTime(workTime,shortBreakTime,longBreakTime, alarmSound);
+
+  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
+    if (timerService != null) {
+      timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound);
     }
     return false;
   }
-  public long getCurrentRemainMillis(){
-    if (timerService != null){
+
+  public long getCurrentRemainMillis() {
+    if (timerService != null) {
       return timerService.millisRemain;
     }
     return -1;
@@ -275,31 +278,52 @@ public class MainActivity extends AppCompatActivity {
           .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
   public int addReminder(String name, long time) {
-    ReminderData reminderData = new ReminderData(name, time);
-    reminderDataList.add(reminderData);
-    boolean result = taskDb.addReminder(reminderData);
-    Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
+    long result = taskDb.addReminder(name,time);
 
-    notificationBuilder.setContentText(name);
-    Notification notification = notificationBuilder.build();
+    try {
+      int id = Math.toIntExact(result);
 
-    /*
-    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
-    intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
-    intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
-    intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+      ReminderData reminderData = new ReminderData(name,time,id);
+      reminderDataList.add(reminderData);
+      Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
 
-    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
-    alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
-    */
+      notificationBuilder.setContentText(name);
+      Notification notification = notificationBuilder.build();
+
+
+      AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+      intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
+      intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
+      intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+
+      PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent,
+              PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+      alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
+
+    } catch (Exception ignore) {}
+
 
     return reminderDataList.size();
   }
+  public void removeReminder(int pos){
+    try {
+      ReminderData data = reminderDataList.get(pos);
+      int id = data.id;
+      long remove = taskDb.removeReminder(id);
+      AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+      PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent,
+              PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+      alarmManager.cancel(pendingIntent);
 
-  public int getReminderAt(int date,int month,int year){
-    List<ReminderData> data = taskDb.getReminderAt(date,month,year);
+      reminderDataList.remove(pos);
+    }catch (Exception ignore){}
+  }
+
+
+  public int getReminderAt(int date, int month, int year) {
+    List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
 
     int oldSize = reminderDataList.size();
@@ -307,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
     reminderDataList.addAll(data);
     int newSize = reminderDataList.size();
 
-    return Math.max(oldSize,newSize);
+    return Math.max(oldSize, newSize);
   }
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener {
@@ -328,12 +352,12 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
-
   class TimerConnectionService implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
     }
+
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
     }

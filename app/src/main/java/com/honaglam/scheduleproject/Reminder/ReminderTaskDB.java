@@ -44,16 +44,15 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     db.execSQL(createTableStatement);
   }
 
-  public boolean addReminder (ReminderData reminderData){
+  public long addReminder (String name,long time){
     try(SQLiteDatabase db = this.getWritableDatabase()){
       ContentValues cv = new ContentValues();
 
-      cv.put(ReminderTable.COLUMN_NAME_TITLE,reminderData.Name);
-      cv.put(ReminderTable.COLUMN_NAME_TIME, reminderData.RemindTime);
+      cv.put(ReminderTable.COLUMN_NAME_TITLE,name);
+      cv.put(ReminderTable.COLUMN_NAME_TIME, time);
 
-      db.insert(ReminderTable.TABLE_NAME, null,cv);
-    }catch(Exception ignore){return false;}
-    return true;
+      return db.insert(ReminderTable.TABLE_NAME, null,cv);
+    }catch(Exception ignore){return -1;}
   }
 
   public List<ReminderData> getReminderAt(int date, int month, int year){
@@ -94,6 +93,18 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       return list;
     }catch (Exception ignore){}
     return null;
+  }
+
+  public long removeReminder(long id){
+    try(SQLiteDatabase db = this.getWritableDatabase()) {
+      return db.delete(
+              ReminderTable.TABLE_NAME,
+              ReminderTable.COLUMN_NAME_ID + " = ?",
+              new String[]{String.valueOf(id)}
+      );
+    }catch(Exception ignore){
+      return -1;
+    }
   }
 
   @Override
