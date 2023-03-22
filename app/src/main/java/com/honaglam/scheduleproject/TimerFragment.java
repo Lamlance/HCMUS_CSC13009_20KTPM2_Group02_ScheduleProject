@@ -53,16 +53,7 @@ public class TimerFragment extends Fragment {
 
   private RecyclerView recyclerTask;
   private Context context = null;
-
-  // TODO: Hardcode data need to be test the function, move this to MainActivity in future
-  TaskData[] taskArray = {
-          new TaskData("Học tiếng anh"),
-          new TaskData("Học tiếng việt"),
-          new TaskData("Học tiếng việt"),
-          new TaskData("Học tiếng việt"),
-          new TaskData("Học tiếng việt")
-  };
-  ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
+  private MainActivity activity;
 
   // TODO: Rename and change types and number of parameters
   public static TimerFragment newInstance() {
@@ -83,11 +74,12 @@ public class TimerFragment extends Fragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    activity = (MainActivity) getActivity();
 
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-    recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
+    recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
     recyclerTask.setLayoutManager(new LinearLayoutManager(context));
-    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, tasks);
+    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, () -> activity.tasks);
     recyclerTask.setAdapter(adapter);
     return timerLayout;
   }
@@ -99,35 +91,20 @@ public class TimerFragment extends Fragment {
     txtTimer.setTextSize(50);
 
     btnTimer = getView().findViewById(R.id.btnTimerStart);
-    btnTimer.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        ((MainActivity) getActivity()).startTimer();
-      }
-    });
+    btnTimer.setOnClickListener(view1 -> ((MainActivity) getActivity()).startTimer());
 
     btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
-    btnGiveUp.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        ((MainActivity) getActivity()).resetTimer();
-      }
-    });
+    btnGiveUp.setOnClickListener(view12 -> ((MainActivity) getActivity()).resetTimer());
 
     btnAddTask = getView().findViewById(R.id.btnAddTask);
     btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        showAddTaskDialog();
+        ((MainActivity) getActivity()).showAddTaskDialog();
       }
     });
 
-    ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
-      @Override
-      public void call(long remainMillis) {
-        UpdateTimeUI(remainMillis);
-      }
-    });
+    ((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis));
 
     timerSetting = getView().findViewById(R.id.btnTimerSetting);
     timerSetting.setOnClickListener(new View.OnClickListener() {
@@ -138,14 +115,11 @@ public class TimerFragment extends Fragment {
     });
 
     btnSkip = getView().findViewById((R.id.btnSkip));
-    btnSkip.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        try {
-          ((MainActivity) getActivity()).skip();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
+    btnSkip.setOnClickListener(view13 -> {
+      try {
+        ((MainActivity) getActivity()).skip();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     });
 
@@ -154,24 +128,10 @@ public class TimerFragment extends Fragment {
     Log.d("Cur",String.valueOf(cur));
   }
 
-  private void showAddTaskDialog() {
-    AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
-    dialog.show();
-  }
-
   public void UpdateTimeUI(long millisRemain) {
     int seconds = ((int) millisRemain / 1000) % 60;
     int minutes = (int) millisRemain / (60 * 1000);
     txtTimer.setText(String.format("%d:%02d", minutes, seconds));
   }
-  
-
-  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
-    @Override
-    public void onDataPassed(TaskData taskData) {
-      tasks.add(taskData);
-    }
-  }
-
 }
 

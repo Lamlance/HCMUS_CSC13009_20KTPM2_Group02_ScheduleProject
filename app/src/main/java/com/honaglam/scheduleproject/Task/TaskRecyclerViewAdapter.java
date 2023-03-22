@@ -8,16 +8,17 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ActionBarPolicy;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.Model.TaskData;
 import com.honaglam.scheduleproject.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder> {
 
-    private ArrayList<TaskData> data;
     Context context;
     LayoutInflater inflater;
 
@@ -34,9 +35,14 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         }
     }
 
-    public TaskRecyclerViewAdapter(Context context, ArrayList<TaskData> data) {
+    public interface  GetListCallback {
+        public List<TaskData> getList();
+    }
+
+    GetListCallback dataGet;
+    public TaskRecyclerViewAdapter(Context context, GetListCallback callback) {
         this.context = context;
-        this.data = data;
+        dataGet = callback;
     }
 
     @NonNull
@@ -51,9 +57,9 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        holder.txtTaskName.setText(data.get(position).taskName);
-        holder.txtCountPomodoro.setText(data.get(position).numberCompletedPomodoros + "/ " + data.get(position).numberPomodoros);
-        holder.checkBoxCompleteTask.setChecked(data.get(position).isCompleted);
+        holder.txtTaskName.setText(dataGet.getList().get(position).taskName);
+        holder.txtCountPomodoro.setText(dataGet.getList().get(position).numberCompletedPomodoros + "/ " + dataGet.getList().get(position).numberPomodoros);
+        holder.checkBoxCompleteTask.setChecked(dataGet.getList().get(position).isCompleted);
     }
 
     @Override
@@ -63,6 +69,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return dataGet.getList().size();
     }
 }
