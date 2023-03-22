@@ -47,7 +47,6 @@ public class TimerFragment extends Fragment {
   private Button btnTimer;
   private Button btnGiveUp;
   private Button btnSkip;
-
   private  Button btnAddTask;
   private Button timerSetting;
 
