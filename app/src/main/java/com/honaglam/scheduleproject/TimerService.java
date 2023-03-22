@@ -97,7 +97,6 @@ public class TimerService extends Service {
     notificationManager.notify(NOTIFICATION_ID, notification);
   }
 
-
   class Timer implements Runnable {
     private MediaPlayer alarmMediaPlayer;
     private MediaPlayer tickingMediaPlayer;
@@ -144,6 +143,7 @@ public class TimerService extends Service {
           if(alarmUri == null){
             alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
           }
+
           alarmMediaPlayer = MediaPlayer.create(getApplicationContext(), alarmUri);
 
           if (alarmMediaPlayer != null) {
