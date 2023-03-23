@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -64,6 +65,10 @@ public class CalendarFragment extends Fragment {
   int selectedMinute = -1;
   int selectedWeekDay = -1;
 
+  long searchStartDate = -1;
+  long searchEndDate = -1;
+  ImageButton filterBtn;
+  EditText txtSearchReminder;
 
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
@@ -146,6 +151,16 @@ public class CalendarFragment extends Fragment {
       }
     });
 
+    filterBtn = view.findViewById(R.id.btnFilterReminder);
+    txtSearchReminder = view.findViewById(R.id.txtEditSearchReminder);
+    (view.findViewById(R.id.btnSearchReminder)).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        searchReminder();
+      }
+    });
+
+
     updateDateUI();
   }
 
@@ -165,6 +180,26 @@ public class CalendarFragment extends Fragment {
     txtBigDate.setText(String.format(Locale.getDefault(), "%d", selectedDate));
     txtBigWeekDate.setText(CalendarRecyclerViewAdapter.WEEKDAY_NAMES_MEDIUM[selectedWeekDay - 1]);
 
+  }
+
+  class FilterBtnClick implements View.OnClickListener{
+    @Override
+    public void onClick(View view) {
+
+    }
+  }
+
+  private void searchReminder(){
+    String searchString = txtSearchReminder.getText().toString();
+
+    if(searchString.isEmpty() && searchStartDate < 0 && searchEndDate < 0){
+      return;
+    }
+
+    int oldSize = mainActivity.reminderDataList.size();
+    int newSize = mainActivity.searchReminder(searchString,searchStartDate,searchEndDate);
+
+    reminderRecyclerAdapter.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
   }
 
   class DateSelectCallBack implements CalendarRecyclerViewAdapter.SelectDateCallBackInterface {

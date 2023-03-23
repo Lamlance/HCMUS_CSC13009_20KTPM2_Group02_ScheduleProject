@@ -75,8 +75,6 @@ public class MainActivity extends AppCompatActivity {
   private TimerFragment timerFragment;
   private TimerSetting timerSettingFragment;
 
-  private MediaPlayer mediaPlayer;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -184,14 +182,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-
-  public boolean pauseTimer() {
-    if (timerService != null) {
-      timerService.pauseTimer();
-    }
-    return false;
-  }
-
   public boolean resetTimer() {
     if (timerService != null) {
       timerService.resetTimer();
@@ -225,50 +215,9 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   protected void onDestroy() {
-    SaveLocalReminder();
     super.onDestroy();
   }
 
-  private boolean CreateLocalReminderFile() {
-    if (reminderFile.exists()) {
-      return true;
-    }
-    try {
-      if (reminderFile.createNewFile()) {
-        reminderDataList = new LinkedList<ReminderData>();
-        return true;
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return false;
-  }
-
-  private boolean LoadLocalReminder() {
-    if (!CreateLocalReminderFile()) {
-      return false;
-    }
-    try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(reminderFile.toPath()))) {
-      reminderDataList = (LinkedList<ReminderData>) ois.readObject();
-    } catch (IOException | ClassNotFoundException e) {
-      return false;
-    }
-    return true;
-  }
-
-  private boolean SaveLocalReminder() {
-    if (!CreateLocalReminderFile()) {
-      return false;
-    }
-
-    try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(reminderFile.toPath()))) {
-      oos.writeObject(reminderDataList);
-    } catch (IOException e) {
-      return false;
-    }
-
-    return true;
-  }
 
   public static final String NOTIFICATION_CHANEL_ID = "ReminderNotificationChanel";
   NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
@@ -320,8 +269,6 @@ public class MainActivity extends AppCompatActivity {
       reminderDataList.remove(pos);
     }catch (Exception ignore){}
   }
-
-
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
@@ -332,6 +279,15 @@ public class MainActivity extends AppCompatActivity {
     int newSize = reminderDataList.size();
 
     return Math.max(oldSize, newSize);
+  }
+  public int searchReminder(String name,long startDate,long endDate){
+    List<ReminderData> newList = taskDb.findReminders(name,startDate,endDate);
+    reminderDataList.clear();
+    reminderDataList.addAll(newList);
+
+    Toast.makeText(this, "Search size " + reminderDataList.size(), Toast.LENGTH_SHORT).show();
+
+    return  reminderDataList.size();
   }
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener {
@@ -350,8 +306,6 @@ public class MainActivity extends AppCompatActivity {
       return false;
     }
   }
-
-
   class TimerConnectionService implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
