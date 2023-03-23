@@ -37,9 +37,11 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
                         clickPositionCallBack.clickAtPosition(position);
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
     }
 }
+
 
