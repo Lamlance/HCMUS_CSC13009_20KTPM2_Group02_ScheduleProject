@@ -1,5 +1,7 @@
 package com.honaglam.scheduleproject.Task;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,7 @@ import androidx.appcompat.view.ActionBarPolicy;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.AddTaskDialog;
+import com.honaglam.scheduleproject.MainActivity;
 import com.honaglam.scheduleproject.Model.TaskData;
 import com.honaglam.scheduleproject.R;
 
@@ -24,7 +27,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
 
     Context context;
     LayoutInflater inflater;
-    AddTaskDialog.AddTaskDialogListener listener;
 
     TaskViewHolder.OnClickPositionCallBack deleteTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
         @Override
@@ -45,6 +47,14 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     TaskViewHolder.OnClickPositionCallBack editTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
         @Override
         public void clickAtPosition(int position) throws NotImplementedError {
+            AddTaskDialog.AddTaskDialogListener listener = new AddTaskDialog.AddTaskDialogListener() {
+                @Override
+                public void onDataPassed(TaskData taskData) {
+                    dataGet.getList().set(position, taskData);
+                }
+            };
+            AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener);
+            addTaskDialog.show();
         }
     };
 
@@ -88,4 +98,5 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     public int getItemCount() {
         return dataGet.getList().size();
     }
+
 }

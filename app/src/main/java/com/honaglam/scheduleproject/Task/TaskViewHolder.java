@@ -40,6 +40,18 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
 
         this.checkTaskCallback = checkTaskCallback;
 
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    int position = getAdapterPosition();
+                    editTaskCallback.clickAtPosition(position);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
         this.imgBtnDeleteTask.setOnClickListener(new View.OnClickListener() {
             @Override
