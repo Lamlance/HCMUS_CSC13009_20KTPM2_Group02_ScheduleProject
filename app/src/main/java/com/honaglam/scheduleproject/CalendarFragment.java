@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderRecyclerAdapter;
 
 
@@ -136,7 +137,7 @@ public class CalendarFragment extends Fragment {
     ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
     helper.attachToRecyclerView(reminderRecycler);
 
-    ((Button) view.findViewById(R.id.btnSetReminder)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnSetReminder).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         ReminderAddDialog reminderAddDialog = new ReminderAddDialog(context, new ReminderAddDialog.ReminderDataCallBack() {
@@ -151,16 +152,16 @@ public class CalendarFragment extends Fragment {
       }
     });
 
-    filterBtn = view.findViewById(R.id.btnFilterReminder);
     txtSearchReminder = view.findViewById(R.id.txtEditSearchReminder);
-    (view.findViewById(R.id.btnSearchReminder)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnSearchReminder).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         searchReminder();
       }
     });
 
-
+    filterBtn = view.findViewById(R.id.btnFilterReminder);
+    filterBtn.setOnClickListener(new FilterBtnClick());
     updateDateUI();
   }
 
@@ -183,9 +184,19 @@ public class CalendarFragment extends Fragment {
   }
 
   class FilterBtnClick implements View.OnClickListener{
+    OnSelectFromToDate onSelectFromToDate = new OnSelectFromToDate();
+    ReminderFilterDialog reminderFilterDialog = new ReminderFilterDialog(context,onSelectFromToDate);
     @Override
     public void onClick(View view) {
+      reminderFilterDialog.show();
+    }
+  }
 
+  class OnSelectFromToDate implements ReminderFilterDialog.OnSelectFromToDate{
+    @Override
+    public void onSelect(long fromDate, long toDate) {
+      searchStartDate = fromDate;
+      searchEndDate = toDate;
     }
   }
 
