@@ -14,22 +14,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.honaglam.scheduleproject.Model.TaskData;
 import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,12 +41,12 @@ public class TimerFragment extends Fragment {
   // TODO: Rename and change types of parameters
 
   private TextView txtTimer;
-  private Button btnTimer;
-  private Button btnGiveUp;
-  private Button btnSkip;
+  private FloatingActionButton btnTimer;
+  private FloatingActionButton btnGiveUp;
+  private FloatingActionButton btnSkip;
 
   private  Button btnAddTask;
-  private Button timerSetting;
+  private FloatingActionButton timerSetting;
 
   private RecyclerView recyclerTask;
   private Context context = null;
@@ -98,7 +95,7 @@ public class TimerFragment extends Fragment {
     txtTimer = getView().findViewById(R.id.txtTimer);
     txtTimer.setTextSize(50);
 
-    btnTimer = getView().findViewById(R.id.btnTimerStart);
+    btnTimer = (FloatingActionButton) getView().findViewById(R.id.btnTimerStart);
     btnTimer.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -106,7 +103,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp = (FloatingActionButton) getView().findViewById(R.id.btnTimerGiveUp);
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -129,7 +126,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    timerSetting = getView().findViewById(R.id.btnTimerSetting);
+    timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
     timerSetting.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -137,7 +134,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    btnSkip = getView().findViewById((R.id.btnSkip));
+    btnSkip = (FloatingActionButton) getView().findViewById((R.id.btnSkip));
     btnSkip.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -163,6 +160,9 @@ public class TimerFragment extends Fragment {
     int seconds = ((int) millisRemain / 1000) % 60;
     int minutes = (int) millisRemain / (60 * 1000);
     txtTimer.setText(String.format("%d:%02d", minutes, seconds));
+  }
+  public void changeBackgroundColor(int color) {
+    getView().setBackgroundColor(color);
   }
   
 

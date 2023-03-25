@@ -14,7 +14,9 @@
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:textSize="25sp"
+        android:textColor="#ffffff"
         android:padding="8dp"
+        android:textStyle="normal"
         android:layout_weight="7"/>
 
     <TextView
@@ -22,8 +24,9 @@
         android:text="1/1"
         android:textAlignment="center"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_width="0dp"
+        android:textColor="#ffffff"
+        android:textStyle="normal"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="2"/>
 
@@ -31,5 +34,6 @@
         android:id="@+id/checkBoxCompleteTask"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
+        android:buttonTint="@color/white"
         android:layout_weight="1"/>
 </LinearLayout>
