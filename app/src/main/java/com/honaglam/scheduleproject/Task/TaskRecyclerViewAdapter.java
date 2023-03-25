@@ -53,7 +53,9 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
                     dataGet.getList().set(position, taskData);
                 }
             };
-            AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener);
+            String taskName = dataGet.getList().get(position).taskName;
+            int numberPomodoros = dataGet.getList().get(position).numberPomodoros;
+            AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener, taskName, numberPomodoros);
             addTaskDialog.show();
         }
     };

@@ -51,7 +51,7 @@ public class TimerFragment extends Fragment {
   private Button timerSetting;
 
   private RecyclerView recyclerTask;
-  private Context context = null;
+  private Context context;
   private MainActivity activity;
 
   // TODO: Rename and change types and number of parameters
@@ -74,6 +74,7 @@ public class TimerFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     activity = (MainActivity) getActivity();
+    context = requireContext();
 
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
     recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
