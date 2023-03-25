@@ -26,7 +26,10 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
         void clickAtPosition(int position) throws NotImplementedError;
     }
 
-    public TaskViewHolder(@NonNull View itemView, OnClickPositionCallBack deleteTaskCallback, OnClickPositionCallBack checkTaskCallback) {
+    public TaskViewHolder(@NonNull View itemView,
+                          OnClickPositionCallBack deleteTaskCallback,
+                          OnClickPositionCallBack checkTaskCallback,
+                          OnClickPositionCallBack editTaskCallback) {
         super(itemView);
         this.txtTaskName = itemView.findViewById(R.id.txtTaskName);
         this.txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
