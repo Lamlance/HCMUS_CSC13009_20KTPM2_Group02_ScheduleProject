@@ -15,11 +15,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,17 +28,11 @@ import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Locale;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -210,6 +201,12 @@ public class MainActivity extends AppCompatActivity {
   public long getCurrentRemainMillis(){
     if (timerService != null){
       return timerService.millisRemain;
+    }
+    return -1;
+  }
+  public int getCurrentWorkState(){
+    if (timerService != null){
+      return timerService.pomodoroState;
     }
     return -1;
   }

@@ -1,10 +1,12 @@
 package com.honaglam.scheduleproject;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 //import android.os.Handler;
@@ -41,7 +43,7 @@ public class TimerFragment extends Fragment {
   // TODO: Rename and change types of parameters
 
   private TextView txtTimer;
-  private FloatingActionButton btnTimer;
+  private FloatingActionButton btnTimerStart;
   private FloatingActionButton btnGiveUp;
   private FloatingActionButton btnSkip;
 
@@ -50,6 +52,7 @@ public class TimerFragment extends Fragment {
 
   private RecyclerView recyclerTask;
   private Context context = null;
+  private int workState = 0;
 
   // TODO: Hardcode data need to be test the function, move this to MainActivity in future
   TaskData[] taskArray = {
@@ -95,11 +98,12 @@ public class TimerFragment extends Fragment {
     txtTimer = getView().findViewById(R.id.txtTimer);
     txtTimer.setTextSize(50);
 
-    btnTimer = (FloatingActionButton) getView().findViewById(R.id.btnTimerStart);
-    btnTimer.setOnClickListener(new View.OnClickListener() {
+    btnTimerStart = (FloatingActionButton) getView().findViewById(R.id.btnTimerStart);
+    btnTimerStart.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         ((MainActivity) getActivity()).startTimer();
+
       }
     });
 
@@ -122,8 +126,13 @@ public class TimerFragment extends Fragment {
     ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
       @Override
       public void call(long remainMillis) {
+        workState = ((MainActivity) getActivity()).getCurrentWorkState();
+        Log.d("UpdateTimeUI: ", String.valueOf(workState));
+        // TODO: CHANGE HERE? HELP ME
+        UpdateTimerBackground(workState);
         UpdateTimeUI(remainMillis);
       }
+
     });
 
     timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
@@ -148,8 +157,10 @@ public class TimerFragment extends Fragment {
 
     long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
     UpdateTimeUI(cur);
-    Log.d("Cur",String.valueOf(cur));
+
+
   }
+
 
   private void showAddTaskDialog() {
     AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
@@ -161,10 +172,25 @@ public class TimerFragment extends Fragment {
     int minutes = (int) millisRemain / (60 * 1000);
     txtTimer.setText(String.format("%d:%02d", minutes, seconds));
   }
-  public void changeBackgroundColor(int color) {
+
+  public void updateBackground(int color) {
     getView().setBackgroundColor(color);
   }
-  
+  private void UpdateTimerBackground(int work_state) {
+    int colorId;
+    if (work_state == 1){
+      colorId = R.color.work_color;
+      updateBackground(colorId);
+    }
+    if (work_state == 2){
+      colorId = R.color.short_break_color;
+      updateBackground(colorId);
+    }
+    if (work_state == 3){
+      colorId = R.color.long_break_color;
+      updateBackground(colorId);
+    }
+  }
 
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
     @Override
@@ -172,6 +198,7 @@ public class TimerFragment extends Fragment {
       tasks.add(taskData);
     }
   }
+
 
 }
 

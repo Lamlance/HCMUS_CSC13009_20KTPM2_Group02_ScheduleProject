@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import android.util.Log;
+import android.view.View;
 
 import androidx.core.app.NotificationCompat;
 //import android.os.Looper;
@@ -48,16 +49,21 @@ public class TimerService extends Service {
   NotificationChannel notificationChannel;
   Handler timerHandler;
   Runnable timerRunnable;
+  TimerFragment timerFragment;
+
 
 
   int runningState = NONE_STATE;
+  int pomodoroState = WORK_STATE;
   int timerCount = 0;
   int cycleCount = 0;
 
   NotificationCompat.Builder notificationBuilder;
 
   public TimerService() {
+
   }
+
 
   @Override
   public void onCreate() {
@@ -85,6 +91,8 @@ public class TimerService extends Service {
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentIntent(pendingIntent)
             .setOnlyAlertOnce(true);
+
+    timerFragment = new TimerFragment();
   }
 
   public Notification makeServiceNotification(String detail) {
@@ -253,18 +261,17 @@ public class TimerService extends Service {
     if (timerCount % 2 == 0) {
       runningState = WORK_STATE;
       millisRemain = workMillis;
+      pomodoroState = WORK_STATE;
     } else if (timerCount % 2 == 1 && timerCount != 7) {
       runningState = SHORT_BREAK_STATE;
       millisRemain = shortBreakMillis;
+      pomodoroState = SHORT_BREAK_STATE;
     } else {
       runningState = LONG_BREAK_STATE;
       timerCount = -1;
       millisRemain = longBreakMillis;
+      pomodoroState = LONG_BREAK_STATE;
     }
-
-    Log.d("Running state", String.valueOf(runningState));
-    Log.d("Timer count", String.valueOf(timerCount));
-    Log.d("Cycle count", String.valueOf(cycleCount));
   }
 
   @Override
