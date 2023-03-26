@@ -30,6 +30,9 @@ import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
+import kotlin.NotImplementedError;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,7 +56,7 @@ public class TimerFragment extends Fragment {
   private Button btnGiveUp;
   private Button btnSkip;
   */
-  private  Button btnAddTask;
+  private Button btnAddTask;
   private FloatingActionButton timerSetting;
   private RecyclerView recyclerTask;
   private Context context;
@@ -94,6 +97,7 @@ public class TimerFragment extends Fragment {
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
     return timerLayout;
   }
+
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
@@ -129,24 +133,12 @@ public class TimerFragment extends Fragment {
     btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        new AddTaskDialog(context,new AddTaskDialogListener()).show();
+        new AddTaskDialog(context, new AddTaskDialogListener()).show();
       }
     });
 
-    activity.setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
-      @Override
-      public void call(long remainMillis) {
-        /*
-        workState = ((MainActivity) getActivity()).getCurrentWorkState();
-        Log.d("UpdateTimeUI: ", String.valueOf(workState));
-        // TODO: CHANGE HERE? HELP ME
-        UpdateTimerBackground(workState);
-         */
-        UpdateTimeUI(remainMillis);
-      }
-
-    });
-
+    activity.setTimerOnTickCallBack(new TimerTickCallBack());
+    activity.setTimerStateChangeCallBack(new TimerStateChangeCallBack());
     //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
 
     timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
@@ -178,13 +170,12 @@ public class TimerFragment extends Fragment {
         throw new RuntimeException(e);
       }
     });
-    */ 
+    */
     long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
     UpdateTimeUI(cur);
 
 
   }
-
 
   public void UpdateTimeUI(long millisRemain) {
     int seconds = ((int) millisRemain / 1000) % 60;
@@ -195,23 +186,20 @@ public class TimerFragment extends Fragment {
   public void updateBackground(int color) {
     getView().setBackgroundColor(color);
   }
+
   private void UpdateTimerBackground(int work_state) {
-    int colorId;
-    if (work_state == 1){
-      colorId = R.color.work_color;
-      updateBackground(colorId);
+    if (work_state == TimerService.WORK_STATE) {
+      requireView().setBackgroundColor(ContextCompat.getColor(context,R.color.work_color));
     }
-    if (work_state == 2){
-      colorId = R.color.short_break_color;
-      updateBackground(colorId);
+    if (work_state == TimerService.SHORT_BREAK_STATE) {
+      requireView().setBackgroundColor(ContextCompat.getColor(context,R.color.short_break_color));
     }
-    if (work_state == 3){
-      colorId = R.color.long_break_color;
-      updateBackground(colorId);
+    if (work_state == TimerService.LONG_BREAK_STATE) {
+      requireView().setBackgroundColor(ContextCompat.getColor(context,R.color.long_break_color));
     }
   }
 
-  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
+  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
       activity.tasks.add(taskData);
@@ -220,5 +208,18 @@ public class TimerFragment extends Fragment {
     }
   }
 
+  class TimerTickCallBack implements TimerService.TimerTickCallBack {
+    @Override
+    public void call(long remainMillis) {
+      UpdateTimeUI(remainMillis);
+    }
+  }
+
+  class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack{
+    @Override
+    public void onStateChange(int newState) {
+      UpdateTimerBackground(newState);
+    }
+  }
 }
 

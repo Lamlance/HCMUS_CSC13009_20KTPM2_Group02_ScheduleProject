@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.core.app.NotificationCompat;
+
+import kotlin.NotImplementedError;
 //import android.os.Looper;
 
 public class TimerService extends Service {
@@ -29,10 +31,10 @@ public class TimerService extends Service {
   private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
   private static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
 
-  private static final int NONE_STATE = 0;
-  private static final int WORK_STATE = 1;
-  private static final int SHORT_BREAK_STATE = 2;
-  private static final int LONG_BREAK_STATE = 3;
+  public static final int NONE_STATE = 0;
+  public static final int WORK_STATE = 1;
+  public static final int SHORT_BREAK_STATE = 2;
+  public static final int LONG_BREAK_STATE = 3;
 
 
   long millisRemain = 0;
@@ -44,17 +46,17 @@ public class TimerService extends Service {
 
   private static final String CHANNEL_ID = "TimerNotificationChanel";
   private static final int NOTIFICATION_ID = 6969;
-  public TimerTickCallBack tickCallBack = null;
+  private TimerTickCallBack tickCallBack = null;
+  private TimerStateChangeCallBack stateChangeCallBack = null;
+
   Intent timerIntent;
   NotificationChannel notificationChannel;
   Handler timerHandler;
   Runnable timerRunnable;
   TimerFragment timerFragment;
 
-
-
   int runningState = NONE_STATE;
-  int pomodoroState = WORK_STATE;
+  //int pomodoroState = WORK_STATE;
   int timerCount = 0;
   int cycleCount = 0;
 
@@ -109,67 +111,71 @@ public class TimerService extends Service {
     private MediaPlayer alarmMediaPlayer;
     private MediaPlayer tickingMediaPlayer;
 
+    class PomodoroTimerCountDown extends CountDownTimer {
+      public PomodoroTimerCountDown(long millisInFuture, long countDownInterval) {
+        super(millisInFuture, countDownInterval);
+      }
+      @Override
+      public void onTick(long l) {
+        millisRemain = l;
+        updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+
+        try {
+          if (tickingMediaPlayer != null && !tickingMediaPlayer.isPlaying() && millisRemain < 4000) {
+            //Start tickling sound
+            tickingMediaPlayer.start();
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
+        callTickCallBack(millisRemain);
+      }
+      @Override
+      public void onFinish() {
+        millisRemain = 0;
+        runningState = NONE_STATE;
+
+        if (tickingMediaPlayer != null) {
+          // Stop the tickling sound and release media player
+          tickingMediaPlayer.stop();
+          tickingMediaPlayer.release();
+          tickingMediaPlayer = null;
+        }
+
+        if(alarmUri == null){
+          alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        }
+
+        alarmMediaPlayer = MediaPlayer.create(getApplicationContext(), alarmUri);
+
+        if (alarmMediaPlayer != null) {
+          PlayLoopSound playLoopSound = new PlayLoopSound(5000, 1000, alarmMediaPlayer);
+          playLoopSound.start();
+        }
+
+        switchState();
+        runningState = NONE_STATE;
+        callTickCallBack(millisRemain);
+      }
+    }
+
     @Override
     public void run() {
-      runningState = WORK_STATE;
+      //runningState = WORK_STATE;
       try {
         tickingMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.count_down_sound);
       } catch (Exception e) {
         e.printStackTrace();
       }
 
-      timer = new CountDownTimer(millisRemain, 1000) {
-        @Override
-        public void onTick(long l) {
-          millisRemain = l;
-          updateServiceNotification(makeServiceNotification(String.format("%d", l)));
-
-          try {
-            if (tickingMediaPlayer != null && !tickingMediaPlayer.isPlaying() && millisRemain < 4000) {
-              //Start tickling sound
-              tickingMediaPlayer.start();
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-
-          callTickCallBack(millisRemain);
-        }
-
-        @Override
-        public void onFinish() {
-          millisRemain = 0;
-          runningState = NONE_STATE;
-
-          if (tickingMediaPlayer != null) {
-            // Stop the tickling sound and release media player
-            tickingMediaPlayer.stop();
-            tickingMediaPlayer.release();
-            tickingMediaPlayer = null;
-          }
-
-          if(alarmUri == null){
-            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-          }
-
-          alarmMediaPlayer = MediaPlayer.create(getApplicationContext(), alarmUri);
-
-          if (alarmMediaPlayer != null) {
-            PlayLoopSound playLoopSound = new PlayLoopSound(5000,1000,alarmMediaPlayer);
-            playLoopSound.start();
-          }
-
-          switchState();
-          runningState = NONE_STATE;
-          callTickCallBack(millisRemain);
-        }
-      };
+      timer = new PomodoroTimerCountDown(millisRemain,1000);
       timer.start();
 
     }
   }
 
-  class PlayLoopSound extends CountDownTimer {
+  static class PlayLoopSound extends CountDownTimer {
     MediaPlayer player;
     public PlayLoopSound(long millisInFuture, long countDownInterval,MediaPlayer mediaPlayer) {
       super(millisInFuture, countDownInterval);
@@ -195,11 +201,26 @@ public class TimerService extends Service {
     }
   }
 
-
+  public void setTickCallBack(TimerTickCallBack tickCallBack){
+    this.tickCallBack = tickCallBack;
+    callTickCallBack(millisRemain);
+  }
   public boolean callTickCallBack(long millis){
     if(tickCallBack == null){return false;}
     try{
       tickCallBack.call(millis);
+    }catch (Exception ignore){return false;}
+    return true;
+  }
+
+  public void setStateChangeCallBack(TimerStateChangeCallBack stateChangeCallBack){
+    this.stateChangeCallBack = stateChangeCallBack;
+    callStateChangeCallBack(calculateCurrentState());
+  }
+  public boolean callStateChangeCallBack(int newState){
+    if(stateChangeCallBack == null){return false;}
+    try {
+      stateChangeCallBack.onStateChange(newState);
     }catch (Exception ignore){return false;}
     return true;
   }
@@ -254,23 +275,35 @@ public class TimerService extends Service {
     alarmUri = alarmSound;
   }
 
+  public int calculateCurrentState(){
+    if (timerCount % 2 == 0){
+      return WORK_STATE;
+    }else if (timerCount % 2 == 1 && timerCount != 7){
+      return SHORT_BREAK_STATE;
+    }
+    return LONG_BREAK_STATE;
+  }
+
   public void switchState() {
     timerCount += 1;
     cycleCount += (timerCount % 2 == 0) ? 1 : 0;
 
     if (timerCount % 2 == 0) {
-      runningState = WORK_STATE;
+      runningState = calculateCurrentState();
       millisRemain = workMillis;
-      pomodoroState = WORK_STATE;
+      //pomodoroState = WORK_STATE;
+      callStateChangeCallBack(WORK_STATE);
     } else if (timerCount % 2 == 1 && timerCount != 7) {
-      runningState = SHORT_BREAK_STATE;
+      runningState = calculateCurrentState();
       millisRemain = shortBreakMillis;
-      pomodoroState = SHORT_BREAK_STATE;
+      //pomodoroState = SHORT_BREAK_STATE;
+      callStateChangeCallBack(SHORT_BREAK_STATE);
     } else {
-      runningState = LONG_BREAK_STATE;
+      runningState = calculateCurrentState();
       timerCount = -1;
       millisRemain = longBreakMillis;
-      pomodoroState = LONG_BREAK_STATE;
+      //pomodoroState = LONG_BREAK_STATE;
+      callStateChangeCallBack(LONG_BREAK_STATE);
     }
   }
 
@@ -312,4 +345,7 @@ public class TimerService extends Service {
     void call(long remainMillis) throws Exception;
   }
 
+  public interface TimerStateChangeCallBack{
+    void onStateChange(int newState) throws NotImplementedError;
+  }
 }

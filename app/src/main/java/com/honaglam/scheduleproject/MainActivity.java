@@ -197,12 +197,18 @@ public class MainActivity extends AppCompatActivity {
 
   public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack) {
     if (timerService != null) {
-      timerService.tickCallBack = tickCallBack;
+      timerService.setTickCallBack(tickCallBack);
       return true;
     }
     return false;
   }
-
+  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack){
+    if (timerService != null) {
+      timerService.setStateChangeCallBack(stateChangeCallBack);
+      return true;
+    }
+    return false;
+  }
   public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
     if (timerService != null) {
       timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound);
@@ -216,12 +222,7 @@ public class MainActivity extends AppCompatActivity {
     }
     return -1;
   }
-  public int getCurrentWorkState(){
-    if (timerService != null){
-      return timerService.pomodoroState;
-    }
-    return -1;
-  }
+
   //===
 
   @Override
