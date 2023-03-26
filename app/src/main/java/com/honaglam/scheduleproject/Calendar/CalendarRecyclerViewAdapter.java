@@ -130,7 +130,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
 
     holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
-    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.BLUE : Color.WHITE);
+    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.WHITE);
 
     if (position < 7) {
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
