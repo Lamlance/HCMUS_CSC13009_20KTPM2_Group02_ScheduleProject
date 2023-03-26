@@ -47,22 +47,19 @@ public class TimerFragment extends Fragment {
   private FloatingActionButton btnGiveUp;
   private FloatingActionButton btnSkip;
 
+  /*
+  private Button btnTimer;
+  private Button btnGiveUp;
+  private Button btnSkip;
   private  Button btnAddTask;
+  */
+  
   private FloatingActionButton timerSetting;
 
   private RecyclerView recyclerTask;
-  private Context context = null;
-  private int workState = 0;
 
-  // TODO: Hardcode data need to be test the function, move this to MainActivity in future
-  TaskData[] taskArray = {
-          new TaskData("Học tiếng anh"),
-          new TaskData("Học tiếng việt"),
-          new TaskData("Học tiếng việt"),
-          new TaskData("Học tiếng việt"),
-          new TaskData("Học tiếng việt")
-  };
-  ArrayList<TaskData> tasks = new ArrayList<>(Arrays.asList(taskArray));
+  private Context context;
+  private MainActivity activity;
 
   // TODO: Rename and change types and number of parameters
   public static TimerFragment newInstance() {
@@ -83,11 +80,13 @@ public class TimerFragment extends Fragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    activity = (MainActivity) getActivity();
+    context = requireContext();
 
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-    recyclerTask = (RecyclerView) timerLayout.findViewById(R.id.recyclerTask);
+    recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
     recyclerTask.setLayoutManager(new LinearLayoutManager(context));
-    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, tasks);
+    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, () -> activity.tasks);
     recyclerTask.setAdapter(adapter);
     return timerLayout;
   }
@@ -114,14 +113,24 @@ public class TimerFragment extends Fragment {
         ((MainActivity) getActivity()).resetTimer();
       }
     });
+    
+    /* Old btn
+    btnTimer = getView().findViewById(R.id.btnTimerStart);
+    btnTimer.setOnClickListener(view1 -> ((MainActivity) getActivity()).startTimer());
+
+    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp.setOnClickListener(view12 -> ((MainActivity) getActivity()).resetTimer());
+    */
 
     btnAddTask = getView().findViewById(R.id.btnAddTask);
     btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        showAddTaskDialog();
+        ((MainActivity) getActivity()).showAddTaskDialog();
       }
     });
+    
+    
 
     ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
       @Override
@@ -134,6 +143,9 @@ public class TimerFragment extends Fragment {
       }
 
     });
+
+    //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
+
 
     timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
     timerSetting.setOnClickListener(new View.OnClickListener() {
@@ -151,10 +163,18 @@ public class TimerFragment extends Fragment {
           ((MainActivity) getActivity()).skip();
         } catch (Exception e) {
           throw new RuntimeException(e);
-        }
+        }}}
+   
+   /*    
+    btnSkip = getView().findViewById((R.id.btnSkip));
+    btnSkip.setOnClickListener(view13 -> {
+      try {
+        ((MainActivity) getActivity()).skip();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     });
-
+    */ 
     long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
     UpdateTimeUI(cur);
 
@@ -166,6 +186,7 @@ public class TimerFragment extends Fragment {
     AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
     dialog.show();
   }
+
 
   public void UpdateTimeUI(long millisRemain) {
     int seconds = ((int) millisRemain / 1000) % 60;
@@ -198,7 +219,5 @@ public class TimerFragment extends Fragment {
       tasks.add(taskData);
     }
   }
-
-
 }
 

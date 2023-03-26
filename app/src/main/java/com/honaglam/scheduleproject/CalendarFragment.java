@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderRecyclerAdapter;
 
 
@@ -44,11 +46,11 @@ public class CalendarFragment extends Fragment {
     // Required empty public constructor
   }
 
-    RecyclerView recyclerCalendar;
-    CalendarRecyclerViewAdapter calendarRecyclerViewAdapter;
-    TextView txtSelectDate;
-    Animation ani_month_l2r;
-    Animation ani_month_r2l;
+  RecyclerView recyclerCalendar;
+  CalendarRecyclerViewAdapter calendarRecyclerViewAdapter;
+  TextView txtSelectDate;
+  Animation ani_month_l2r;
+  Animation ani_month_r2l;
 
   TextView txtBigDate;
   TextView txtBigWeekDate;
@@ -64,7 +66,10 @@ public class CalendarFragment extends Fragment {
   int selectedMinute = -1;
   int selectedWeekDay = -1;
 
-
+  long searchStartDate = -1;
+  long searchEndDate = -1;
+  ImageButton filterBtn;
+  EditText txtSearchReminder;
 
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
@@ -72,10 +77,11 @@ public class CalendarFragment extends Fragment {
     fragment.setArguments(args);
     return fragment;
   }
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
 
 
   @Override
@@ -97,8 +103,8 @@ public class CalendarFragment extends Fragment {
 
     recyclerCalendar = view.findViewById(R.id.recyclerCalendar);
 
-    ani_month_r2l = AnimationUtils.loadAnimation(context,R.anim.calendar_month_change_r2l);
-    ani_month_l2r = AnimationUtils.loadAnimation(context,R.anim.calendar_month_change_l2r);
+    ani_month_r2l = AnimationUtils.loadAnimation(context, R.anim.calendar_month_change_r2l);
+    ani_month_l2r = AnimationUtils.loadAnimation(context, R.anim.calendar_month_change_l2r);
 
     calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapter(context);
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
@@ -120,7 +126,7 @@ public class CalendarFragment extends Fragment {
     });
 
     RecyclerView reminderRecycler = view.findViewById(R.id.recyclerReminders);
-    reminderRecyclerAdapter= new ReminderRecyclerAdapter(context, new ReminderRecyclerAdapter.ReminderListGetter() {
+    reminderRecyclerAdapter = new ReminderRecyclerAdapter(context, new ReminderRecyclerAdapter.ReminderListGetter() {
       @Override
       public List<ReminderData> get() throws NotImplementedError {
         return mainActivity.reminderDataList;
@@ -131,7 +137,7 @@ public class CalendarFragment extends Fragment {
     ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
     helper.attachToRecyclerView(reminderRecycler);
 
-    ((Button)view.findViewById(R.id.btnSetReminder)).setOnClickListener(new View.OnClickListener() {
+    view.findViewById(R.id.btnSetReminder).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         ReminderAddDialog reminderAddDialog = new ReminderAddDialog(context, new ReminderAddDialog.ReminderDataCallBack() {
@@ -146,36 +152,85 @@ public class CalendarFragment extends Fragment {
       }
     });
 
+    txtSearchReminder = view.findViewById(R.id.txtEditSearchReminder);
+    view.findViewById(R.id.btnSearchReminder).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        searchReminder();
+      }
+    });
+
+    filterBtn = view.findViewById(R.id.btnFilterReminder);
+    filterBtn.setOnClickListener(new FilterBtnClick());
     updateDateUI();
   }
 
-  private void AddReminder(String name){
+  private void AddReminder(String name) {
     Calendar calendar = Calendar.getInstance();
-    calendar.set(selectedYear,selectedMonth,selectedDate,selectedHour,selectedMinute,0);
+    calendar.set(selectedYear, selectedMonth, selectedDate, selectedHour, selectedMinute, 0);
     long remindTime = calendar.getTimeInMillis();
-    Log.d("DATE",String.format("%d",remindTime));
-    int size = mainActivity.addReminder(name,remindTime);
-    reminderRecyclerAdapter.notifyItemInserted(size-1);
+    Log.d("DATE", String.format("%d", remindTime));
+    int size = mainActivity.addReminder(name, remindTime);
+    reminderRecyclerAdapter.notifyItemInserted(size - 1);
   }
 
-  private void updateDateUI(){
+  private void updateDateUI() {
     String dateStr = String.format(
-            Locale.getDefault(), "%d/%d/%d",selectedDate,selectedMonth+1,selectedYear);
+            Locale.getDefault(), "%d/%d/%d", selectedDate, selectedMonth + 1, selectedYear);
     txtSelectDate.setText(dateStr);
-    txtBigDate.setText(String.format(Locale.getDefault(),"%d",selectedDate));
-    txtBigWeekDate.setText(CalendarRecyclerViewAdapter.WEEKDAY_NAMES_MEDIUM[selectedWeekDay-1]);
+    txtBigDate.setText(String.format(Locale.getDefault(), "%d", selectedDate));
+    txtBigWeekDate.setText(CalendarRecyclerViewAdapter.WEEKDAY_NAMES_MEDIUM[selectedWeekDay - 1]);
 
   }
 
-  class DateSelectCallBack implements CalendarRecyclerViewAdapter.SelectDateCallBackInterface{
+  class FilterBtnClick implements View.OnClickListener{
+    OnSelectFromToDate onSelectFromToDate = new OnSelectFromToDate();
+    ReminderFilterDialog reminderFilterDialog = new ReminderFilterDialog(context,onSelectFromToDate);
     @Override
-    public void clickDate(int date, int month, int year,int weekDay) throws NotImplementedError {
+    public void onClick(View view) {
+      reminderFilterDialog.show();
+    }
+  }
+
+  class OnSelectFromToDate implements ReminderFilterDialog.OnSelectFromToDate{
+    @Override
+    public void onSelect(long fromDate, long toDate) {
+      searchStartDate = fromDate;
+      searchEndDate = toDate;
+    }
+  }
+
+  private void searchReminder(){
+    String searchString = txtSearchReminder.getText().toString();
+
+    if(searchString.isEmpty() && searchStartDate < 0 && searchEndDate < 0){
+      return;
+    }
+
+    int oldSize = mainActivity.reminderDataList.size();
+    int newSize = mainActivity.searchReminder(searchString,searchStartDate,searchEndDate);
+
+    reminderRecyclerAdapter.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
+  }
+
+  class DateSelectCallBack implements CalendarRecyclerViewAdapter.SelectDateCallBackInterface {
+    @Override
+    public void clickDate(int date, int month, int year, int weekDay) throws NotImplementedError {
+      if ((date != selectedDate || month != selectedMonth || year != selectedYear)
+              && (date * month * year * weekDay) > 0) {
+        int size = mainActivity.getReminderAt(date, month, year);
+        if(reminderRecyclerAdapter != null){
+          reminderRecyclerAdapter.notifyItemRangeChanged(0,size);
+        }
+      }
+
       selectedDate = date;
       selectedMonth = month;
       selectedYear = year;
       selectedWeekDay = weekDay;
 
       updateDateUI();
+
     }
   }
 
@@ -190,9 +245,9 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
       int pos = reminderRecyclerAdapter.selectedItemPos;
-      mainActivity.reminderDataList.remove(pos);
+      mainActivity.removeReminder(pos);
       reminderRecyclerAdapter.notifyItemRemoved(pos);
-      Toast.makeText(context, String.format(Locale.getDefault(),"Delete %d ",pos), Toast.LENGTH_SHORT).show();
+      Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
     }
   };
 }
