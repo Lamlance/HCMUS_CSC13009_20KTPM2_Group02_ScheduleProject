@@ -1,5 +1,7 @@
 package com.honaglam.scheduleproject.Task;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,42 +10,75 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ActionBarPolicy;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.honaglam.scheduleproject.AddTaskDialog;
+import com.honaglam.scheduleproject.MainActivity;
 import com.honaglam.scheduleproject.Model.TaskData;
 import com.honaglam.scheduleproject.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder> {
+import kotlin.NotImplementedError;
 
-    private ArrayList<TaskData> data;
+public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder> {
+
     Context context;
     LayoutInflater inflater;
 
-
-    public static class TaskViewHolder extends RecyclerView.ViewHolder {
-        TextView txtTaskName;
-        TextView txtCountPomodoro;
-        CheckBox checkBoxCompleteTask;
-        public TaskViewHolder(@NonNull View itemView) {
-            super(itemView);
-            txtTaskName = itemView.findViewById(R.id.txtTaskName);
-            txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
-            checkBoxCompleteTask = itemView.findViewById(R.id.checkBoxCompleteTask);
+    TaskViewHolder.OnClickPositionCallBack deleteTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
+        @Override
+        public void clickAtPosition(int position) throws NotImplementedError {
+            dataGet.getList().remove(position);
+            notifyItemRemoved(position);
         }
+    };
+
+    TaskViewHolder.OnClickPositionCallBack checkTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
+        @Override
+        public void clickAtPosition(int position) throws NotImplementedError {
+            dataGet.getList().get(position).isCompleted = !dataGet.getList().get(position).isCompleted;
+            notifyItemChanged(position);
+        }
+    };
+
+    TaskViewHolder.OnClickPositionCallBack editTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
+        @Override
+        public void clickAtPosition(int position) throws NotImplementedError {
+            AddTaskDialog.AddTaskDialogListener listener = new AddTaskDialog.AddTaskDialogListener() {
+                @Override
+                public void onDataPassed(TaskData taskData) {
+                    dataGet.getList().set(position, taskData);
+                }
+            };
+            String taskName = dataGet.getList().get(position).taskName;
+            int numberPomodoros = dataGet.getList().get(position).numberPomodoros;
+            AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener, taskName, numberPomodoros);
+            addTaskDialog.show();
+        }
+    };
+
+
+    public interface  GetListCallback {
+        public List<TaskData> getList();
     }
 
-    public TaskRecyclerViewAdapter(Context context, ArrayList<TaskData> data) {
+    GetListCallback dataGet;
+    public TaskRecyclerViewAdapter(Context context, GetListCallback callback) {
         this.context = context;
-        this.data = data;
+        dataGet = callback;
     }
 
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         TaskViewHolder viewHolder = new TaskViewHolder(
-                LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false)
+                LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false),
+                deleteTaskCallback,
+                checkTaskCallback,
+                editTaskCallback
         );
 
         return viewHolder;
@@ -51,9 +86,9 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        holder.txtTaskName.setText(data.get(position).taskName);
-        holder.txtCountPomodoro.setText(data.get(position).numberCompletedPomodoros + "/ " + data.get(position).numberPomodoros);
-        holder.checkBoxCompleteTask.setChecked(data.get(position).isCompleted);
+        holder.txtTaskName.setText(dataGet.getList().get(position).taskName);
+        holder.txtCountPomodoro.setText(dataGet.getList().get(position).numberCompletedPomodoros + "/ " + dataGet.getList().get(position).numberPomodoros);
+        holder.checkBoxCompleteTask.setChecked(dataGet.getList().get(position).isCompleted);
     }
 
     @Override
@@ -63,6 +98,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return dataGet.getList().size();
     }
+
 }

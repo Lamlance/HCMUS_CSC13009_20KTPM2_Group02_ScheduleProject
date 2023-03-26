@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
+import com.honaglam.scheduleproject.Model.TaskData;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Reminder.ReminderTaskDB;
@@ -39,6 +40,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
   private TimerFragment timerFragment;
   private TimerSetting timerSettingFragment;
 
+
+
+  // Task
+  ArrayList<TaskData> tasks = new ArrayList<>();
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -83,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     //LoadLocalReminder();
 
     Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
-
     taskDb = new ReminderTaskDB(this);
 
     /*
@@ -99,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     timerIntent = new Intent(this, TimerService.class);
     bindService(timerIntent, new TimerConnectionService(), Context.BIND_AUTO_CREATE);
 
-    setSupportActionBar((androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar));
+    setSupportActionBar(findViewById(R.id.toolbar));
 
     drawerLayout = findViewById(R.id.drawerLayout);
     sideNavView = findViewById(R.id.navSideMenu);
@@ -315,5 +322,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
     }
+  }
+  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
+    @Override
+    public void onDataPassed(TaskData taskData) {
+      tasks.add(taskData);
+    }
+  }
+
+  public void showAddTaskDialog() {
+    AddTaskDialog dialog = new AddTaskDialog(MainActivity.this, new AddTaskDialogListener());
+    dialog.show();
   }
 }
