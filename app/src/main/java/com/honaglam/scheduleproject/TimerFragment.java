@@ -51,8 +51,9 @@ public class TimerFragment extends Fragment {
   private Button btnTimer;
   private Button btnGiveUp;
   private Button btnSkip;
-  private  Button btnAddTask;
   */
+  private  Button btnAddTask;
+
   
   private FloatingActionButton timerSetting;
 
@@ -135,10 +136,12 @@ public class TimerFragment extends Fragment {
     ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
       @Override
       public void call(long remainMillis) {
+        /*
         workState = ((MainActivity) getActivity()).getCurrentWorkState();
         Log.d("UpdateTimeUI: ", String.valueOf(workState));
         // TODO: CHANGE HERE? HELP ME
         UpdateTimerBackground(workState);
+         */
         UpdateTimeUI(remainMillis);
       }
 
@@ -163,7 +166,9 @@ public class TimerFragment extends Fragment {
           ((MainActivity) getActivity()).skip();
         } catch (Exception e) {
           throw new RuntimeException(e);
-        }}}
+        }
+      }
+    });
    
    /*    
     btnSkip = getView().findViewById((R.id.btnSkip));
@@ -216,7 +221,7 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
     @Override
     public void onDataPassed(TaskData taskData) {
-      tasks.add(taskData);
+      activity.tasks.add(taskData);
     }
   }
 }
