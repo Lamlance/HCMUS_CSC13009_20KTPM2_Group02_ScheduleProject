@@ -2,14 +2,21 @@ package com.honaglam.scheduleproject.Reminder;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.CycleInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.honaglam.scheduleproject.R;
 
@@ -20,11 +27,15 @@ public class ReminderAddDialog extends Dialog {
     void onSubmit(String name,int hour24h,int minute) throws NotImplementedError;
   }
 
+  Animation shakeAnim;
 
   ReminderDataCallBack dataCallBack = null;
   public ReminderAddDialog(@NonNull Context context,ReminderDataCallBack dataCallBack) {
     super(context);
     this.dataCallBack = dataCallBack;
+    this.shakeAnim = AnimationUtils.loadAnimation(context,R.anim.shake);
+    this.shakeAnim.setInterpolator(new CycleInterpolator(7));
+
   }
 
   @Override
@@ -42,6 +53,16 @@ public class ReminderAddDialog extends Dialog {
         String name = editText.getText().toString();
         int hour = timePicker.getHour();
         int minute = timePicker.getMinute();
+
+        if(name.isEmpty()){
+          editText.startAnimation(shakeAnim);
+          editText.setBackgroundTintList(ColorStateList.valueOf(
+                  ContextCompat.getColor(getContext(),R.color.red_700)
+          ));
+          Toast.makeText(getContext(), "Please enter a name", Toast.LENGTH_SHORT).show();
+          return;
+        }
+
         try{
           dataCallBack.onSubmit(name,hour,minute);
         }catch (Exception ignore){}

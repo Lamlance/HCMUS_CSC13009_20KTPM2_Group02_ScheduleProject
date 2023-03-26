@@ -13,4 +13,5 @@
     <string name="start">START</string>
     <string name="timer">TIMER</string>
     <string name="time_minutes">Time (minutes)</string>
+    <string name="date_format">DD/MM/YYYY</string>
 </resources>

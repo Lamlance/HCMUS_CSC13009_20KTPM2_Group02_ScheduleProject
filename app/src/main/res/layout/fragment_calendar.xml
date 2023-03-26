@@ -109,7 +109,31 @@
   </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+  <LinearLayout
+      android:orientation="horizontal"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
 
+    <EditText
+        android:id="@+id/txtEditSearchReminder"
+        android:hint="Search a reminder name"
+        android:layout_weight="1"
+        android:minEms="10"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"/>
+    <ImageButton
+        android:id="@+id/btnSearchReminder"
+        android:backgroundTint="@color/white"
+        android:src="@drawable/baseline_search_24_black"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"/>
+    <ImageButton
+        android:id="@+id/btnFilterReminder"
+        android:backgroundTint="@color/white"
+        android:src="@drawable/baseline_filter_alt_24_black"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"/>
+  </LinearLayout>
 
   <!-- Reminder list -->
   <androidx.recyclerview.widget.RecyclerView
