@@ -327,15 +327,5 @@ public class MainActivity extends AppCompatActivity {
     public void onServiceDisconnected(ComponentName componentName) {
     }
   }
-  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
-    @Override
-    public void onDataPassed(TaskData taskData) {
-      tasks.add(taskData);
-    }
-  }
 
-  public void showAddTaskDialog() {
-    AddTaskDialog dialog = new AddTaskDialog(MainActivity.this, new AddTaskDialogListener());
-    dialog.show();
-  }
 }

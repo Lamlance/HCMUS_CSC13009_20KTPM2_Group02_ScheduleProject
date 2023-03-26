@@ -29,6 +29,7 @@ import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,16 +54,13 @@ public class TimerFragment extends Fragment {
   private Button btnSkip;
   */
   private  Button btnAddTask;
-
-  
   private FloatingActionButton timerSetting;
-
   private RecyclerView recyclerTask;
-
   private Context context;
   private MainActivity activity;
 
-  // TODO: Rename and change types and number of parameters
+  TaskRecyclerViewAdapter taskRecyclerViewAdapter;
+
   public static TimerFragment newInstance() {
     TimerFragment fragment = new TimerFragment();
     Bundle args = new Bundle();
@@ -87,31 +85,35 @@ public class TimerFragment extends Fragment {
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
     recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
     recyclerTask.setLayoutManager(new LinearLayoutManager(context));
-    TaskRecyclerViewAdapter adapter = new TaskRecyclerViewAdapter(context, () -> activity.tasks);
-    recyclerTask.setAdapter(adapter);
+    taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(context, new TaskRecyclerViewAdapter.GetListCallback() {
+      @Override
+      public List<TaskData> getList() {
+        return activity.tasks;
+      }
+    });
+    recyclerTask.setAdapter(taskRecyclerViewAdapter);
     return timerLayout;
   }
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    txtTimer = getView().findViewById(R.id.txtTimer);
+    txtTimer = view.findViewById(R.id.txtTimer);
     txtTimer.setTextSize(50);
 
-    btnTimerStart = (FloatingActionButton) getView().findViewById(R.id.btnTimerStart);
+    btnTimerStart = (FloatingActionButton) view.findViewById(R.id.btnTimerStart);
     btnTimerStart.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ((MainActivity) getActivity()).startTimer();
-
+        activity.startTimer();
       }
     });
 
-    btnGiveUp = (FloatingActionButton) getView().findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp = (FloatingActionButton) view.findViewById(R.id.btnTimerGiveUp);
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ((MainActivity) getActivity()).resetTimer();
+        activity.resetTimer();
       }
     });
     
@@ -127,13 +129,11 @@ public class TimerFragment extends Fragment {
     btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ((MainActivity) getActivity()).showAddTaskDialog();
+        new AddTaskDialog(context,new AddTaskDialogListener()).show();
       }
     });
-    
-    
 
-    ((MainActivity) getActivity()).setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
+    activity.setTimerOnTickCallBack(new TimerService.TimerTickCallBack() {
       @Override
       public void call(long remainMillis) {
         /*
@@ -149,12 +149,11 @@ public class TimerFragment extends Fragment {
 
     //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
 
-
     timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
     timerSetting.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ((MainActivity) getActivity()).switchFragment_TimerSetting();
+        activity.switchFragment_TimerSetting();
       }
     });
 
@@ -163,7 +162,7 @@ public class TimerFragment extends Fragment {
       @Override
       public void onClick(View view) {
         try {
-          ((MainActivity) getActivity()).skip();
+          activity.skip();
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
@@ -184,12 +183,6 @@ public class TimerFragment extends Fragment {
     UpdateTimeUI(cur);
 
 
-  }
-
-
-  private void showAddTaskDialog() {
-    AddTaskDialog dialog = new AddTaskDialog(getContext(), new AddTaskDialogListener());
-    dialog.show();
   }
 
 
@@ -222,7 +215,10 @@ public class TimerFragment extends Fragment {
     @Override
     public void onDataPassed(TaskData taskData) {
       activity.tasks.add(taskData);
+      int newPos = activity.tasks.size() - 1;
+      taskRecyclerViewAdapter.notifyItemInserted(newPos);
     }
   }
+
 }
 
