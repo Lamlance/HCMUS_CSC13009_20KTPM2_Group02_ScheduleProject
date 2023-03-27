@@ -23,30 +23,22 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
 
     ImageButton imgBtnEditTask;
 
-    UpdateTaskDataCallback callbackListener;
-
 
     public interface OnClickPositionCallBack {
         void clickAtPosition(int position) throws NotImplementedError;
-    }
-    
-    public interface UpdateTaskDataCallback {
-        void updatePomodoroCounter(int position) throws NotImplementedError;
     }
 
     public TaskViewHolder(@NonNull View itemView,
                           OnClickPositionCallBack deleteTaskCallback,
                           OnClickPositionCallBack checkTaskCallback,
-                          OnClickPositionCallBack editTaskCallback,
-                          UpdateTaskDataCallback updateTaskDataCallback) {
+                          OnClickPositionCallBack editTaskCallback) {
         super(itemView);
         this.txtTaskName = itemView.findViewById(R.id.txtTaskName);
         this.txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
         this.checkBoxCompleteTask = itemView.findViewById(R.id.checkBoxCompleteTask);
         this.imgBtnDeleteTask = itemView.findViewById(R.id.imgBtnDeleteTask);
         this.imgBtnEditTask = itemView.findViewById(R.id.imgBtnEditTask);
-        
-        this.callbackListener = updateTaskDataCallback;
+
 
         this.imgBtnEditTask.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,9 +76,5 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
-    }
-    
-    public void updatePomodoroCounterTaskData(int position) {
-        this.callbackListener.updatePomodoroCounter(position);
     }
 }

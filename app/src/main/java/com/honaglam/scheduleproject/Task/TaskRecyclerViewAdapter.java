@@ -66,16 +66,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
         }
     };
 
-    TaskViewHolder.UpdateTaskDataCallback updateTaskDataCallback = new TaskViewHolder.UpdateTaskDataCallback() {
-        @Override
-        public void updatePomodoroCounter(int position) throws NotImplementedError {
-            Log.e("Before change: ", String.valueOf(dataGet.getList().get(position).numberPomodoros));
-            dataGet.getList().get(position).numberPomodoros += 1;
-            Log.e("Before change: ", String.valueOf(dataGet.getList().get(position).numberPomodoros));
-            notifyItemChanged(position);
-        }
-    };
-
 
     public interface GetListCallback {
         public List<TaskData> getList();
@@ -95,8 +85,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
                 LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false),
                 deleteTaskCallback,
                 checkTaskCallback,
-                editTaskCallback,
-                updateTaskDataCallback
+                editTaskCallback
         );
 
         return viewHolder;
