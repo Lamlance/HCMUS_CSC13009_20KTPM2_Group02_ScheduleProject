@@ -158,11 +158,12 @@ public class TimerService extends Service {
                     playLoopSound.start();
                 }
 
+                // TODO: Set isAutoSwitchTask after adding state of timer setting done
+
                 switchState();
                 runningState = NONE_STATE;
                 callTickCallBack(millisRemain);
-                // TODO: Set isAutoSwitchTask after adding state of timer setting done
-                callOnFinishCallback(false);
+
             }
         }
 
@@ -337,12 +338,14 @@ public class TimerService extends Service {
             runningState = calculateCurrentState();
             millisRemain = shortBreakMillis;
             //pomodoroState = SHORT_BREAK_STATE;
+            callOnFinishCallback(false);
             callStateChangeCallBack(SHORT_BREAK_STATE);
         } else {
             runningState = calculateCurrentState();
             timerCount = -1;
             millisRemain = longBreakMillis;
             //pomodoroState = LONG_BREAK_STATE;
+            callOnFinishCallback(false);
             callStateChangeCallBack(LONG_BREAK_STATE);
         }
     }
