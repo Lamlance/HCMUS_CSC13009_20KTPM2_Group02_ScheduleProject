@@ -1,5 +1,8 @@
 package com.honaglam.scheduleproject.Task;
 
+
+
+import android.graphics.Color;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -12,35 +15,40 @@ import kotlin.NotImplementedError;
 
 
 public class TaskViewHolder extends RecyclerView.ViewHolder {
+    
     TextView txtTaskName;
     TextView txtCountPomodoro;
     CheckBox checkBoxCompleteTask;
     ImageButton imgBtnDeleteTask;
 
-    OnClickPositionCallBack deleteTaskCallback = null;
+    ImageButton imgBtnEditTask;
 
-    OnClickPositionCallBack checkTaskCallback = null;
+    UpdateTaskDataCallback callbackListener;
 
 
     public interface OnClickPositionCallBack {
         void clickAtPosition(int position) throws NotImplementedError;
     }
+    
+    public interface UpdateTaskDataCallback {
+        void updatePomodoroCounter(int position) throws NotImplementedError;
+    }
 
     public TaskViewHolder(@NonNull View itemView,
                           OnClickPositionCallBack deleteTaskCallback,
                           OnClickPositionCallBack checkTaskCallback,
-                          OnClickPositionCallBack editTaskCallback) {
+                          OnClickPositionCallBack editTaskCallback,
+                          UpdateTaskDataCallback updateTaskDataCallback) {
         super(itemView);
         this.txtTaskName = itemView.findViewById(R.id.txtTaskName);
         this.txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
         this.checkBoxCompleteTask = itemView.findViewById(R.id.checkBoxCompleteTask);
         this.imgBtnDeleteTask = itemView.findViewById(R.id.imgBtnDeleteTask);
+        this.imgBtnEditTask = itemView.findViewById(R.id.imgBtnEditTask);
+        
+        this.callbackListener = updateTaskDataCallback;
 
-        this.deleteTaskCallback = deleteTaskCallback;
-
-        this.checkTaskCallback = checkTaskCallback;
-
-        itemView.setOnClickListener(new View.OnClickListener() {
+        this.imgBtnEditTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
@@ -76,6 +84,9 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
-
+    }
+    
+    public void updatePomodoroCounterTaskData(int position) {
+        this.callbackListener.updatePomodoroCounter(position);
     }
 }
