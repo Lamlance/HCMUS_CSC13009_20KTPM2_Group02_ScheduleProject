@@ -1,7 +1,6 @@
 package com.honaglam.scheduleproject;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,7 +11,6 @@ import androidx.fragment.app.Fragment;
 //import android.os.Handler;
 //import android.os.Looper;
 //import android.util.Log;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,15 +22,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.honaglam.scheduleproject.Model.TaskData;
+import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-
-import kotlin.NotImplementedError;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -202,8 +195,7 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
-      activity.tasks.add(taskData);
-      int newPos = activity.tasks.size() - 1;
+      int newPos = activity.addTask(taskData.taskName,taskData.numberPomodoros);
       taskRecyclerViewAdapter.notifyItemInserted(newPos);
     }
   }

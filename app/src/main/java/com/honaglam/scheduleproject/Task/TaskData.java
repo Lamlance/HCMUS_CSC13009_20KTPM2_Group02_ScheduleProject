@@ -1,9 +1,9 @@
-package com.honaglam.scheduleproject.Model;
+package com.honaglam.scheduleproject.Task;
 
 public class TaskData {
 
     public String taskName;
-
+    public int id;
     public int numberCompletedPomodoros;
     public int numberPomodoros;
     public boolean isCompleted;
@@ -21,5 +21,11 @@ public class TaskData {
         this.numberPomodoros = numberPomodoros;
         this.isCompleted = false;
     }
-
+    public TaskData(String taskName, int numberPomodoros,int id) {
+        this.taskName = taskName;
+        this.numberCompletedPomodoros = 0;
+        this.numberPomodoros = numberPomodoros;
+        this.isCompleted = false;
+        this.id = id;
+    }
 }

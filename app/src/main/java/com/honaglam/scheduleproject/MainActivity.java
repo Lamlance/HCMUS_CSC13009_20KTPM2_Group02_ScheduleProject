@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -13,7 +14,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -25,25 +25,15 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
-import com.honaglam.scheduleproject.Model.TaskData;
+import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
-import com.honaglam.scheduleproject.Reminder.ReminderTaskDB;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.nio.file.Files;
 import java.util.LinkedList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
   private TimerSetting timerSettingFragment;
 
 
-
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
 
@@ -90,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
     taskDb = new ReminderTaskDB(this);
-
+    tasks.addAll(taskDb.getAllTask());
     /*
     SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
     userDBUuid = sPrefs.getString(UUID_KEY,null);
@@ -178,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-
   public boolean skip() {
     if (timerService != null) {
       timerService.skipTimer();
@@ -202,13 +190,15 @@ public class MainActivity extends AppCompatActivity {
     }
     return false;
   }
-  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack){
+
+  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack) {
     if (timerService != null) {
       timerService.setStateChangeCallBack(stateChangeCallBack);
       return true;
     }
     return false;
   }
+
   public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
     if (timerService != null) {
       timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound);
@@ -223,6 +213,15 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
 
+  public int addTask(String name, int loops) {
+    try {
+      int id = Math.toIntExact(taskDb.addTask(name, loops));
+      tasks.add(new TaskData(name,loops,id));
+      return tasks.size() - 1;
+    } catch (Exception ignore) {
+    }
+    return -1;
+  }
   //===
 
   @Override
@@ -239,12 +238,12 @@ public class MainActivity extends AppCompatActivity {
           .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
   public int addReminder(String name, long time) {
-    long result = taskDb.addReminder(name,time);
+    long result = taskDb.addReminder(name, time);
 
     try {
       int id = Math.toIntExact(result);
 
-      ReminderData reminderData = new ReminderData(name,time,id);
+      ReminderData reminderData = new ReminderData(name, time, id);
       reminderDataList.add(reminderData);
       Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
 
@@ -262,12 +261,14 @@ public class MainActivity extends AppCompatActivity {
               PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
       alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
 
-    } catch (Exception ignore) {}
+    } catch (Exception ignore) {
+    }
 
 
     return reminderDataList.size();
   }
-  public void removeReminder(int pos){
+
+  public void removeReminder(int pos) {
     try {
       ReminderData data = reminderDataList.get(pos);
       int id = data.id;
@@ -279,8 +280,10 @@ public class MainActivity extends AppCompatActivity {
       alarmManager.cancel(pendingIntent);
 
       reminderDataList.remove(pos);
-    }catch (Exception ignore){}
+    } catch (Exception ignore) {
+    }
   }
+
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
@@ -292,14 +295,15 @@ public class MainActivity extends AppCompatActivity {
 
     return Math.max(oldSize, newSize);
   }
-  public int searchReminder(String name,long startDate,long endDate){
-    List<ReminderData> newList = taskDb.findReminders(name,startDate,endDate);
+
+  public int searchReminder(String name, long startDate, long endDate) {
+    List<ReminderData> newList = taskDb.findReminders(name, startDate, endDate);
     reminderDataList.clear();
     reminderDataList.addAll(newList);
 
     Toast.makeText(this, "Search size " + reminderDataList.size(), Toast.LENGTH_SHORT).show();
 
-    return  reminderDataList.size();
+    return reminderDataList.size();
   }
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener {
@@ -318,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
       return false;
     }
   }
+
   class TimerConnectionService implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
