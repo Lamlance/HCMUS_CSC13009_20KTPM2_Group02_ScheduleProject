@@ -80,15 +80,6 @@ public class MainActivity extends AppCompatActivity {
     Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
     taskDb = new ReminderTaskDB(this);
     tasks.addAll(taskDb.getAllTask());
-    /*
-    SharedPreferences sPrefs= PreferenceManager.getDefaultSharedPreferences(this);
-    userDBUuid = sPrefs.getString(UUID_KEY,null);
-    if(userDBUuid == null){
-     userDBUuid =  UUID.randomUUID().toString();
-     SharedPreferences.Editor editor = sPrefs.edit();
-     editor.putString(UUID_KEY, userDBUuid);
-     editor.apply();
-    }*/
 
     timerIntent = new Intent(this, TimerService.class);
     bindService(timerIntent, new TimerConnectionService(), Context.BIND_AUTO_CREATE);

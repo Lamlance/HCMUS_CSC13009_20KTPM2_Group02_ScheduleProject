@@ -1,4 +1,4 @@
-package com.honaglam.scheduleproject;
+package com.honaglam.scheduleproject.Task;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 
+import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.Task.TaskData;
 
 public class AddTaskDialog extends Dialog {

@@ -1,46 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layout_margin="30dp"
-    android:layout_height="wrap_content">
-  <TextView
-    android:textSize="30sp"
-    android:textAlignment="center"
-    android:text="Add a reminder"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-  <TextView
-      android:text="Reminder name"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
-  <EditText
-      android:id="@+id/txtEditNameReminder"
-      android:maxLength="20"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
-  <TimePicker
-      android:id="@+id/timeReminderDialog"
-      android:timePickerMode="spinner"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
   <LinearLayout
-      android:gravity="end"
-      android:orientation="horizontal"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
-    <Button
-        android:id="@+id/btnAddReminderDialog"
-        android:layout_marginHorizontal="5dp"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add a reminder"
+        android:textAlignment="center"
+        android:textSize="30sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reminder name" />
+
+    <EditText
+        android:id="@+id/txtEditNameReminder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLength="20" />
+
+    <TimePicker
+        android:id="@+id/timeReminderDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:timePickerMode="spinner" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+      <Button
+          android:id="@+id/btnAddReminderDialog"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginHorizontal="5dp"
+          android:text="Add" />
+
+      <Button
+          android:id="@+id/btnCancelReminderDialog"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginEnd="10dp"
+          android:text="Cancel" />
+    </LinearLayout>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchAddReminderDaily"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add" />
-    <Button
-        android:id="@+id/btnCancelReminderDialog"
-        android:layout_marginEnd="10dp"
-        android:layout_width="wrap_content"
+        android:text="Set Daily Reminder" />
+
+    <LinearLayout
+        android:layout_marginBottom="30dp"
+        android:id="@+id/layoutAddReminderDaily"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cancel" />
+        android:layout_gravity="center_horizontal">
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="SU"
+          android:textOff="SU"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="MO"
+          android:textOff="MO"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="TU"
+          android:textOff="TU"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="WE"
+          android:textOff="WE"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="TH"
+          android:textOff="TH"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="FR"
+          android:textOff="FR"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+
+      <androidx.appcompat.widget.AppCompatToggleButton
+          android:background="@drawable/selector_date_daily_btn"
+          android:minWidth="0dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:textOn="SA"
+          android:textOff="SA"
+          android:textAlignment="center"
+          android:textSize="12sp" />
+    </LinearLayout>
   </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

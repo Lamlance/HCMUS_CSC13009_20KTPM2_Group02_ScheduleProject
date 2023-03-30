@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -18,6 +19,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -140,15 +142,14 @@ public class CalendarFragment extends Fragment {
     view.findViewById(R.id.btnSetReminder).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        ReminderAddDialog reminderAddDialog = new ReminderAddDialog(context, new ReminderAddDialog.ReminderDataCallBack() {
-          @Override
-          public void onSubmit(String name, int hour24h, int minute) throws NotImplementedError {
-            selectedHour = hour24h;
-            selectedMinute = minute;
-            AddReminder(name);
-          }
-        });
+        ReminderAddDialog reminderAddDialog = new ReminderAddDialog(
+                context,
+                new AddReminderDialogCallBack(),
+                calendarRecyclerViewAdapter.calendar);
         reminderAddDialog.show();
+        reminderAddDialog.getWindow().setLayout(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
       }
     });
 
@@ -181,6 +182,15 @@ public class CalendarFragment extends Fragment {
     txtBigDate.setText(String.format(Locale.getDefault(), "%d", selectedDate));
     txtBigWeekDate.setText(CalendarRecyclerViewAdapter.WEEKDAY_NAMES_MEDIUM[selectedWeekDay - 1]);
 
+  }
+
+  class AddReminderDialogCallBack implements ReminderAddDialog.ReminderDataCallBack{
+    @Override
+    public void onSubmit(String name, int hour24h, int minute) {
+      selectedHour = hour24h;
+      selectedMinute = minute;
+      AddReminder(name);
+    }
   }
 
   class FilterBtnClick implements View.OnClickListener{

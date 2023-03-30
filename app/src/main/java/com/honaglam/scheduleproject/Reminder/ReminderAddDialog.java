@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject.Reminder;
 
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -11,31 +12,65 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.CycleInterpolator;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.AppCompatToggleButton;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 
 import com.honaglam.scheduleproject.R;
 
+import java.util.AbstractMap;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import kotlin.NotImplementedError;
 
 public class ReminderAddDialog extends Dialog {
-  public interface ReminderDataCallBack{
-    void onSubmit(String name,int hour24h,int minute) throws NotImplementedError;
+  public interface ReminderDataCallBack {
+    void onSubmit(String name, int hour24h, int minute) throws NotImplementedError;
   }
 
-  Animation shakeAnim;
+  private static final HashMap<String, Integer> DATE_TO_CALENDAR_INT = new HashMap<String, Integer>() {{
+    put("SU", Calendar.SUNDAY);
+    put("MO", Calendar.MONDAY);
+    put("TU", Calendar.TUESDAY);
+    put("WE", Calendar.WEDNESDAY);
+    put("TH", Calendar.THURSDAY);
+    put("FR", Calendar.FRIDAY);
+    put("SA", Calendar.SATURDAY);
+  }};
 
+
+  Animation shakeAnim;
+  Calendar currCalendar;
   ReminderDataCallBack dataCallBack = null;
-  public ReminderAddDialog(@NonNull Context context,ReminderDataCallBack dataCallBack) {
+  LinearLayout linearLayoutDailyBtn = null;
+  EditText editTextName;
+  TimePicker timePicker;
+  HashSet<Integer> dailyReminder = new HashSet<Integer>();
+
+
+  public ReminderAddDialog(
+          @NonNull Context context,
+          ReminderDataCallBack dataCallBack,
+          Calendar current) {
     super(context);
     this.dataCallBack = dataCallBack;
-    this.shakeAnim = AnimationUtils.loadAnimation(context,R.anim.shake);
+    this.shakeAnim = AnimationUtils.loadAnimation(context, R.anim.shake);
     this.shakeAnim.setInterpolator(new CycleInterpolator(7));
-
+    this.currCalendar = current;
   }
 
   @Override
@@ -44,38 +79,80 @@ public class ReminderAddDialog extends Dialog {
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     setContentView(R.layout.dialog_reminder_add);
 
-    TimePicker timePicker = findViewById(R.id.timeReminderDialog);
+    timePicker = findViewById(R.id.timeReminderDialog);
     timePicker.setIs24HourView(true);
-    EditText editText = findViewById(R.id.txtEditNameReminder);
-    ((Button)findViewById(R.id.btnAddReminderDialog)).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        String name = editText.getText().toString();
-        int hour = timePicker.getHour();
-        int minute = timePicker.getMinute();
+    editTextName = findViewById(R.id.txtEditNameReminder);
+    findViewById(R.id.btnAddReminderDialog).setOnClickListener(new AddReminderButton());
 
-        if(name.isEmpty()){
-          editText.startAnimation(shakeAnim);
-          editText.setBackgroundTintList(ColorStateList.valueOf(
-                  ContextCompat.getColor(getContext(),R.color.red_700)
-          ));
-          Toast.makeText(getContext(), "Please enter a name", Toast.LENGTH_SHORT).show();
-          return;
-        }
-
-        try{
-          dataCallBack.onSubmit(name,hour,minute);
-        }catch (Exception ignore){}
-        ReminderAddDialog.this.dismiss();
-      }
-    });
-
-    ((Button)findViewById(R.id.btnCancelReminderDialog)).setOnClickListener(new View.OnClickListener() {
+    findViewById(R.id.btnCancelReminderDialog).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         dismiss();
       }
     });
+    linearLayoutDailyBtn = findViewById(R.id.layoutAddReminderDaily);
+    for (int i = 0; i < linearLayoutDailyBtn.getChildCount(); i++){
+      View v = linearLayoutDailyBtn.getChildAt(i);
+      if(v instanceof AppCompatToggleButton){
+        ((AppCompatToggleButton) v).setOnCheckedChangeListener(new DateToggleButtonClick());
+        String txt =  ((AppCompatToggleButton) v).getText().toString();
+        ((AppCompatToggleButton) v).setChecked(DATE_TO_CALENDAR_INT.get(txt) == currCalendar.get(Calendar.DAY_OF_WEEK));
+      }
+    }
 
+    SwitchCompat switchDaily = findViewById(R.id.switchAddReminderDaily);
+    switchDaily.setOnCheckedChangeListener(new SwitchDaily());
+
+    setEnableDaily(false);
+  }
+
+
+  void setEnableDaily(boolean isEnable) {
+    linearLayoutDailyBtn.setVisibility(isEnable ? View.VISIBLE : View.INVISIBLE);
+  }
+
+  class AddReminderButton implements View.OnClickListener {
+    @Override
+    public void onClick(View view) {
+      String name = editTextName.getText().toString();
+      int hour = timePicker.getHour();
+      int minute = timePicker.getMinute();
+
+      if (name.isEmpty()) {
+        editTextName.startAnimation(shakeAnim);
+        editTextName.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(getContext(), R.color.red_700)
+        ));
+        Toast.makeText(getContext(), "Please enter a name", Toast.LENGTH_SHORT).show();
+        return;
+      }
+
+      try {
+        dataCallBack.onSubmit(name, hour, minute);
+      } catch (Exception ignore) {
+      }
+      ReminderAddDialog.this.dismiss();
+    }
+  }
+  class SwitchDaily implements CompoundButton.OnCheckedChangeListener {
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+      setEnableDaily(b);
+    }
+  }
+  class DateToggleButtonClick implements CompoundButton.OnCheckedChangeListener{
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+      if(DATE_TO_CALENDAR_INT.get(compoundButton.getText()) == currCalendar.get(Calendar.DAY_OF_WEEK) ){
+        compoundButton.setChecked(true);
+        return;
+      }
+
+      if(b){
+        dailyReminder.add(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
+      }else{
+        dailyReminder.remove(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
+      }
+    }
   }
 }

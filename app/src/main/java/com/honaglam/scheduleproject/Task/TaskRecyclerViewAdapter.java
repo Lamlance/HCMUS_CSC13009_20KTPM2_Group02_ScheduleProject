@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.honaglam.scheduleproject.AddTaskDialog;
 import com.honaglam.scheduleproject.R;
 
 import java.util.List;
