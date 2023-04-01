@@ -42,24 +42,23 @@ public class TimerService extends Service {
   long shortBreakMillis = 0;
   long longBreakMillis = 0;
 
+  boolean autoStartBreakSetting = false;
+  boolean autoStartPomodoroSetting = false;
+  long longBreakInterValSetting = 4;
   Uri alarmUri;
 
   private static final String CHANNEL_ID = "TimerNotificationChanel";
   private static final int NOTIFICATION_ID = 6969;
   private TimerTickCallBack tickCallBack = null;
   private TimerStateChangeCallBack stateChangeCallBack = null;
-
   Intent timerIntent;
   NotificationChannel notificationChannel;
   Handler timerHandler;
   Runnable timerRunnable;
   TimerFragment timerFragment;
-
   int runningState = NONE_STATE;
-  //int pomodoroState = WORK_STATE;
   int timerCount = 0;
   int cycleCount = 0;
-
   NotificationCompat.Builder notificationBuilder;
 
   public TimerService() {
@@ -263,7 +262,9 @@ public class TimerService extends Service {
     }
   }
 
-  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
+  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime,
+                           Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro,
+                           long longBreakInterVal) {
     if (runningState != NONE_STATE && timer != null) {
       timer.cancel();
       runningState = NONE_STATE;
@@ -273,12 +274,16 @@ public class TimerService extends Service {
     longBreakMillis = longBreakTime;
     millisRemain = workTime;
     alarmUri = alarmSound;
+    autoStartBreakSetting = autoStartBreak;
+    autoStartPomodoroSetting = autoStartPomodoro;
+    longBreakInterValSetting = longBreakInterVal;
   }
 
   public int calculateCurrentState(){
+    long LONG_BREAK_INTERVAL = ( longBreakInterValSetting * 2 )- 1;
     if (timerCount % 2 == 0){
       return WORK_STATE;
-    }else if (timerCount % 2 == 1 && timerCount != 7){
+    }else if (timerCount % 2 == 1 && timerCount != LONG_BREAK_INTERVAL){
       return SHORT_BREAK_STATE;
     }
     return LONG_BREAK_STATE;
@@ -287,22 +292,19 @@ public class TimerService extends Service {
   public void switchState() {
     timerCount += 1;
     cycleCount += (timerCount % 2 == 0) ? 1 : 0;
-
+    long LONG_BREAK_INTERVAL = ( longBreakInterValSetting * 2 )- 1;
     if (timerCount % 2 == 0) {
       runningState = calculateCurrentState();
       millisRemain = workMillis;
-      //pomodoroState = WORK_STATE;
       callStateChangeCallBack(WORK_STATE);
-    } else if (timerCount % 2 == 1 && timerCount != 7) {
+    } else if (timerCount % 2 == 1 && timerCount != LONG_BREAK_INTERVAL) {
       runningState = calculateCurrentState();
       millisRemain = shortBreakMillis;
-      //pomodoroState = SHORT_BREAK_STATE;
       callStateChangeCallBack(SHORT_BREAK_STATE);
     } else {
       runningState = calculateCurrentState();
       timerCount = -1;
       millisRemain = longBreakMillis;
-      //pomodoroState = LONG_BREAK_STATE;
       callStateChangeCallBack(LONG_BREAK_STATE);
     }
   }

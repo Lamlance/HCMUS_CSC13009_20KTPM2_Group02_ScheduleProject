@@ -29,6 +29,8 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.widget.Toast;
 
+import com.google.android.material.slider.Slider;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 
 import java.net.URI;
@@ -40,16 +42,18 @@ import java.net.URI;
  */
 public class TimerSetting extends DialogFragment {
   // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-  private Button confirmButton;
-  private Button cancelButton;
   private NumberPicker pomodoroTimePicker;
   private NumberPicker shortBreakPicker;
   private NumberPicker longBreakPicker;
+  private SwitchMaterial autoStartBreakSwitch;
+  private SwitchMaterial autoStartPomodoroSwitch;
+  private Slider longBreakIntervalSlider;
   private TextView soundPicker;
   private Uri selectedUri;
+  private Button confirmButton;
+  private Button cancelButton;
   private ActivityResultLauncher<Intent> soundPickerLauncher;
-  private static final int DEFAULT_SOUND_PICKER_REQUEST_CODE = 1;
-  private static final int CUSTOM_SOUND_PICKER_REQUEST_CODE = 2;
+
 
   public TimerSetting() {
     // Required empty public constructor
@@ -102,6 +106,18 @@ public class TimerSetting extends DialogFragment {
     longBreakPicker.setMaxValue(maxVal);
     longBreakPicker.setValue(10);
 
+    // Set auto start breaks to true
+    autoStartBreakSwitch = getView().findViewById(R.id.autoStartBreak);
+    autoStartBreakSwitch.setChecked(true);
+
+    // Set auto start pomodoro to true
+    autoStartPomodoroSwitch = getView().findViewById(R.id.autoStartPomodoro);
+    autoStartPomodoroSwitch.setChecked(true);
+
+    // Set long break interval default to 4
+    longBreakIntervalSlider = getView().findViewById(R.id.longBreakInterval);
+    longBreakIntervalSlider.setValue(4);
+
     // Set sound for timer notifications
     soundPicker = getView().findViewById(R.id.soundPicker);
     Uri defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
@@ -119,7 +135,6 @@ public class TimerSetting extends DialogFragment {
         soundPickerLauncher.launch(intent);
       }
     });
-
     // TODO: CREATE A HANDLER TO GRANT PERMISSION TO OPEN CUSTOM RINGTONE
     soundPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
       public void onActivityResult(ActivityResult result) {
@@ -144,9 +159,15 @@ public class TimerSetting extends DialogFragment {
         long workTime = pomodoroTimePicker.getValue() * (long) 1000;
         long shortBreak = shortBreakPicker.getValue() * (long) 1000;
         long longBreak = longBreakPicker.getValue() * (long) 1000;
+        boolean autoStartBreak = autoStartBreakSwitch.isChecked();
+        boolean autoStartPomodoro = autoStartPomodoroSwitch.isChecked();
+        long longBreakInterVal = (long) longBreakIntervalSlider.getValue();
+        Log.d("autoStartBreak: ", String.valueOf(autoStartBreak));
+        Log.d("autoStartPomodoro: ", String.valueOf(autoStartPomodoro));
+        Log.d("longBreakInterVal: ", String.valueOf(longBreakInterVal));
         Uri final_uri = selectedUri;
-        Log.d("URI", "onClick: " + selectedUri.toString());
-        ((MainActivity) getActivity()).setTimerTime(workTime, shortBreak, longBreak, final_uri);
+
+        ((MainActivity) getActivity()).setTimerTime(workTime, shortBreak, longBreak, final_uri, autoStartBreak, autoStartPomodoro, longBreakInterVal);
         ((MainActivity) getActivity()).switchFragment_Pomodoro();
       }
     });
