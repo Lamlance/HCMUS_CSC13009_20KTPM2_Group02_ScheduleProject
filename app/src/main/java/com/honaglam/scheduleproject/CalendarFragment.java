@@ -108,7 +108,6 @@ public class CalendarFragment extends Fragment {
 
     calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapter(context);
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
-    calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
 
     view.findViewById(R.id.btnIncreaseMonth).setOnClickListener(new View.OnClickListener() {
       @Override
@@ -162,7 +161,9 @@ public class CalendarFragment extends Fragment {
 
     filterBtn = view.findViewById(R.id.btnFilterReminder);
     filterBtn.setOnClickListener(new FilterBtnClick());
-    updateDateUI();
+    //updateDateUI();
+    calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
+
   }
 
   private void AddReminder(String name) {
