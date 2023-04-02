@@ -369,7 +369,6 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
@@ -391,7 +390,9 @@ public class MainActivity extends AppCompatActivity {
 
     return reminderDataList.size();
   }
-
+  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate){
+    return taskDb.findReminders(name, startDate, endDate);
+  }
   class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener{
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {

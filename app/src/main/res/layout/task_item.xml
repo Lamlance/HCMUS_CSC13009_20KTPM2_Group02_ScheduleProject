@@ -1,51 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:orientation="horizontal"
-  android:gravity="center_vertical"
-  android:weightSum="10">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:weightSum="10">
 
   <CheckBox
-    android:id="@+id/checkBoxCompleteTask"
-    style="@style/IMAGE_BUTTON"
-    android:layout_height="wrap_content"
-    android:layout_width="0dp"
-    android:layout_weight="1"/>
+      android:id="@+id/checkBoxCompleteTask"
+      android:layout_height="wrap_content"
+      android:layout_width="0dp"
+      android:layout_weight="1"/>
 
   <TextView
-    style="@style/TEXT"
-    android:id="@+id/txtTaskName"
-    android:text="Task name"
-    android:layout_height="wrap_content"
-    android:layout_width="0dp"
-    android:textSize="25sp"
-    android:textColor="#ffffff"
-    android:padding="8dp"
-    android:textStyle="normal"
-    android:layout_weight="7"/>
+      android:id="@+id/txtTaskName"
+      android:text="Task name"
+      android:layout_height="wrap_content"
+      android:layout_width="0dp"
+      android:textSize="25sp"
+      android:textColor="#ffffff"
+      android:padding="8dp"
+      android:textStyle="normal"
+      android:layout_weight="6.5"/>
 
   <TextView
-    android:id="@+id/txtCountPomodoro"
-    style="@style/TEXT"
-    android:text="1/1"
-    android:textAlignment="center"
-    android:textSize="20sp"
-    android:textColor="#ffffff"
-    android:textStyle="normal"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_weight="1.25"/>
+      android:id="@+id/txtCountPomodoro"
+      android:text="1/1"
+      android:textAlignment="center"
+      android:textSize="20sp"
+      android:textColor="#ffffff"
+      android:textStyle="normal"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"/>
 
   <ImageButton
-    android:id="@+id/imgBtnDeleteTask"
-    style="@style/IMAGE_BUTTON"
-    android:src="@drawable/baseline_delete_24"
-    android:background="@android:color/transparent"
-    android:layout_height="wrap_content"
-    android:layout_width="0dp"
-    android:buttonTint="@color/white"
-    android:layout_weight="0.75"/>
+      android:id="@+id/imgBtnEditTask"
+      android:src="@drawable/baseline_edit_24"
+      android:background="@android:color/transparent"
+      android:layout_height="wrap_content"
+      android:layout_width="0dp"
+      android:buttonTint="@color/white"
+      android:layout_weight="0.75" />
+
+  <ImageButton
+      android:id="@+id/imgBtnDeleteTask"
+      android:src="@drawable/baseline_delete_24"
+      android:background="@android:color/transparent"
+      android:layout_height="wrap_content"
+      android:layout_width="0dp"
+      android:buttonTint="@color/white"
+      android:layout_weight="0.75" />
 
 </LinearLayout>
