@@ -22,7 +22,7 @@
         android:textColor="#ffffff"
         android:padding="8dp"
         android:textStyle="normal"
-        android:layout_weight="7"/>
+        android:layout_weight="6.5"/>
 
     <TextView
         android:id="@+id/txtCountPomodoro"
@@ -33,18 +33,24 @@
         android:textStyle="normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1.75"/>
+        android:layout_weight="1"/>
+
+    <ImageButton
+        android:id="@+id/imgBtnEditTask"
+        android:src="@drawable/baseline_edit_24"
+        android:background="@android:color/transparent"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:buttonTint="@color/white"
+        android:layout_weight="0.75" />
 
     <ImageButton
         android:id="@+id/imgBtnDeleteTask"
         android:src="@drawable/baseline_delete_24"
         android:background="@android:color/transparent"
         android:layout_height="wrap_content"
- 
         android:layout_width="0dp"
         android:buttonTint="@color/white"
-        android:layout_weight="1"/>
-
-        android:layout_weight="0.25"/>
+        android:layout_weight="0.75" />
 
 </LinearLayout>

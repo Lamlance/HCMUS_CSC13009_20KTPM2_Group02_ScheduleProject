@@ -202,12 +202,14 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
+  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal ) {
     if (timerService != null) {
-      timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound);
+      timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound, autoStartBreak, autoStartPomodoro, longBreakInterVal);
     }
     return false;
   }
+
+
 
   public long getCurrentRemainMillis() {
     if (timerService != null) {

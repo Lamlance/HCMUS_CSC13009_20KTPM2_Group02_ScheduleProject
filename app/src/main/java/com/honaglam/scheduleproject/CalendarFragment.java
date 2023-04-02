@@ -163,8 +163,8 @@ public class CalendarFragment extends Fragment {
     filterBtn = view.findViewById(R.id.btnFilterReminder);
     filterBtn.setOnClickListener(new FilterBtnClick());
     //updateDateUI();
-
     calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
+
   }
 
   private void AddReminder(String name) {
