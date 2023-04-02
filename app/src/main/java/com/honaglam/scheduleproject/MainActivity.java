@@ -76,11 +76,21 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    //reminderFile = new File(getFilesDir(), REMINDER_FILE_NAME);
-    //LoadLocalReminder();
+
+    Calendar calendar = Calendar.getInstance();
+    int year = calendar.get(Calendar.YEAR);
+    int month = calendar.get(Calendar.MONTH);
+    int lastDateOfMonth = calendar.getActualMaximum(Calendar.DATE);
+
+    calendar.set(year,month,1,0,0,0);
+    long startOfMonth = calendar.getTimeInMillis();
+
+    calendar.set(year,month,lastDateOfMonth,23,59,59);
+    long endOfMonth = calendar.getTimeInMillis();
+
+    Log.d("MONTH_SPAN", String.valueOf((endOfMonth - startOfMonth)));
 
 
-    //Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
     taskDb = new ReminderTaskDB(this);
     tasks.addAll(taskDb.getAllTask());
 
@@ -152,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
   }
 
   //Timer Service
-
   public boolean startTimer() {
     if (timerService != null) {
       timerService.startTimer();
@@ -362,6 +371,9 @@ public class MainActivity extends AppCompatActivity {
     Toast.makeText(this, "Search size " + reminderDataList.size(), Toast.LENGTH_SHORT).show();
 
     return reminderDataList.size();
+  }
+  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate){
+    return taskDb.findReminders(name, startDate, endDate);
   }
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener {

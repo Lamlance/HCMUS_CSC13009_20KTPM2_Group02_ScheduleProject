@@ -108,9 +108,8 @@ public class CalendarFragment extends Fragment {
     ani_month_r2l = AnimationUtils.loadAnimation(context, R.anim.calendar_month_change_r2l);
     ani_month_l2r = AnimationUtils.loadAnimation(context, R.anim.calendar_month_change_l2r);
 
-    calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapter(context);
+    calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapter(context, new GetReminderInMonth());
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
-    calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
 
     view.findViewById(R.id.btnIncreaseMonth).setOnClickListener(new View.OnClickListener() {
       @Override
@@ -163,7 +162,9 @@ public class CalendarFragment extends Fragment {
 
     filterBtn = view.findViewById(R.id.btnFilterReminder);
     filterBtn.setOnClickListener(new FilterBtnClick());
-    updateDateUI();
+    //updateDateUI();
+
+    calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
   }
 
   private void AddReminder(String name) {
@@ -240,13 +241,25 @@ public class CalendarFragment extends Fragment {
 
   class DateSelectCallBack implements CalendarRecyclerViewAdapter.SelectDateCallBackInterface {
     @Override
-    public void clickDate(int date, int month, int year, int weekDay) throws NotImplementedError {
+    public void clickDate(int date, int month, int year, int weekDay,List<ReminderData> reminders) throws NotImplementedError {
+      /*
       if ((date != selectedDate || month != selectedMonth || year != selectedYear)
               && (date * month * year * weekDay) > 0) {
-        int size = mainActivity.getReminderAt(date, month, year);
-        if(reminderRecyclerAdapter != null){
+        if(reminderRecyclerAdapter != null && (reminders == null || reminders.size() == 0)){
+          int size = mainActivity.getReminderAt(date, month, year);
           reminderRecyclerAdapter.notifyItemRangeChanged(0,size);
         }
+      }
+      */
+
+      if(reminders != null){
+        mainActivity.reminderDataList.clear();
+        mainActivity.reminderDataList.addAll(reminders);
+        reminderRecyclerAdapter.notifyItemRangeChanged(0,mainActivity.reminderDataList.size());
+      }else{
+        int sizeBefore = mainActivity.reminderDataList.size();
+        mainActivity.reminderDataList.clear();
+        reminderRecyclerAdapter.notifyItemRangeChanged(0,sizeBefore);
       }
 
       selectedDate = date;
@@ -256,6 +269,24 @@ public class CalendarFragment extends Fragment {
 
       updateDateUI();
 
+    }
+  }
+
+  class GetReminderInMonth implements CalendarRecyclerViewAdapter.GetReminderInMonth{
+    @Override
+    public List<ReminderData> getReminderInMonth(int year,int month) {
+      try {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.set(year,month,1,0,0,0);
+        long firstOfMonth = calendar.getTimeInMillis();
+
+        calendar.set(year,month,calendar.getActualMaximum(Calendar.DATE),23,59,59);
+        long lastOfMonth = calendar.getTimeInMillis();
+
+        return mainActivity.getSearchReminder("",firstOfMonth,lastOfMonth);
+      }catch (Exception ignore){}
+      return null;
     }
   }
 
