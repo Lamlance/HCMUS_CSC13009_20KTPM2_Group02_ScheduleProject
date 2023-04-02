@@ -82,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
     int month = calendar.get(Calendar.MONTH);
     int lastDateOfMonth = calendar.getActualMaximum(Calendar.DATE);
 
-    calendar.set(year,month,1,0,0,0);
+    calendar.set(year, month, 1, 0, 0, 0);
     long startOfMonth = calendar.getTimeInMillis();
 
-    calendar.set(year,month,lastDateOfMonth,23,59,59);
+    calendar.set(year, month, lastDateOfMonth, 23, 59, 59);
     long endOfMonth = calendar.getTimeInMillis();
 
     Log.d("MONTH_SPAN", String.valueOf((endOfMonth - startOfMonth)));
@@ -202,14 +202,20 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal ) {
+  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal) {
     if (timerService != null) {
       timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound, autoStartBreak, autoStartPomodoro, longBreakInterVal);
     }
     return false;
   }
 
-
+  public boolean setTimerOnFinishCallback(TimerService.TimerOnFinishCallback onFinishCallback) {
+    if (timerFragment != null) {
+      timerService.setOnFinishCallback(onFinishCallback);
+      return true;
+    }
+    return false;
+  }
 
   public long getCurrentRemainMillis() {
     if (timerService != null) {
@@ -221,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
   public int addTask(String name, int loops) {
     try {
       int id = Math.toIntExact(taskDb.addTask(name, loops));
-      tasks.add(new TaskData(name,loops,id));
+      tasks.add(new TaskData(name, loops, id));
       return tasks.size() - 1;
     } catch (Exception ignore) {
     }
@@ -261,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
       intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
       intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
       intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
-      intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY,id);
+      intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY, id);
 
       PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent,
               PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
@@ -274,13 +280,13 @@ public class MainActivity extends AppCompatActivity {
     return reminderDataList.size();
   }
 
-  public int addReminderWeekly(String name,long time, HashSet<Integer> weekDates){
+  public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
     ArrayList<ReminderData> reminders = new ArrayList<ReminderData>();
 
     try {
       Calendar calendar = Calendar.getInstance();
       calendar.setTimeInMillis(time);
-      long result = taskDb.addReminder(name, time,calendar.get(Calendar.DAY_OF_WEEK));
+      long result = taskDb.addReminder(name, time, calendar.get(Calendar.DAY_OF_WEEK));
       reminders.add(new ReminderData(
               name,
               calendar.getTimeInMillis(),
@@ -289,14 +295,14 @@ public class MainActivity extends AppCompatActivity {
 
       int curWeekDate = calendar.get(Calendar.DAY_OF_WEEK);
 
-      for (Integer wDate:weekDates) {
+      for (Integer wDate : weekDates) {
         int weekDateDif = Math.min(
                 Math.abs(curWeekDate - wDate),
-                Math.abs(7-(curWeekDate - wDate))
-        ) ;
+                Math.abs(7 - (curWeekDate - wDate))
+        );
 
 
-        calendar.add(Calendar.DAY_OF_WEEK,weekDateDif);
+        calendar.add(Calendar.DAY_OF_WEEK, weekDateDif);
         Log.d("WEEKDAY_DATE", String.valueOf(calendar.get(Calendar.DATE)));
 
         long idResult = taskDb.addReminder(name, calendar.getTimeInMillis());
@@ -306,19 +312,19 @@ public class MainActivity extends AppCompatActivity {
                 Math.toIntExact(idResult)
         ));
 
-        calendar.add(Calendar.DAY_OF_WEEK,-weekDateDif);
+        calendar.add(Calendar.DAY_OF_WEEK, -weekDateDif);
       }
 
       AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
       notificationBuilder.setContentText(name);
       Notification notification = notificationBuilder.build();
 
-      for (ReminderData reminderData: reminders){
+      for (ReminderData reminderData : reminders) {
         Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
         intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
         intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
         intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
-        intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY,reminderData.id);
+        intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY, reminderData.id);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, reminderData.id, intent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
@@ -331,7 +337,8 @@ public class MainActivity extends AppCompatActivity {
         );
 
       }
-    }catch (Exception ignore){}
+    } catch (Exception ignore) {
+    }
 
     reminderDataList.add(reminders.get(0));
     return reminderDataList.size();
@@ -374,7 +381,8 @@ public class MainActivity extends AppCompatActivity {
 
     return reminderDataList.size();
   }
-  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate){
+
+  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate) {
     return taskDb.findReminders(name, startDate, endDate);
   }
 

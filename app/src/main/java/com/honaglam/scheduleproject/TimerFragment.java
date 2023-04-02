@@ -29,6 +29,8 @@ import com.honaglam.scheduleproject.Task.TaskViewHolder;
 
 import java.util.List;
 
+import kotlin.NotImplementedError;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link TimerFragment#newInstance} factory method to
@@ -37,194 +39,185 @@ import java.util.List;
 public class TimerFragment extends Fragment {
 
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    // TODO: Rename and change types of parameters
+  // TODO: Rename parameter arguments, choose names that match
+  // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+  // TODO: Rename and change types of parameters
 
-    private TextView txtTimer;
-    private FloatingActionButton btnTimerStart;
-    private FloatingActionButton btnGiveUp;
-    private FloatingActionButton btnSkip;
+  private TextView txtTimer;
+  private FloatingActionButton btnTimerStart;
+  private FloatingActionButton btnGiveUp;
+  private FloatingActionButton btnSkip;
 
-    /*
-    private Button btnTimer;
-    private Button btnGiveUp;
-    private Button btnSkip;
-    */
-    private Button btnAddTask;
-    private FloatingActionButton timerSetting;
-    private RecyclerView recyclerTask;
-    private Context context;
-    private MainActivity activity;
+  /*
+  private Button btnTimer;
+  private Button btnGiveUp;
+  private Button btnSkip;
+  */
+  private Button btnAddTask;
+  private FloatingActionButton timerSetting;
+  private RecyclerView recyclerTask;
+  private Context context;
+  private MainActivity activity;
 
-    TaskRecyclerViewAdapter taskRecyclerViewAdapter;
+  TaskRecyclerViewAdapter taskRecyclerViewAdapter;
 
-    public static TimerFragment newInstance() {
-        TimerFragment fragment = new TimerFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+  public static TimerFragment newInstance() {
+    TimerFragment fragment = new TimerFragment();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+    return fragment;
+  }
 
-    public TimerFragment() {
-        // Required empty public constructor
-    }
+  public TimerFragment() {
+    // Required empty public constructor
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        activity = (MainActivity) getActivity();
-        context = requireContext();
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    activity = (MainActivity) getActivity();
+    context = requireContext();
 
-        LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-        recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
-        recyclerTask.setLayoutManager(new LinearLayoutManager(context));
-        taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(context, new TaskRecyclerViewAdapter.GetListCallback() {
-            @Override
-            public List<TaskData> getList() {
-                return activity.tasks;
-            }
-        });
-        recyclerTask.setAdapter(taskRecyclerViewAdapter);
+    LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
+    recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
+    recyclerTask.setLayoutManager(new LinearLayoutManager(context));
+    taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(context, new TaskRecyclerViewAdapter.GetListCallback() {
+      @Override
+      public List<TaskData> getList() {
+        return activity.tasks;
+      }
+    });
+    recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
-        return timerLayout;
-    }
+    return timerLayout;
+  }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
 
-        txtTimer = view.findViewById(R.id.txtTimer);
-        txtTimer.setTextSize(50);
+    txtTimer = view.findViewById(R.id.txtTimer);
+    txtTimer.setTextSize(50);
 
-        btnTimerStart = (FloatingActionButton) view.findViewById(R.id.btnTimerStart);
-        btnTimerStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.startTimer();
-            }
-        });
+    btnTimerStart = (FloatingActionButton) view.findViewById(R.id.btnTimerStart);
+    btnTimerStart.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        activity.startTimer();
+      }
+    });
 
-        btnGiveUp = (FloatingActionButton) view.findViewById(R.id.btnTimerGiveUp);
-        btnGiveUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.resetTimer();
-            }
-        });
+    btnGiveUp = (FloatingActionButton) view.findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        activity.resetTimer();
+      }
+    });
 
-        btnAddTask = getView().findViewById(R.id.btnAddTask);
-        btnAddTask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new AddTaskDialog(context, new AddTaskDialogListener()).show();
-            }
-        });
+    btnAddTask = getView().findViewById(R.id.btnAddTask);
+    btnAddTask.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        new AddTaskDialog(context, new AddTaskDialogListener()).show();
+      }
+    });
 
-        activity.setTimerOnTickCallBack(new TimerTickCallBack());
-        activity.setTimerStateChangeCallBack(new TimerStateChangeCallBack());
-        activity.setTimerOnFinishCallback(new TimerOnFinishCallback());
+    activity.setTimerOnTickCallBack(new TimerTickCallBack());
+    activity.setTimerStateChangeCallBack(new TimerStateChangeCallBack());
+    activity.setTimerOnFinishCallback(new TimerOnFinishCallback());
 
-        //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
+    //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
 
-        timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
-        timerSetting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.switchFragment_TimerSetting();
-            }
-        });
+    timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
+    timerSetting.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        activity.switchFragment_TimerSetting();
+      }
+    });
 
-        btnSkip = (FloatingActionButton) getView().findViewById((R.id.btnSkip));
-        btnSkip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    activity.skip();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
-        long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
-        UpdateTimeUI(cur);
-    }
-
-    public void UpdateTimeUI(long millisRemain) {
-        int seconds = ((int) millisRemain / 1000) % 60;
-        int minutes = (int) millisRemain / (60 * 1000);
-        txtTimer.setText(String.format("%d:%02d", minutes, seconds));
-    }
-
-    public void updateBackground(int color) {
-        getView().setBackgroundColor(color);
-    }
-
-    private void UpdateTimerBackground(int work_state) {
-        if (work_state == TimerService.WORK_STATE) {
-            requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.work_color));
+    btnSkip = (FloatingActionButton) getView().findViewById((R.id.btnSkip));
+    btnSkip.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          activity.skip();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         }
-        if (work_state == TimerService.SHORT_BREAK_STATE) {
-            requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.short_break_color));
-        }
-        if (work_state == TimerService.LONG_BREAK_STATE) {
-            requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.long_break_color));
-        }
-    }
+      }
+    });
 
-    class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
-        @Override
-        public void onDataPassed(TaskData taskData) {
-            activity.tasks.add(taskData);
-            int newPos = activity.tasks.size() - 1;
-            taskRecyclerViewAdapter.notifyItemInserted(newPos);
-        }
+    long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
+    UpdateTimeUI(cur);
+  }
+
+  public void UpdateTimeUI(long millisRemain) {
+    int seconds = ((int) millisRemain / 1000) % 60;
+    int minutes = (int) millisRemain / (60 * 1000);
+    txtTimer.setText(String.format("%d:%02d", minutes, seconds));
+  }
+
+  public void updateBackground(int color) {
+    getView().setBackgroundColor(color);
+  }
+
+  private void UpdateTimerBackground(int work_state) {
+    if (work_state == TimerService.WORK_STATE) {
+      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.work_color));
     }
+    if (work_state == TimerService.SHORT_BREAK_STATE) {
+      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.short_break_color));
+    }
+    if (work_state == TimerService.LONG_BREAK_STATE) {
+      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.long_break_color));
+    }
+  }
 
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
-      int newPos = activity.addTask(taskData.taskName,taskData.numberPomodoros);
+      int newPos = activity.addTask(taskData.taskName, taskData.numberPomodoros);
       taskRecyclerViewAdapter.notifyItemInserted(newPos);
-     }
-     }
-
-    class TimerTickCallBack implements TimerService.TimerTickCallBack {
-        @Override
-        public void call(long remainMillis) {
-            UpdateTimeUI(remainMillis);
-        }
     }
+  }
 
-    class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack {
-        @Override
-        public void onStateChange(int newState) {
-            UpdateTimerBackground(newState);
-        }
+  class TimerTickCallBack implements TimerService.TimerTickCallBack {
+    @Override
+    public void call(long remainMillis) {
+      UpdateTimeUI(remainMillis);
     }
+  }
 
-    class TimerOnFinishCallback implements TimerService.TimerOnFinishCallback {
-        @Override
-        public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
-            if (isAutoSwitchTask) return;
-
-            try {
-                TaskRecyclerViewAdapter adapter = (TaskRecyclerViewAdapter) recyclerTask.getAdapter();
-                if (adapter != null) {
-                    int selectedTaskIndex = adapter.getSelectedPosition();
-                    activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
-                    recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+  class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack {
+    @Override
+    public void onStateChange(int newState) {
+      UpdateTimerBackground(newState);
     }
+  }
+
+  class TimerOnFinishCallback implements TimerService.TimerOnFinishCallback {
+    @Override
+    public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
+      if (isAutoSwitchTask) return;
+
+      try {
+        TaskRecyclerViewAdapter adapter = (TaskRecyclerViewAdapter) recyclerTask.getAdapter();
+        if (adapter != null) {
+          int selectedTaskIndex = adapter.getSelectedPosition();
+          activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
+          recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
 
 }
 
