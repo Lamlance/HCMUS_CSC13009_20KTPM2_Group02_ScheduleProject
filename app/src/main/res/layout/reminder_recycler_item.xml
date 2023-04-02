@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/SCREEN"
     android:orientation="horizontal"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,6 +12,7 @@
       android:layout_height="wrap_content"
       android:orientation="horizontal">
     <ImageView
+        style="@style/IMAGE_BUTTON"
         android:layout_margin="10dp"
         android:src="@drawable/baseline_notifications_active_24"
         android:layout_width="30dp"
@@ -20,12 +22,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
       <TextView
+          style="@style/TEXT"
           android:textSize="25sp"
           tools:text="1001"
           android:id="@+id/txtRecyclerRemindersId"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
       <TextView
+        style="@style/TEXT"
           android:id="@+id/txtRecyclerRemindersTime"
           android:textSize="15sp"
           tools:text="1001"

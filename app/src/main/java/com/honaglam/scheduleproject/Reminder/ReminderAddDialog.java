@@ -74,11 +74,11 @@ public class ReminderAddDialog extends Dialog {
     this.currCalendar = current;
   }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    requestWindowFeature(Window.FEATURE_NO_TITLE);
-    setContentView(R.layout.dialog_reminder_add);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.dialog_reminder_add);
 
     timePicker = findViewById(R.id.timeReminderDialog);
     timePicker.setIs24HourView(true);

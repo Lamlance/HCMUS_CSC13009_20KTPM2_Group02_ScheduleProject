@@ -3,7 +3,10 @@ package com.honaglam.scheduleproject;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
@@ -22,12 +25,16 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+//import com.honaglam.scheduleproject.UserSetting.UserSettings;
 
 import java.io.File;
 import java.util.Calendar;
@@ -50,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
   private ServiceConnection timerServiceConnection;
   protected TimerService timerService;
 
+  private SwitchMaterial darkThemeSwitcher;
+
 
   //Reminder
   public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
@@ -61,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
   private DrawerLayout drawerLayout;
   private NavigationView sideNavView;
   private Button toolbarBtn;
+  private boolean nightMode;
 
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
@@ -71,27 +81,19 @@ public class MainActivity extends AppCompatActivity {
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
 
+  // User setting
+  //  private UserSettings userSettings;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    Calendar calendar = Calendar.getInstance();
-    int year = calendar.get(Calendar.YEAR);
-    int month = calendar.get(Calendar.MONTH);
-    int lastDateOfMonth = calendar.getActualMaximum(Calendar.DATE);
-
-    calendar.set(year, month, 1, 0, 0, 0);
-    long startOfMonth = calendar.getTimeInMillis();
-
-    calendar.set(year, month, lastDateOfMonth, 23, 59, 59);
-    long endOfMonth = calendar.getTimeInMillis();
-
-    Log.d("MONTH_SPAN", String.valueOf((endOfMonth - startOfMonth)));
-
 
     taskDb = new ReminderTaskDB(this);
+
+
     tasks.addAll(taskDb.getAllTask());
 
     timerIntent = new Intent(this, TimerService.class);
@@ -102,6 +104,10 @@ public class MainActivity extends AppCompatActivity {
     drawerLayout = findViewById(R.id.drawerLayout);
     sideNavView = findViewById(R.id.navSideMenu);
     sideNavView.setNavigationItemSelectedListener(new SideNavItemSelect());
+
+    SwitchCompat switchTheme = (SwitchCompat) sideNavView.getMenu().findItem(R.id.nav_switchTheme)
+            .getActionView().findViewById(R.id.nav_switchTheme_switchView);
+    switchTheme.setOnCheckedChangeListener(new DarkThemeSwitch());
 
     toolbarBtn = findViewById(R.id.toolbarBtn);
     toolbarBtn.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
     calendarFragment = CalendarFragment.newInstance();
     timerFragment = TimerFragment.newInstance();
     timerSettingFragment = TimerSetting.newInstance();
+
 
     fragmentManager
             .beginTransaction()
@@ -135,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
             .commit();
     return true;
   }
-
 
   public boolean switchFragment_Schedule() {
     if (calendarFragment.isVisible()) {
@@ -160,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
             .commit();
     return true;
   }
+
 
   //Timer Service
   public boolean startTimer() {
@@ -194,7 +201,8 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack) {
+
+  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack)  {
     if (timerService != null) {
       timerService.setStateChangeCallBack(stateChangeCallBack);
       return true;
@@ -280,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
     return reminderDataList.size();
   }
 
+
   public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
     ArrayList<ReminderData> reminders = new ArrayList<ReminderData>();
 
@@ -344,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
     return reminderDataList.size();
   }
 
-  public void removeReminder(int pos) {
+  public void removeReminder(int pos)  {
     try {
       ReminderData data = reminderDataList.get(pos);
       int id = data.id;
@@ -359,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception ignore) {
     }
   }
+
 
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
@@ -382,11 +392,20 @@ public class MainActivity extends AppCompatActivity {
     return reminderDataList.size();
   }
 
-  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate) {
-    return taskDb.findReminders(name, startDate, endDate);
+  class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener{
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
+      Toast.makeText(MainActivity.this, "Dark is on " + isOn, Toast.LENGTH_SHORT).show();
+      if (isOn == true) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+      } else {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+      }
+    }
   }
 
   class SideNavItemSelect implements NavigationView.OnNavigationItemSelectedListener {
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
       int id = item.getItemId();
@@ -398,6 +417,7 @@ public class MainActivity extends AppCompatActivity {
         case R.id.nav_schedule:
           Toast.makeText(MainActivity.this, "Select schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
+
       }
       return false;
     }

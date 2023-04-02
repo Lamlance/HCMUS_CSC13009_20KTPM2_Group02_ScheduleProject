@@ -21,12 +21,15 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
     CheckBox checkBoxCompleteTask;
     ImageButton imgBtnDeleteTask;
 
+  OnClickPositionCallBack deleteTaskCallback = null;
+
+  OnClickPositionCallBack checkTaskCallback = null;
     ImageButton imgBtnEditTask;
 
 
-    public interface OnClickPositionCallBack {
-        void clickAtPosition(int position) throws NotImplementedError;
-    }
+  public interface OnClickPositionCallBack {
+    void clickAtPosition(int position) throws NotImplementedError;
+  }
 
     public TaskViewHolder(@NonNull View itemView,
                           OnClickPositionCallBack deleteTaskCallback,
@@ -39,42 +42,45 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
         this.imgBtnDeleteTask = itemView.findViewById(R.id.imgBtnDeleteTask);
         this.imgBtnEditTask = itemView.findViewById(R.id.imgBtnEditTask);
 
+    this.deleteTaskCallback = deleteTaskCallback;
 
-        this.imgBtnEditTask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    int position = getAdapterPosition();
-                    editTaskCallback.clickAtPosition(position);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    this.checkTaskCallback = checkTaskCallback;
+
+    itemView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          int position = getAdapterPosition();
+          editTaskCallback.clickAtPosition(position);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
 
 
-        this.imgBtnDeleteTask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    int position = getAdapterPosition();
-                    deleteTaskCallback.clickAtPosition(position);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    this.imgBtnDeleteTask.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          int position = getAdapterPosition();
+          deleteTaskCallback.clickAtPosition(position);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
 
-        this.checkBoxCompleteTask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    int position = getAdapterPosition();
-                    checkTaskCallback.clickAtPosition(position);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
+    this.checkBoxCompleteTask.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try {
+          int position = getAdapterPosition();
+          checkTaskCallback.clickAtPosition(position);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
 }

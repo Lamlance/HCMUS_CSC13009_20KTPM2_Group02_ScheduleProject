@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/SCREEN"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:orientation="vertical"
@@ -21,11 +22,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content">
       <TextView
+          style="@style/TEXT"
           android:textSize="15sp"
           android:text="From date"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
       <androidx.appcompat.widget.AppCompatTextView
+          style="@style/TEXT"
           android:autoSizeTextType="uniform"
           android:id="@+id/txtFilterFromDate"
           android:layout_marginVertical="10dp"
@@ -45,11 +48,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content">
       <TextView
+          style="@style/TEXT"
           android:textSize="15sp"
           android:text="To date"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
       <androidx.appcompat.widget.AppCompatTextView
+          style="@style/TEXT"
           android:autoSizeTextType="uniform"
           android:id="@+id/txtFilterToDate"
           android:layout_marginVertical="10dp"
@@ -72,12 +77,14 @@
       android:layout_height="wrap_content">
 
     <Button
+        style="@style/BUTTON"
         android:id="@+id/btnFilterAccept"
         android:layout_marginHorizontal="5dp"
         android:text="Accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <Button
+        style="@style/BUTTON"
         android:id="@+id/btnFilterClear"
         android:layout_marginHorizontal="5dp"
         android:text="Cancel"
