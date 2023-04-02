@@ -18,7 +18,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class ReminderTaskDB extends SQLiteOpenHelper {
-  private static final int DB_VERSION = 2;
+  private static final int DB_VERSION = 3;
   private static final String DB_NAME = "ScheduleProject.db";
   private static final String SQL_DROP_REMINDER_TABLE = "DROP TABLE IF EXISTS " + ReminderTable.TABLE_NAME;
   private static final String SQL_DROP_TASK_TABLE = "DROP TABLE IF EXISTS " + TaskTable.TABLE_NAME;
@@ -30,6 +30,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_TIME = "time";
     public static final String COLUMN_NAME_FATHER = "father";
+    public static final String COLUMN_NAME_WEEKDAY = "weekday";
   }
 
   private static class TaskTable implements BaseColumns {
@@ -53,6 +54,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                     + ReminderTable.COLUMN_NAME_TITLE + " TEXT ,"
                     + ReminderTable.COLUMN_NAME_TIME + " INTEGER ,"
                     + ReminderTable.COLUMN_NAME_FATHER + " INTEGER ,"
+                    + ReminderTable.COLUMN_NAME_WEEKDAY + " INTEGER ,"
                     + " FOREIGN KEY (" + ReminderTable.COLUMN_NAME_FATHER + ") REFERENCES "
                     + ReminderTable.TABLE_NAME + "( " + ReminderTable.COLUMN_NAME_ID + "));";
     String createTaskTable =
@@ -77,6 +79,32 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     } catch (Exception ignore) {
       return -1;
     }
+  }
+
+  public long addReminder(String name, long time,int weekDate) {
+    try (SQLiteDatabase db = this.getWritableDatabase()) {
+      ContentValues cv = new ContentValues();
+
+      cv.put(ReminderTable.COLUMN_NAME_TITLE, name);
+      cv.put(ReminderTable.COLUMN_NAME_TIME, time);
+      cv.put(ReminderTable.COLUMN_NAME_WEEKDAY,weekDate);
+
+      return db.insert(ReminderTable.TABLE_NAME, null, cv);
+    } catch (Exception ignore) {
+      return -1;
+    }
+  }
+
+  public long addChildReminder(String name,long time, int fatherId){
+    try(SQLiteDatabase db = this.getWritableDatabase()){
+      ContentValues cv = new ContentValues();
+      cv.put(ReminderTable.COLUMN_NAME_TITLE,name);
+      cv.put(ReminderTable.COLUMN_NAME_TIME,time);
+      cv.put(ReminderTable.COLUMN_NAME_FATHER, fatherId);
+
+      return db.insert(ReminderTable.TABLE_NAME,null,cv);
+    }catch (Exception ignore){};
+    return -1;
   }
 
   public List<ReminderData> getReminderAt(int date, int month, int year) {

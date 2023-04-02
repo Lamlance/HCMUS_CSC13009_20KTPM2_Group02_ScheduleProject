@@ -39,7 +39,8 @@ import kotlin.NotImplementedError;
 
 public class ReminderAddDialog extends Dialog {
   public interface ReminderDataCallBack {
-    void onSubmit(String name, int hour24h, int minute) throws NotImplementedError;
+    void onSubmit(String name, int hour24h, int minute);
+    void onSubmitWeekly(String name, int hour24h, int minute,HashSet<Integer> dailyReminder);
   }
 
   private static final HashMap<String, Integer> DATE_TO_CALENDAR_INT = new HashMap<String, Integer>() {{
@@ -60,7 +61,7 @@ public class ReminderAddDialog extends Dialog {
   EditText editTextName;
   TimePicker timePicker;
   HashSet<Integer> dailyReminder = new HashSet<Integer>();
-
+  SwitchCompat switchDaily;
 
   public ReminderAddDialog(
           @NonNull Context context,
@@ -99,9 +100,8 @@ public class ReminderAddDialog extends Dialog {
         ((AppCompatToggleButton) v).setChecked(DATE_TO_CALENDAR_INT.get(txt) == currCalendar.get(Calendar.DAY_OF_WEEK));
       }
     }
-
-    SwitchCompat switchDaily = findViewById(R.id.switchAddReminderDaily);
-    switchDaily.setOnCheckedChangeListener(new SwitchDaily());
+    switchDaily = findViewById(R.id.switchAddReminderDaily);
+    switchDaily.setOnCheckedChangeListener(new SwitchDailyClick());
 
     setEnableDaily(false);
   }
@@ -128,13 +128,17 @@ public class ReminderAddDialog extends Dialog {
       }
 
       try {
-        dataCallBack.onSubmit(name, hour, minute);
+        if(switchDaily.isChecked()){
+          dataCallBack.onSubmitWeekly(name,hour,minute,dailyReminder);
+        }else{
+          dataCallBack.onSubmit(name, hour, minute);
+        }
       } catch (Exception ignore) {
       }
       ReminderAddDialog.this.dismiss();
     }
   }
-  class SwitchDaily implements CompoundButton.OnCheckedChangeListener {
+  class SwitchDailyClick implements CompoundButton.OnCheckedChangeListener {
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
       setEnableDaily(b);
@@ -143,16 +147,21 @@ public class ReminderAddDialog extends Dialog {
   class DateToggleButtonClick implements CompoundButton.OnCheckedChangeListener{
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-      if(DATE_TO_CALENDAR_INT.get(compoundButton.getText()) == currCalendar.get(Calendar.DAY_OF_WEEK) ){
-        compoundButton.setChecked(true);
-        return;
+      try {
+        if(DATE_TO_CALENDAR_INT.get(compoundButton.getText()) == currCalendar.get(Calendar.DAY_OF_WEEK) ){
+          compoundButton.setChecked(true);
+          return;
+        }
+
+        if(b){
+          dailyReminder.add(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
+        }else{
+          dailyReminder.remove(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
+        }
+      }catch (Exception e){
+        e.printStackTrace();
       }
 
-      if(b){
-        dailyReminder.add(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
-      }else{
-        dailyReminder.remove(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
-      }
     }
   }
 }

@@ -30,6 +30,8 @@ import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import java.util.ArrayList;
@@ -77,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
     //reminderFile = new File(getFilesDir(), REMINDER_FILE_NAME);
     //LoadLocalReminder();
 
-    Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
+
+    //Toast.makeText(this, String.format("Length %d", reminderDataList.size()), Toast.LENGTH_SHORT).show();
     taskDb = new ReminderTaskDB(this);
     tasks.addAll(taskDb.getAllTask());
 
@@ -236,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
 
       ReminderData reminderData = new ReminderData(name, time, id);
       reminderDataList.add(reminderData);
-      Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
+      //Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
 
       notificationBuilder.setContentText(name);
       Notification notification = notificationBuilder.build();
@@ -247,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
       intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
       intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
       intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+      intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY,id);
 
       PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent,
               PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
@@ -256,6 +260,69 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    return reminderDataList.size();
+  }
+
+  public int addReminderWeekly(String name,long time, HashSet<Integer> weekDates){
+    ArrayList<ReminderData> reminders = new ArrayList<ReminderData>();
+
+    try {
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTimeInMillis(time);
+      long result = taskDb.addReminder(name, time,calendar.get(Calendar.DAY_OF_WEEK));
+      reminders.add(new ReminderData(
+              name,
+              calendar.getTimeInMillis(),
+              Math.toIntExact(result)
+      ));
+
+      int curWeekDate = calendar.get(Calendar.DAY_OF_WEEK);
+
+      for (Integer wDate:weekDates) {
+        int weekDateDif = Math.min(
+                Math.abs(curWeekDate - wDate),
+                Math.abs(7-(curWeekDate - wDate))
+        ) ;
+
+
+        calendar.add(Calendar.DAY_OF_WEEK,weekDateDif);
+        Log.d("WEEKDAY_DATE", String.valueOf(calendar.get(Calendar.DATE)));
+
+        long idResult = taskDb.addReminder(name, calendar.getTimeInMillis());
+        reminders.add(new ReminderData(
+                name,
+                calendar.getTimeInMillis(),
+                Math.toIntExact(idResult)
+        ));
+
+        calendar.add(Calendar.DAY_OF_WEEK,-weekDateDif);
+      }
+
+      AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      notificationBuilder.setContentText(name);
+      Notification notification = notificationBuilder.build();
+
+      for (ReminderData reminderData: reminders){
+        Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+        intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
+        intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
+        intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+        intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY,reminderData.id);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, reminderData.id, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+
+        alarmManager.setInexactRepeating(
+                AlarmManager.RTC,
+                reminderData.RemindTime,
+                AlarmManager.INTERVAL_DAY * 7,
+                pendingIntent
+        );
+
+      }
+    }catch (Exception ignore){}
+
+    reminderDataList.add(reminders.get(0));
     return reminderDataList.size();
   }
 

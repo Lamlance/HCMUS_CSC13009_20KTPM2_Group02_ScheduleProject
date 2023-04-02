@@ -25,8 +25,8 @@
           android:text="From date"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
-      <TextView
-          android:minEms="10"
+      <androidx.appcompat.widget.AppCompatTextView
+          android:autoSizeTextType="uniform"
           android:id="@+id/txtFilterFromDate"
           android:layout_marginVertical="10dp"
           android:textSize="20sp"
@@ -34,7 +34,7 @@
           android:text="@string/date_format"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          app:drawableEndCompat="@drawable/baseline_calendar_month_24" />
+          app:drawableLeftCompat="@drawable/baseline_calendar_month_24" />
     </LinearLayout>
     <LinearLayout
         android:paddingVertical="10dp"
@@ -49,8 +49,8 @@
           android:text="To date"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
-      <TextView
-          android:minEms="10"
+      <androidx.appcompat.widget.AppCompatTextView
+          android:autoSizeTextType="uniform"
           android:id="@+id/txtFilterToDate"
           android:layout_marginVertical="10dp"
           android:textSize="20sp"
@@ -58,14 +58,19 @@
           android:text="@string/date_format"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          app:drawableEndCompat="@drawable/baseline_calendar_month_24" />
+          app:drawableLeftCompat="@drawable/baseline_calendar_month_24" />
     </LinearLayout>
   </LinearLayout>
-
+  <CheckBox
+      android:text="Show weekly reminder"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
   <LinearLayout
+      android:layout_marginBottom="10dp"
       android:gravity="end"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
+
     <Button
         android:id="@+id/btnFilterAccept"
         android:layout_marginHorizontal="5dp"

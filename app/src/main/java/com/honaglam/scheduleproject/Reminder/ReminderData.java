@@ -6,6 +6,7 @@ public class ReminderData implements Serializable {
   public String Name;
   public long RemindTime;
   public int id = -1;
+  boolean isWeekly = false;
   public ReminderData(String name, long time,int id){
     this.Name = name;
     this.RemindTime = time;

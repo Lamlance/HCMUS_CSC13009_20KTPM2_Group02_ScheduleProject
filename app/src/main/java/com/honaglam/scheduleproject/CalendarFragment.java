@@ -32,6 +32,7 @@ import com.honaglam.scheduleproject.Reminder.ReminderRecyclerAdapter;
 
 
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -84,7 +85,6 @@ public class CalendarFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
   }
-
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -170,8 +170,16 @@ public class CalendarFragment extends Fragment {
     Calendar calendar = Calendar.getInstance();
     calendar.set(selectedYear, selectedMonth, selectedDate, selectedHour, selectedMinute, 0);
     long remindTime = calendar.getTimeInMillis();
-    Log.d("DATE", String.format("%d", remindTime));
+    //Log.d("DATE", String.format("%d", remindTime));
     int size = mainActivity.addReminder(name, remindTime);
+    reminderRecyclerAdapter.notifyItemInserted(size - 1);
+  }
+
+  private void AddReminderWeekly(String name,HashSet<Integer> weekly){
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(selectedYear, selectedMonth, selectedDate, selectedHour, selectedMinute, 0);
+    long remindTime = calendar.getTimeInMillis();
+    int size = mainActivity.addReminderWeekly(name,remindTime,weekly);
     reminderRecyclerAdapter.notifyItemInserted(size - 1);
   }
 
@@ -190,6 +198,13 @@ public class CalendarFragment extends Fragment {
       selectedHour = hour24h;
       selectedMinute = minute;
       AddReminder(name);
+    }
+
+    @Override
+    public void onSubmitWeekly(String name, int hour24h, int minute, HashSet<Integer> dailyReminder) {
+      selectedHour = hour24h;
+      selectedMinute = minute;
+      AddReminderWeekly(name,dailyReminder);
     }
   }
 

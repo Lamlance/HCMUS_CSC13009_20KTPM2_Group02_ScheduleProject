@@ -58,7 +58,7 @@
         android:id="@+id/switchAddReminderDaily"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set Daily Reminder" />
+        android:text="Set Weekly Reminder" />
 
     <LinearLayout
         android:layout_marginBottom="30dp"
