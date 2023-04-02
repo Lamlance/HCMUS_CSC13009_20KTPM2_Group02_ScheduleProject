@@ -16,4 +16,19 @@
     <!-- Customize your theme here. -->
   </style>
 
+  <!-- Light mode -->
+  <!-- Screen background if dark light is on-->
+  <style name="SCREEN">
+    <item name="android:background">#FFFFFF</item>
+  </style>
+
+  <!-- Text background if light mode is on-->
+  <style name="TEXT">
+    <item name="android:textColor">#000</item>
+  </style>
+
+  <!-- Button background if light mode is on-->
+  <style name="BUTTON">
+    <item name="android:textColor">#FFF</item>
+  </style>
 </resources>

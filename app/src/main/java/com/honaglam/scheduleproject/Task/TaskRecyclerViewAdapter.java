@@ -51,6 +51,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
         @Override
         public void onDataPassed(TaskData taskData) {
           dataGet.getList().set(position, taskData);
+          notifyItemChanged(position);
         }
       };
       String taskName = dataGet.getList().get(position).taskName;

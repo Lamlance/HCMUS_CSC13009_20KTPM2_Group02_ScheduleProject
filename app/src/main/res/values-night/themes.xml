@@ -16,4 +16,31 @@
     <item name="windowNoTitle">true</item>
     <!-- Customize your theme here. -->
   </style>
+
+  <!-- Night mode -->
+  <!-- Screen background if dark mode is on-->
+  <style name="SCREEN">
+    <item name="android:background">#000000</item>
+  </style>
+
+  <!-- Text color if dark mode is on-->
+  <style name="TEXT">
+    <item name="android:textColor">#AAAAAA</item>
+  </style>
+
+  <!-- Button background and text color if dark mode is on-->
+  <style name="BUTTON">
+    <item name="android:backgroundTint">#2E2E2E</item>
+    <item name="android:textColor">#E6E6E6</item>
+  </style>
+
+  <!-- Image button background if dark mode is on-->
+  <style name="IMAGE_BUTTON">
+    <item name="android:tint">#E6E6E6</item>
+  </style>
+
+  <!-- Navigation header background if dark mode is on-->
+  <style name="NAV">
+    <item name="android:background">#000000</item>
+  </style>
 </resources>

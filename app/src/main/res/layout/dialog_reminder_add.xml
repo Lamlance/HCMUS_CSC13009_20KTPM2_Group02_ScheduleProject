@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/SCREEN"
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_margin="30dp"
     android:layout_height="wrap_content">
   <TextView
+      style="@style/TEXT"
     android:textSize="30sp"
     android:textAlignment="center"
     android:text="Add a reminder"
@@ -12,6 +14,7 @@
     android:layout_height="wrap_content"/>
 
   <TextView
+      style="@style/TEXT"
       android:text="Reminder name"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" />
@@ -31,12 +34,14 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
     <Button
+        style="@style/BUTTON"
         android:id="@+id/btnAddReminderDialog"
         android:layout_marginHorizontal="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add" />
     <Button
+        style="@style/BUTTON"
         android:id="@+id/btnCancelReminderDialog"
         android:layout_marginEnd="10dp"
         android:layout_width="wrap_content"

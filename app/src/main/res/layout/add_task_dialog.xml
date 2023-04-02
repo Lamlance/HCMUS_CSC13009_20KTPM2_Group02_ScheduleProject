@@ -1,94 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:orientation="vertical">
+
+  <EditText
+    android:id="@+id/editTxtTaskName"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:hint="What are you working on?"
+    android:background="#FFFFFF"
+    android:padding="10dp"/>
+
+  <TextView
+    style="@style/TEXT"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Est Pomodoros:"
+    android:paddingLeft="10dp"
+    android:paddingBottom="5dp"
+    android:textStyle="bold"
+    android:textSize="20sp"/>
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingLeft="10dp"
+    android:paddingBottom="5dp"
+    android:gravity="center_vertical">
 
     <EditText
-        android:id="@+id/editTxtTaskName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="What are you working on?"
-        android:background="#FFFFFF"
-        android:padding="10dp"/>
+      android:id="@+id/editTxtCountPomodoro"
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+      android:inputType="number"
+      android:background="#DFDFDF"
+      android:text="1"
+      android:textAlignment="viewEnd"
+      android:padding="10dp"
+      android:layout_marginRight="10dp"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Est Pomodoros:"
-        android:paddingLeft="10dp"
-        android:paddingBottom="5dp"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
+    <Button
+      android:id="@+id/btnUp"
+      style="@style/BUTTON"
+      android:text="Up"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:backgroundTint="#FFFFFF"
+      android:textColor="#000000"
+      android:layout_margin="5dp"
+      />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingBottom="5dp"
-        android:gravity="center_vertical">
-
-        <EditText
-            android:id="@+id/editTxtCountPomodoro"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:background="#DFDFDF"
-            android:text="1"
-            android:textAlignment="viewEnd"
-            android:padding="10dp"
-            android:layout_marginRight="10dp"/>
-
-        <Button
-            android:id="@+id/btnUp"
-            android:text="Up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FFFFFF"
-            android:textColor="#000000"
-            android:layout_margin="5dp"
-            />
-
-        <Button
-            android:id="@+id/btnDown"
-            android:text="Down"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FFFFFF"
-            android:textColor="#000000"
-            android:layout_margin="5dp"
-            />
-    </LinearLayout>
+    <Button
+      android:id="@+id/btnDown"
+      style="@style/BUTTON"
+      android:text="Down"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:backgroundTint="#FFFFFF"
+      android:textColor="#000000"
+      android:layout_margin="5dp"
+      />
+  </LinearLayout>
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical | end"
-        android:background="#DFDFDF">
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical|end"
+    android:background="#DFDFDF">
 
-        <Button
-            android:id="@+id/btnCancelAddTask"
-            android:text="Cancel"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#DFDFDF"
-            android:textColor="#000000"
-            android:layout_margin="5dp"
-            android:layout_gravity=""
-            />
+    <Button
+      android:id="@+id/btnCancelAddTask"
+      style="@style/BUTTON"
+      android:text="Cancel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:backgroundTint="#DFDFDF"
+      android:textColor="#000000"
+      android:layout_margin="5dp"
+      android:layout_gravity=""
+      />
 
-        <Button
-            android:id="@+id/btnSaveTask"
-            android:text="Save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/black"
-            android:textColor="#FFFFFF"
-            android:layout_margin="5dp"
-            android:layout_gravity=""
-            />
-    </LinearLayout>
+    <Button
+      android:id="@+id/btnSaveTask"
+      style="@style/BUTTON"
+      android:text="Save"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:backgroundTint="@color/black"
+      android:textColor="#FFFFFF"
+      android:layout_margin="5dp"
+      android:layout_gravity=""
+      />
+  </LinearLayout>
 </LinearLayout>
