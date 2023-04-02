@@ -16,7 +16,10 @@ import com.honaglam.scheduleproject.MainActivity;
 public class ReminderBroadcastReceiver extends BroadcastReceiver {
   public static final String NAME_TAG = "ReminderName";
   public static final String NOTIFICATION_KEY = "ReminderNotification";
-  public static String NOTIFICATION_ID_KEY = "ReminderNotificationId";
+  public static final String NOTIFICATION_ID_KEY = "ReminderNotificationId";
+
+  public static final String REMINDER_ID_KEY = "ReminderId";
+
   @Override
   public void onReceive(Context context, Intent intent) {
     MediaPlayer mediaPlayer = MediaPlayer.create(context, Settings.System.DEFAULT_RINGTONE_URI);
@@ -26,9 +29,11 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
     Notification notification = intent.getParcelableExtra( NOTIFICATION_KEY) ;
     String name = intent.getStringExtra(NAME_TAG);
     int notificationId = intent.getIntExtra(NOTIFICATION_ID_KEY,0);
+    int reminderId = intent.getIntExtra(REMINDER_ID_KEY,-1);
 
     NotificationChannel notificationChannel = new NotificationChannel(
-            MainActivity.NOTIFICATION_CHANEL_ID, "REMINDER_NOTIFICATION_CHANEL" , NotificationManager. IMPORTANCE_HIGH ) ;
+            MainActivity.NOTIFICATION_CHANEL_ID, "REMINDER_NOTIFICATION_CHANEL" ,
+            NotificationManager. IMPORTANCE_HIGH ) ;
     notificationManager.createNotificationChannel(notificationChannel) ;
 
     CountDownTimer timer = new CountDownTimer(5*1000,1*1000) {

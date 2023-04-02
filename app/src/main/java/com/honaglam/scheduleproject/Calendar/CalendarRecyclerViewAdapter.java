@@ -11,9 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
+import com.honaglam.scheduleproject.Reminder.ReminderData;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import kotlin.NotImplementedError;
 
@@ -36,8 +42,11 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   }
 
   public interface SelectDateCallBackInterface {
+    void clickDate(int date, int month, int year, int weekDay,List<ReminderData> reminders) throws NotImplementedError;
+  }
 
-    void clickDate(int date, int month, int year, int weekDay) throws NotImplementedError;
+  public interface GetReminderInMonth {
+    List<ReminderData> getReminderInMonth(int year, int month) throws NotImplementedError;
   }
 
   /*
@@ -49,6 +58,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   private int clickedPos = -1;
   private int weekDateOfFirstDayOfMoth;
   private SelectDateCallBackInterface selectDateCallBack = null;
+  private GetReminderInMonth getReminderInMonth = null;
   public Calendar calendar = Calendar.getInstance();
 
   Context context;
@@ -64,13 +74,42 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
           "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"
   };
 
-  public CalendarRecyclerViewAdapter(Context context) {
+  @NonNull Map<Integer, List<ReminderData>> reminderByDates = new HashMap<>();
+
+  public CalendarRecyclerViewAdapter(Context context, GetReminderInMonth getReminderInMonth) {
     this.context = context;
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth();
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
+
+    this.getReminderInMonth = getReminderInMonth;
+    getSetAllReminderInMonth();
   }
 
+  private void getSetAllReminderInMonth() {
+    try {
+      List<ReminderData> reminders = getReminderInMonth.getReminderInMonth(
+              calendar.get(Calendar.YEAR),
+              calendar.get(Calendar.MONTH));
+      reminderByDates = reminders.stream().collect(
+              Collectors.groupingBy(ReminderData::getMyDate)
+      );
+    } catch (Exception ignore) {
+    }
+  }
+  private void callSelectDateCallBack(){
+    if (this.selectDateCallBack != null) {
+      try {
+        this.selectDateCallBack.clickDate(
+                calendar.get(Calendar.DATE),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.DAY_OF_WEEK),
+                reminderByDates.get(calendar.get(Calendar.DATE)));
+      } catch (Exception ignore) {
+      }
+    }
+  }
   public void setSelectDateCallBack(SelectDateCallBackInterface callBack) {
     this.selectDateCallBack = callBack;
     if (this.selectDateCallBack != null) {
@@ -79,7 +118,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
                 calendar.get(Calendar.DATE),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.DAY_OF_WEEK));
+                calendar.get(Calendar.DAY_OF_WEEK),
+                reminderByDates.get(calendar.get(Calendar.DATE)));
       } catch (Exception ignore) {
       }
     }
@@ -119,7 +159,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
                   date,
                   calendar.get(Calendar.MONTH),
                   calendar.get(Calendar.YEAR),
-                  calendar.get(Calendar.DAY_OF_WEEK));
+                  calendar.get(Calendar.DAY_OF_WEEK),
+                  reminderByDates.get(date));
         } catch (Exception e) {
         }
       }
@@ -128,7 +169,6 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
-
     holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
     holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.WHITE);
 
@@ -136,9 +176,14 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
       return;
     }
+
     int date = posToDate(position);
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
+    if(reminderByDates.get(date) != null){
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
+    }
+
   }
 
   private int dateToPos(int date) {
@@ -164,6 +209,9 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     int newSize = getItemCount();
     clickedPos = dateToPos(1);
     this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+
+    getSetAllReminderInMonth();
+    callSelectDateCallBack();
   }
 
   public void decreaseMonth() {
@@ -174,6 +222,9 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     int newSize = getItemCount();
     clickedPos = dateToPos(1);
     this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+
+    getSetAllReminderInMonth();
+    callSelectDateCallBack();
   }
 
   public String getSelectDateString() {
