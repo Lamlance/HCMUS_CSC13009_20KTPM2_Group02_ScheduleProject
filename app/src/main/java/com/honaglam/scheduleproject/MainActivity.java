@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
+  //TODO Timer On Finished
   public boolean setTimerOnFinishCallback(TimerService.TimerOnFinishCallback onFinishCallback) {
     if (timerFragment != null) {
       timerService.setOnFinishCallback(onFinishCallback);

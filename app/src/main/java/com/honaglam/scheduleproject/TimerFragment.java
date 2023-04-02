@@ -205,7 +205,6 @@ public class TimerFragment extends Fragment {
     @Override
     public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
       if (isAutoSwitchTask) return;
-
       try {
         TaskRecyclerViewAdapter adapter = (TaskRecyclerViewAdapter) recyclerTask.getAdapter();
         if (adapter != null) {

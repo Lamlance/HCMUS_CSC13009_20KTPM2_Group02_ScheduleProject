@@ -356,11 +356,13 @@ public class TimerService extends Service {
     } else if (timerCount % 2 == 1 && timerCount != LONG_BREAK_INTERVAL) {
       runningState = calculateCurrentState();
       millisRemain = shortBreakMillis;
+      callOnFinishCallback(false);
       callStateChangeCallBack(SHORT_BREAK_STATE);
     } else {
       runningState = calculateCurrentState();
       timerCount = -1;
       millisRemain = longBreakMillis;
+      callOnFinishCallback(false);
       callStateChangeCallBack(LONG_BREAK_STATE);
     }
   }
