@@ -18,7 +18,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class ReminderTaskDB extends SQLiteOpenHelper {
-  private static final int DB_VERSION = 3;
+  private static final int DB_VERSION = 5;
   private static final String DB_NAME = "ScheduleProject.db";
   private static final String SQL_DROP_REMINDER_TABLE = "DROP TABLE IF EXISTS " + ReminderTable.TABLE_NAME;
   private static final String SQL_DROP_TASK_TABLE = "DROP TABLE IF EXISTS " + TaskTable.TABLE_NAME;
@@ -38,6 +38,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_LOOPS = "loops";
+    public static final String COLUMN_NAME_HISTORY = "history";
+    public static final String COLUMN_NAME_IS_DONE = "done";
   }
 
 
@@ -61,11 +63,12 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             "CREATE TABLE " + TaskTable.TABLE_NAME + " ( "
                     + TaskTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
                     + TaskTable.COLUMN_NAME_TITLE + " TEXT ,"
+                    + TaskTable.COLUMN_NAME_HISTORY + " INTEGER ,"
+                    + TaskTable.COLUMN_NAME_IS_DONE + " INTEGER ,"
                     + TaskTable.COLUMN_NAME_LOOPS + " INTEGER );";
     db.execSQL(createReminderTable);
     db.execSQL(createTaskTable);
   }
-
 
   //Reminder
   public long addReminder(String name, long time) {
@@ -279,11 +282,12 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   //===
 
   //Task
-  public long addTask(String name, int loops) {
+  public long addTask(String name, int loops,boolean isDone) {
     try (SQLiteDatabase db = getWritableDatabase()) {
       ContentValues cv = new ContentValues();
       cv.put(TaskTable.COLUMN_NAME_TITLE, name);
       cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
+      cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
       return db.insert(TaskTable.TABLE_NAME, null, cv);
     } catch (Exception ignore) {
     }
@@ -310,15 +314,35 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
       int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
       int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+      int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
       do {
         String name = cursor.getString(titleIndex);
         int loops = cursor.getInt(loopIndex);
         int id = cursor.getInt(idIndex);
-        list.add(new TaskData(name, loops, id));
+        boolean isComplete = cursor.getInt(completeIndex) > 0;
+        list.add(new TaskData(name, loops, id,isComplete));
       } while (cursor.moveToNext());
     } catch (Exception ignore) {
     }
     return list;
+  }
+
+  public boolean editTask(TaskData newData){
+    try(SQLiteDatabase db = getWritableDatabase()){
+      ContentValues cv = new ContentValues();
+      cv.put(TaskTable.COLUMN_NAME_LOOPS,newData.numberPomodoros);
+      cv.put(TaskTable.COLUMN_NAME_TITLE,newData.taskName);
+      cv.put(TaskTable.COLUMN_NAME_IS_DONE,newData.isCompleted  ? 1 : 0);
+      long updated = db.update(
+              TaskTable.TABLE_NAME,
+              cv,
+              TaskTable.COLUMN_NAME_ID + " =?",
+              new String[]{String.valueOf(newData.id)}
+      );
+
+      return updated > 0;
+    }catch (Exception ignore){}
+    return false;
   }
 
   public boolean deleteTask(int id){
@@ -334,6 +358,24 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }catch (Exception ignore){}
     return false;
   }
+
+  public boolean makeTaskHistory(int id){
+    try(SQLiteDatabase db = this.getWritableDatabase()){
+      ContentValues cv = new ContentValues();
+      cv.put(TaskTable.COLUMN_NAME_HISTORY,1);
+      long update = db.update(
+              TaskTable.TABLE_NAME,
+              cv,
+              TaskTable.COLUMN_NAME_ID + "=?",
+              new String[]{String.valueOf(id)}
+      );
+      return update > 0;
+    }catch (Exception ignore){
+    }
+    return false;
+  }
+
+
   //===
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

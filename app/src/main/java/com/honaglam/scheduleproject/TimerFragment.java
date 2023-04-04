@@ -90,7 +90,7 @@ public class TimerFragment extends Fragment {
       public List<TaskData> getList() {
         return activity.tasks;
       }
-    });
+    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
     return timerLayout;
@@ -182,7 +182,7 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
-      int newPos = activity.addTask(taskData.taskName, taskData.numberPomodoros);
+      int newPos = activity.addTask(taskData.taskName, taskData.numberPomodoros,taskData.isCompleted);
       taskRecyclerViewAdapter.notifyItemInserted(newPos);
     }
   }
@@ -218,5 +218,48 @@ public class TimerFragment extends Fragment {
     }
   }
 
+  class DeleteTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      try {
+        activity.deleteTask(activity.tasks.get(position).id);
+        activity.tasks.remove(position);
+        taskRecyclerViewAdapter.notifyItemRemoved(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
+
+  class EditTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      AddTaskDialog.AddTaskDialogListener listener = new AddTaskDialog.AddTaskDialogListener() {
+        @Override
+        public void onDataPassed(TaskData taskData) {
+          try {
+            activity.editTask(taskData);
+            activity.tasks.set(position, taskData);
+            taskRecyclerViewAdapter.notifyItemChanged(position);
+          } catch (Exception ignore) {
+          }
+        }
+      };
+      AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener, activity.tasks.get(position));
+      addTaskDialog.show();
+    }
+  }
+
+  class CheckTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      boolean isCompleted = activity.tasks.get(position).isCompleted;
+      activity.tasks.get(position).isCompleted = !isCompleted;
+      try {
+        activity.editTask(activity.tasks.get(position));
+        taskRecyclerViewAdapter.notifyItemChanged(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
 }
 

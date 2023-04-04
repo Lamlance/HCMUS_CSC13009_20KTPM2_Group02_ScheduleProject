@@ -201,7 +201,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-
   public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack)  {
     if (timerService != null) {
       timerService.setStateChangeCallBack(stateChangeCallBack);
@@ -233,14 +232,24 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
 
-  public int addTask(String name, int loops) {
+  public int addTask(String name, int loops,boolean isDone) {
     try {
-      int id = Math.toIntExact(taskDb.addTask(name, loops));
+      int id = Math.toIntExact(taskDb.addTask(name, loops,isDone));
       tasks.add(new TaskData(name, loops, id));
       return tasks.size() - 1;
     } catch (Exception ignore) {
     }
     return -1;
+  }
+  public int editTask(TaskData data){
+    return taskDb.editTask(data) ? tasks.size() - 1 : -1;
+  }
+  public boolean makeTaskHistory(int id){
+    return taskDb.makeTaskHistory(id);
+  }
+
+  public boolean deleteTask(int id){
+    return taskDb.deleteTask(id);
   }
   //===
 
@@ -288,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
 
     return reminderDataList.size();
   }
-
 
   public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
     ArrayList<ReminderData> reminders = new ArrayList<ReminderData>();
@@ -370,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  /*
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
@@ -381,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
 
     return Math.max(oldSize, newSize);
   }
+  */
 
   public int searchReminder(String name, long startDate, long endDate) {
     List<ReminderData> newList = taskDb.findReminders(name, startDate, endDate);
