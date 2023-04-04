@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
   public static final String FRAGMENT_TAG_TIMER = "pomodoro_timer";
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
+  public static final String FRAGMENT_TAG_STATISTIC = "statstic";
 
   private static final String UUID_KEY = "SchedulerKey";
   private String userDBUuid = null;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
   private TimerSetting timerSettingFragment;
+  private StatisticFragment statisticFragment;
 
 
   // Task
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     calendarFragment = CalendarFragment.newInstance();
     timerFragment = TimerFragment.newInstance();
     timerSettingFragment = TimerSetting.newInstance();
+    statisticFragment = StatisticFragment.newInstance();
 
 
     fragmentManager
@@ -163,6 +166,18 @@ public class MainActivity extends AppCompatActivity {
             .beginTransaction()
             .replace(R.id.fragmentContainerView, timerSettingFragment, "SettingFragment")
             .addToBackStack("SettingFragment")
+            .commit();
+    return true;
+  }
+
+  public boolean switchFragment_Statistic() {
+    if (statisticFragment.isVisible()) {
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, statisticFragment, FRAGMENT_TAG_STATISTIC)
+            .addToBackStack(FRAGMENT_TAG_STATISTIC)
             .commit();
     return true;
   }
@@ -417,9 +432,11 @@ public class MainActivity extends AppCompatActivity {
           Toast.makeText(MainActivity.this, "Select Timer", Toast.LENGTH_SHORT).show();
           return switchFragment_Pomodoro();
         case R.id.nav_schedule:
-          Toast.makeText(MainActivity.this, "Select schedule", Toast.LENGTH_SHORT).show();
+          Toast.makeText(MainActivity.this, "Select Schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
-
+        case R.id.nav_statistic:
+          Toast.makeText(MainActivity.this, "Select Report", Toast.LENGTH_SHORT).show();
+          return switchFragment_Statistic();
       }
       return false;
     }
