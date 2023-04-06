@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject;
 
 import android.app.ActionBar;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -173,6 +174,8 @@ public class CalendarFragment extends Fragment {
     long remindTime = calendar.getTimeInMillis();
     //Log.d("DATE", String.format("%d", remindTime));
     int size = mainActivity.addReminder(name, remindTime);
+    calendarRecyclerViewAdapter.addInMonthReminder(
+            mainActivity.reminderDataList.get(size-1),selectedDate);
     reminderRecyclerAdapter.notifyItemInserted(size - 1);
   }
 
@@ -297,13 +300,17 @@ public class CalendarFragment extends Fragment {
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
       return false;
     }
-
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
       int pos = reminderRecyclerAdapter.selectedItemPos;
       mainActivity.removeReminder(pos);
       reminderRecyclerAdapter.notifyItemRemoved(pos);
       Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+      super.onChildDraw(c, recyclerView, viewHolder, dX / 4, dY, actionState, isCurrentlyActive);
     }
   };
 }

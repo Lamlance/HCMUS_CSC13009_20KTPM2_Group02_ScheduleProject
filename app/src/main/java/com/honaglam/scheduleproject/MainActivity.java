@@ -297,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception ignore) {
     }
 
-
     return reminderDataList.size();
   }
 
