@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 //import android.os.Handler;
 //import android.os.Looper;
 //import android.util.Log;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Task.TaskViewHolder;
 
 import java.util.List;
+import java.util.Locale;
 
 import kotlin.NotImplementedError;
 
@@ -196,8 +198,21 @@ public class TimerFragment extends Fragment {
 
   class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack {
     @Override
-    public void onStateChange(int newState) {
+    public void onStateChange(int newState,long prevTimeState,int oldState) {
       UpdateTimerBackground(newState);
+      activity.addStatsTime(
+              oldState == TimerService.WORK_STATE ? prevTimeState : 0,
+              oldState == TimerService.SHORT_BREAK_STATE ? prevTimeState : 0,
+              oldState == TimerService.LONG_BREAK_STATE ? prevTimeState : 0
+      );
+
+      String stats = String.format(
+              Locale.getDefault(),
+              "%d / %d / %d: Work: %d , Short: %d, Long: %d , PrevState: %d, Added time: %d",
+              activity.taskDb.date,activity.taskDb.month,activity.taskDb.year,
+              activity.taskDb.curWork,activity.taskDb.curShort,activity.taskDb.curLong,oldState,prevTimeState);
+
+      Log.i("Toady Stats",stats);
     }
   }
 

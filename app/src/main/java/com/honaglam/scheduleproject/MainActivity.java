@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
-
   // User setting
   //  private UserSettings userSettings;
 
@@ -92,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     taskDb = new ReminderTaskDB(this);
-
+    taskDb.getTodayStats();
 
     tasks.addAll(taskDb.getAllTask());
 
@@ -223,6 +222,10 @@ public class MainActivity extends AppCompatActivity {
       return true;
     }
     return false;
+  }
+
+  public boolean addStatsTime(long workTime,long shortTime,long longTime){
+    return taskDb.addTimeTodayStats(workTime,shortTime,longTime);
   }
 
   public long getCurrentRemainMillis() {
