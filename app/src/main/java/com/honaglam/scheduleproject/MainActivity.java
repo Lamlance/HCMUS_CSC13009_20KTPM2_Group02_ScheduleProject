@@ -43,6 +43,7 @@ import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
-
   // User setting
   //  private UserSettings userSettings;
 
@@ -92,9 +92,20 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-
     taskDb = new ReminderTaskDB(this);
+    taskDb.getTodayStats();
 
+    if(taskDb.IS_DEV){
+      //taskDb.createSampleData();
+    }
+
+    List<ReminderTaskDB.TimerStatsData> list = taskDb.get30StatsBeforeToday();
+    for (ReminderTaskDB.TimerStatsData data:list) {
+      String str = String.format(Locale.getDefault(),
+              "%d / %d / %d, Work: %d ,Short: %d, Long: %d",
+              data.date,data.month,data.year,data.workDur,data.shortDur,data.longDur);
+      Log.i("TASK_DATA",str);
+    }
 
     tasks.addAll(taskDb.getAllTask());
 
@@ -216,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-
   public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack)  {
     if (timerService != null) {
       timerService.setStateChangeCallBack(stateChangeCallBack);
@@ -241,6 +251,10 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
+  public boolean addStatsTime(long workTime,long shortTime,long longTime){
+    return taskDb.addTimeTodayStats(workTime,shortTime,longTime);
+  }
+
   public long getCurrentRemainMillis() {
     if (timerService != null) {
       return timerService.millisRemain;
@@ -248,14 +262,24 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
 
-  public int addTask(String name, int loops) {
+  public int addTask(String name, int loops, int loopsCompleted ,boolean isDone) {
     try {
-      int id = Math.toIntExact(taskDb.addTask(name, loops));
+      int id = Math.toIntExact(taskDb.addTask(name, loops,loopsCompleted,isDone));
       tasks.add(new TaskData(name, loops, id));
       return tasks.size() - 1;
     } catch (Exception ignore) {
     }
     return -1;
+  }
+  public int editTask(TaskData data){
+    return taskDb.editTask(data) ? tasks.size() - 1 : -1;
+  }
+  public boolean makeTaskHistory(int id){
+    return taskDb.makeTaskHistory(id);
+  }
+
+  public boolean deleteTask(int id){
+    return taskDb.deleteTask(id);
   }
   //===
 
@@ -300,10 +324,8 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception ignore) {
     }
 
-
     return reminderDataList.size();
   }
-
 
   public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
     ArrayList<ReminderData> reminders = new ArrayList<ReminderData>();
@@ -385,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  /*
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
@@ -396,6 +419,7 @@ public class MainActivity extends AppCompatActivity {
 
     return Math.max(oldSize, newSize);
   }
+  */
 
   public int searchReminder(String name, long startDate, long endDate) {
     List<ReminderData> newList = taskDb.findReminders(name, startDate, endDate);

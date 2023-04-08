@@ -13,7 +13,7 @@ import kotlin.NotImplementedError;
 public class ReminderViewHolder extends RecyclerView.ViewHolder{
   TextView txtId;
   TextView txtName;
-
+  int selectedId = -1;
   SelectItemCallBack callBack;
   public ReminderViewHolder(@NonNull View itemView) {
     super(itemView);

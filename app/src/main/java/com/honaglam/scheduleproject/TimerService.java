@@ -31,7 +31,7 @@ public class TimerService extends Service {
   private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
   private static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
 
-  public static final int NONE_STATE = 0;
+  //public static final int NONE_STATE = 0;
   public static final int WORK_STATE = 1;
   public static final int SHORT_BREAK_STATE = 2;
   public static final int LONG_BREAK_STATE = 3;
@@ -42,6 +42,7 @@ public class TimerService extends Service {
   long shortBreakMillis = 0;
   long longBreakMillis = 0;
 
+  boolean isRunning = false;
   boolean autoStartBreakSetting = false;
   boolean autoStartPomodoroSetting = false;
   long longBreakInterValSetting = 4;
@@ -55,7 +56,7 @@ public class TimerService extends Service {
   NotificationChannel notificationChannel;
   Handler timerHandler;
   Runnable timerRunnable;
-  int runningState = NONE_STATE;
+  int runningState = WORK_STATE;
   int timerCount = 0;
   int cycleCount = 0;
   NotificationCompat.Builder notificationBuilder;
@@ -111,6 +112,7 @@ public class TimerService extends Service {
     class PomodoroTimerCountDown extends CountDownTimer {
       public PomodoroTimerCountDown(long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
+        isRunning = true;
       }
 
       @Override
@@ -133,7 +135,6 @@ public class TimerService extends Service {
       @Override
       public void onFinish() {
         millisRemain = 0;
-        runningState = NONE_STATE;
 
         if (tickingMediaPlayer != null) {
           // Stop the tickling sound and release media player
@@ -156,9 +157,8 @@ public class TimerService extends Service {
         // TODO: Set isAutoSwitchTask after adding state of timer setting done
 
         switchState();
-        runningState = NONE_STATE;
         callTickCallBack(millisRemain);
-
+        isRunning = false;
       }
     }
 
@@ -228,7 +228,7 @@ public class TimerService extends Service {
 
   public void setStateChangeCallBack(TimerStateChangeCallBack stateChangeCallBack) {
     this.stateChangeCallBack = stateChangeCallBack;
-    callStateChangeCallBack(calculateCurrentState());
+    callStateChangeCallBack(calculateCurrentState(),0,0);
   }
 
   public void setOnFinishCallback(TimerOnFinishCallback onFinishCallback) {
@@ -249,12 +249,12 @@ public class TimerService extends Service {
   }
 
 
-  public boolean callStateChangeCallBack(int newState) {
+  public boolean callStateChangeCallBack(int newState,long timePrevSate,int oldState) {
     if (stateChangeCallBack == null) {
       return false;
     }
     try {
-      stateChangeCallBack.onStateChange(newState);
+      stateChangeCallBack.onStateChange(newState,timePrevSate,oldState);
     } catch (Exception ignore) {
       return false;
     }
@@ -270,18 +270,17 @@ public class TimerService extends Service {
 
 
   public void startTimer() {
-    if (runningState == NONE_STATE) {
+    if (!isRunning) {
       timerRunnable = new Timer();
       timerHandler = new Handler();
       timerHandler.post(timerRunnable);
     }
   }
 
-
   public void pauseTimer() {
-    if (runningState != NONE_STATE && timer != null) {
+    if (isRunning) {
       timer.cancel();
-      runningState = NONE_STATE;
+      isRunning = false;
     }
     if (tickCallBack == null) {
       return;
@@ -291,25 +290,14 @@ public class TimerService extends Service {
 
   public void resetTimer() {
     millisRemain = workMillis;
-    if (runningState != NONE_STATE && timer != null) {
+    if (isRunning) {
       timer.cancel();
       timerHandler.removeCallbacks(timerRunnable);
       callTickCallBack(millisRemain);
-      runningState = NONE_STATE;
+      isRunning = false;
     }
   }
 
-  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
-    if (runningState != NONE_STATE && timer != null) {
-      timer.cancel();
-      runningState = NONE_STATE;
-    }
-    workMillis = workTime;
-    shortBreakMillis = shortBreakTime;
-    longBreakMillis = longBreakTime;
-    millisRemain = workTime;
-    alarmUri = alarmSound;
-  }
 
   @Override
   public void onDestroy() {
@@ -321,9 +309,9 @@ public class TimerService extends Service {
           long workTime, long shortBreakTime, long longBreakTime,
           Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro,
           long longBreakInterVal) {
-    if (runningState != NONE_STATE && timer != null) {
+    if (isRunning) {
       timer.cancel();
-      runningState = NONE_STATE;
+      isRunning = false;
     }
     workMillis = workTime;
     shortBreakMillis = shortBreakTime;
@@ -333,6 +321,7 @@ public class TimerService extends Service {
     autoStartBreakSetting = autoStartBreak;
     autoStartPomodoroSetting = autoStartPomodoro;
     longBreakInterValSetting = longBreakInterVal;
+
   }
 
   public int calculateCurrentState() {
@@ -349,21 +338,40 @@ public class TimerService extends Service {
     timerCount += 1;
     cycleCount += (timerCount % 2 == 0) ? 1 : 0;
     long LONG_BREAK_INTERVAL = (longBreakInterValSetting * 2) - 1;
+
+    int oldState = runningState;
+    long stateTime = 0;
+    switch (oldState){
+      case WORK_STATE:{
+        stateTime = workMillis;
+        break;
+      }
+      case SHORT_BREAK_STATE:{
+        stateTime = shortBreakMillis;
+        break;
+      }
+      case LONG_BREAK_STATE:{
+        stateTime = longBreakMillis;
+        break;
+      }
+    }
+    long timePassed = stateTime - millisRemain;
+
     if (timerCount % 2 == 0) {
       runningState = calculateCurrentState();
       millisRemain = workMillis;
-      callStateChangeCallBack(WORK_STATE);
+      callStateChangeCallBack(WORK_STATE,timePassed,oldState);
     } else if (timerCount % 2 == 1 && timerCount != LONG_BREAK_INTERVAL) {
       runningState = calculateCurrentState();
       millisRemain = shortBreakMillis;
       callOnFinishCallback(false);
-      callStateChangeCallBack(SHORT_BREAK_STATE);
+      callStateChangeCallBack(SHORT_BREAK_STATE,timePassed,oldState);
     } else {
       runningState = calculateCurrentState();
       timerCount = -1;
       millisRemain = longBreakMillis;
       callOnFinishCallback(false);
-      callStateChangeCallBack(LONG_BREAK_STATE);
+      callStateChangeCallBack(LONG_BREAK_STATE,timePassed,oldState);
     }
   }
 
@@ -380,12 +388,12 @@ public class TimerService extends Service {
 
   public void skipTimer() {
 
-    if (runningState != NONE_STATE && timer != null) {
+    if (isRunning) {
       timer.cancel();
+      isRunning = false;
     }
 
     switchState();
-    runningState = NONE_STATE;
     callTickCallBack(millisRemain);
   }
 
@@ -400,7 +408,7 @@ public class TimerService extends Service {
   }
 
   public interface TimerStateChangeCallBack {
-    void onStateChange(int newState) throws NotImplementedError;
+    void onStateChange(int newState,long timePrevState,int oldState) throws NotImplementedError;
   }
 
   public interface TimerOnFinishCallback {

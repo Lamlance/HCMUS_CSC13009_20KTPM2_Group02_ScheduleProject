@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 //import android.os.Handler;
 //import android.os.Looper;
 //import android.util.Log;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Task.TaskViewHolder;
 
 import java.util.List;
+import java.util.Locale;
 
 import kotlin.NotImplementedError;
 
@@ -90,7 +92,7 @@ public class TimerFragment extends Fragment {
       public List<TaskData> getList() {
         return activity.tasks;
       }
-    });
+    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
     return timerLayout;
@@ -119,7 +121,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    btnAddTask = getView().findViewById(R.id.btnAddTask);
+    btnAddTask = view.findViewById(R.id.btnAddTask);
     btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -182,7 +184,11 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
-      int newPos = activity.addTask(taskData.taskName, taskData.numberPomodoros);
+      int newPos = activity.addTask(
+              taskData.taskName,
+              taskData.numberPomodoros,
+              taskData.numberCompletedPomodoros,
+              taskData.isCompleted);
       taskRecyclerViewAdapter.notifyItemInserted(newPos);
     }
   }
@@ -196,8 +202,21 @@ public class TimerFragment extends Fragment {
 
   class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack {
     @Override
-    public void onStateChange(int newState) {
+    public void onStateChange(int newState,long prevTimeState,int oldState) {
       UpdateTimerBackground(newState);
+      activity.addStatsTime(
+              oldState == TimerService.WORK_STATE ? prevTimeState : 0,
+              oldState == TimerService.SHORT_BREAK_STATE ? prevTimeState : 0,
+              oldState == TimerService.LONG_BREAK_STATE ? prevTimeState : 0
+      );
+
+      String stats = String.format(
+              Locale.getDefault(),
+              "%d / %d / %d: Work: %d , Short: %d, Long: %d , PrevState: %d, Added time: %d",
+              activity.taskDb.date,activity.taskDb.month,activity.taskDb.year,
+              activity.taskDb.curWork,activity.taskDb.curShort,activity.taskDb.curLong,oldState,prevTimeState);
+
+      Log.i("Toady_Stats",stats);
     }
   }
 
@@ -209,8 +228,11 @@ public class TimerFragment extends Fragment {
         TaskRecyclerViewAdapter adapter = (TaskRecyclerViewAdapter) recyclerTask.getAdapter();
         if (adapter != null) {
           int selectedTaskIndex = adapter.getSelectedPosition();
-          activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
-          recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
+          if(selectedTaskIndex >= 0){
+            activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
+            activity.editTask(activity.tasks.get(selectedTaskIndex));
+            recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
+          }
         }
       } catch (Exception e) {
         e.printStackTrace();
@@ -218,5 +240,48 @@ public class TimerFragment extends Fragment {
     }
   }
 
+  class DeleteTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      try {
+        activity.deleteTask(activity.tasks.get(position).id);
+        activity.tasks.remove(position);
+        taskRecyclerViewAdapter.notifyItemRemoved(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
+
+  class EditTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      AddTaskDialog.AddTaskDialogListener listener = new AddTaskDialog.AddTaskDialogListener() {
+        @Override
+        public void onDataPassed(TaskData taskData) {
+          try {
+            activity.editTask(taskData);
+            activity.tasks.set(position, taskData);
+            taskRecyclerViewAdapter.notifyItemChanged(position);
+          } catch (Exception ignore) {
+          }
+        }
+      };
+      AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener, activity.tasks.get(position));
+      addTaskDialog.show();
+    }
+  }
+
+  class CheckTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      boolean isCompleted = activity.tasks.get(position).isCompleted;
+      activity.tasks.get(position).isCompleted = !isCompleted;
+      try {
+        activity.editTask(activity.tasks.get(position));
+        taskRecyclerViewAdapter.notifyItemChanged(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
 }
 

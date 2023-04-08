@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:orientation="vertical"
-  style="@style/SCREEN"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content">
-  <LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/SCREEN"
+    android:id="@+id/layoutCalendarItemAll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:padding="2dp">
-    <TextView
-      style="@style/TEXT"
-      android:textAlignment="center"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+  <LinearLayout
+      android:gravity="center_vertical"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:textSize="14sp"
-      android:id="@+id/txtCalendarDateItem"
-      tools:text="1"/>
+      android:padding="2dp">
+
+    <TextView
+        android:id="@+id/txtCalendarDateItem"
+        style="@style/TEXT"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        tools:text="1" />
   </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>
