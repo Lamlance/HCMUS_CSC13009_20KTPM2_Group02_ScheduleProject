@@ -297,8 +297,10 @@ public class TimerService extends Service {
 
 
   public void pauseTimer() {
-    if (runningState != NONE_STATE && timer != null) {
+    if (timer != null) {
       timer.cancel();
+      timerHandler.removeCallbacks(timerRunnable);
+      timer = null; // set timer to null to indicate that it has been paused
       runningState = NONE_STATE;
     }
     if (tickCallBack == null) {
@@ -306,7 +308,6 @@ public class TimerService extends Service {
     }
     callTickCallBack(millisRemain);
   }
-
   public void resetTimer() {
     millisRemain = workMillis;
     if (runningState != NONE_STATE && timer != null) {
