@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +24,13 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -48,6 +52,11 @@ public class StatisticFragment extends Fragment {
     private PieChart pieChart;
     private TextView txtTotalTime;
 
+    private MainActivity activity;
+
+
+    private List<ReminderTaskDB.TimerStatsData> data;
+
 
     public static StatisticFragment newInstance() {
         StatisticFragment fragment = new StatisticFragment();
@@ -65,8 +74,17 @@ public class StatisticFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        this.activity = (MainActivity) getActivity();
+        float workHours = 0;
+        if (this.activity != null) {
+            this.data = this.activity.taskDb.get30StatsBeforeToday();
+            Collections.reverse(this.data);
+            workHours = this.data.stream().mapToLong(e -> e.workDur).sum();
+            workHours = workHours / (1000 * 60 * 60);
+        }
+
         LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_statistic, container, false);
 
         BarChart barChart = linearLayout.findViewById(R.id.barChart);
@@ -83,16 +101,13 @@ public class StatisticFragment extends Fragment {
         configurePieChartAppearance();
         preparePieChartData(pieData);
 
-
-        txtTotalTime.setText("You have completed total time " + WORK_TIME + " hours");
-
+        txtTotalTime.setText("You have focused " + String.format("%.2f", workHours) + " hours in 30 days recently.");
         return linearLayout;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
     }
 
 
@@ -102,9 +117,9 @@ public class StatisticFragment extends Fragment {
         ArrayList<BarEntry> values1 = new ArrayList<>();
         ArrayList<BarEntry> values2 = new ArrayList<>();
 
-        for (int i = 0; i < MAX_X_VALUE; i++) {
-            values1.add(new BarEntry(i, rng.nextFloat() * (MAX_Y_VALUE - MIN_Y_VALUE) + MIN_Y_VALUE));
-            values2.add(new BarEntry(i, rng.nextFloat() * (MAX_Y_VALUE - MIN_Y_VALUE) + MIN_Y_VALUE));
+        for (int i = 0; i < this.data.size(); i++) {
+            values1.add(new BarEntry(i, this.data.get(i).workDur));
+            values2.add(new BarEntry(i, this.data.get(i).shortDur + this.data.get(i).longDur));
         }
 
         BarDataSet set1 = new BarDataSet(values1, GROUP_1_LABEL);
@@ -117,9 +132,7 @@ public class StatisticFragment extends Fragment {
         dataSets.add(set1);
         dataSets.add(set2);
 
-        BarData data = new BarData(dataSets);
-
-        return data;
+        return new BarData(dataSets);
     }
     private void configureChartAppearance() {
         barChart.setPinchZoom(false);
@@ -129,9 +142,18 @@ public class StatisticFragment extends Fragment {
 
         barChart.getDescription().setEnabled(false);
 
+        ArrayList<String> labels = new ArrayList<>();
+
+        for (int i = 0; i < this.data.size(); i++) {
+            int date = this.data.get(i).date;
+            int month = this.data.get(i).month;
+            labels.add(String.format("%d/%d", date, month));
+        }
+
         XAxis xAxis = barChart.getXAxis();
         xAxis.setGranularity(1f);
-        xAxis.setCenterAxisLabels(true);
+        xAxis.setCenterAxisLabels(false);
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
 
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setDrawGridLines(true);
@@ -139,11 +161,11 @@ public class StatisticFragment extends Fragment {
         leftAxis.setAxisMinimum(0f);
 
         barChart.getAxisRight().setEnabled(false);
-
         barChart.getXAxis().setAxisMinimum(0);
         barChart.getXAxis().setAxisMaximum(MAX_X_VALUE);
-
         barChart.setVisibleXRangeMaximum(MAX_X_SHOW);
+
+
     }
     private void prepareChartData(BarData data) {
         barChart.setData(data);
@@ -159,8 +181,16 @@ public class StatisticFragment extends Fragment {
     private PieData createPieCharData() {
         List<PieEntry> entries = new ArrayList<>();
 
-        entries.add(new PieEntry(85, "Work"));
-        entries.add(new PieEntry(15, "Break"));
+        long workTime = this.data.stream().mapToLong(e -> e.workDur).sum();
+        long breakTime = this.data.stream().mapToLong(e -> (e.longDur + e.shortDur)).sum();
+
+
+        float workPercent = (float) workTime / (workTime + breakTime);
+        workPercent = Math.round(workPercent * 100);
+        float breakPercent = 100 - workPercent;
+
+        entries.add(new PieEntry(workPercent, "Work"));
+        entries.add(new PieEntry(breakPercent, "Break"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
 
@@ -168,9 +198,7 @@ public class StatisticFragment extends Fragment {
         dataSet.setValueTextColor(Color.BLACK);
         dataSet.setValueTextSize(10f);
 
-        PieData pieData = new PieData(dataSet);
-
-        return pieData;
+        return new PieData(dataSet);
     }
 
     private void configurePieChartAppearance() {
@@ -182,6 +210,4 @@ public class StatisticFragment extends Fragment {
         pieChart.setData(data);
         pieChart.invalidate();
     }
-
-
 }
