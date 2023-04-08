@@ -26,6 +26,8 @@ import kotlin.NotImplementedError;
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
+  private MediaPlayer alarmMediaPlayer;
+  private MediaPlayer tickingMediaPlayer;
 
   private static final long DEFAULT_WORK_TIME = 5000; //5second
   private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
@@ -105,9 +107,6 @@ public class TimerService extends Service {
   }
 
   class Timer implements Runnable {
-    private MediaPlayer alarmMediaPlayer;
-    private MediaPlayer tickingMediaPlayer;
-
     class PomodoroTimerCountDown extends CountDownTimer {
       public PomodoroTimerCountDown(long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
@@ -154,26 +153,29 @@ public class TimerService extends Service {
         }
 
         // TODO: Set isAutoSwitchTask after adding state of timer setting done
-
         switchState();
-        runningState = NONE_STATE;
         callTickCallBack(millisRemain);
+
+        Log.d( "Running State: ", String.valueOf(runningState));
+        if (autoStartBreakSetting && autoStartPomodoroSetting){
+          run();
+        }
+        else {
+          runningState = 0;
+        }
 
       }
     }
 
     @Override
     public void run() {
-      //runningState = WORK_STATE;
       try {
         tickingMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.count_down_sound);
       } catch (Exception e) {
         e.printStackTrace();
       }
-
       timer = new PomodoroTimerCountDown(millisRemain, 1000);
       timer.start();
-
     }
   }
 
@@ -299,18 +301,6 @@ public class TimerService extends Service {
     }
   }
 
-  public void setStateTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound) {
-    if (runningState != NONE_STATE && timer != null) {
-      timer.cancel();
-      runningState = NONE_STATE;
-    }
-    workMillis = workTime;
-    shortBreakMillis = shortBreakTime;
-    longBreakMillis = longBreakTime;
-    millisRemain = workTime;
-    alarmUri = alarmSound;
-  }
-
   @Override
   public void onDestroy() {
     timer.cancel();
@@ -379,11 +369,15 @@ public class TimerService extends Service {
   }
 
   public void skipTimer() {
-
-    if (runningState != NONE_STATE && timer != null) {
-      timer.cancel();
+    timer.cancel();
+    if (tickingMediaPlayer != null){
+      tickingMediaPlayer.stop();
+      tickingMediaPlayer.release();
+      tickingMediaPlayer = null;
     }
 
+    timerHandler.removeCallbacks(timerRunnable);
+    callTickCallBack(millisRemain);
     switchState();
     runningState = NONE_STATE;
     callTickCallBack(millisRemain);

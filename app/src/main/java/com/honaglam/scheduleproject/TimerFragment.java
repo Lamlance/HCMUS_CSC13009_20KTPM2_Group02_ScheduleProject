@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -143,9 +144,24 @@ public class TimerFragment extends Fragment {
 
     btnSkip = (FloatingActionButton) getView().findViewById((R.id.btnSkip));
     btnSkip.setOnClickListener(new View.OnClickListener() {
+
       @Override
       public void onClick(View view) {
         try {
+          // Get current activity
+          Activity currentActivity = getActivity();
+          // Finish all activities before the current one
+          if (currentActivity != null) {
+            while (!currentActivity.isTaskRoot()){
+              Activity parent = currentActivity.getParent();
+              if (parent == null){
+                break;
+              }
+              currentActivity = parent;
+              parent.finish();
+            }
+          }
+
           activity.skip();
         } catch (Exception e) {
           throw new RuntimeException(e);
