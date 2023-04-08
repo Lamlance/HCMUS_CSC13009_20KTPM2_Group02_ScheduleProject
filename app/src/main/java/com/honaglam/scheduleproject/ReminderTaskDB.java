@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,7 +19,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public class ReminderTaskDB extends SQLiteOpenHelper {
-  private static final int DB_VERSION = 14;
+  private static final int DB_VERSION = 24;
+  public static final boolean IS_DEV = true;
   private static final String DB_NAME = "ScheduleProject.db";
   private static final String SQL_DROP_REMINDER_TABLE = "DROP TABLE IF EXISTS " + ReminderTable.TABLE_NAME;
   private static final String SQL_DROP_TASK_TABLE = "DROP TABLE IF EXISTS " + TaskTable.TABLE_NAME;
@@ -49,13 +51,14 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_LOOPS = "loops";
     public static final String COLUMN_NAME_HISTORY = "history";
     public static final String COLUMN_NAME_IS_DONE = "done";
+    public static final String COLUMN_NAME_LOOPS_DONE = "loops_done";
   }
 
   private static class StatsTable implements BaseColumns{
     private static final String TABLE_NAME = "TimerStats";
-    public static final String COLUMN_NAME_ID = "id";
-    public static final String COLUMN_NAME_STATE = "state";
-    public static final String COLUMN_NAME_DURATION = "duration";
+    public static final String COLUMN_NAME_WORK_DURATION = "work_duration";
+    public static final String COLUMN_NAME_SHORT_DURATION = "short_duration";
+    public static final String COLUMN_NAME_LONG_DURATION = "long_duration";
     public static final String COLUMN_NAME_DATE = "date";
     public static final String COLUMN_NAME_MONTH = "month";
     public static final String COLUMN_NAME_YEAR = "year";
@@ -72,8 +75,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     year = calendar.get(Calendar.YEAR);
 
   }
-
-
 
   @Override
   public void onCreate(SQLiteDatabase db) {
@@ -92,15 +93,20 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                     + TaskTable.COLUMN_NAME_TITLE + " TEXT ,"
                     + TaskTable.COLUMN_NAME_HISTORY + " INTEGER ,"
                     + TaskTable.COLUMN_NAME_IS_DONE + " INTEGER ,"
-                    + TaskTable.COLUMN_NAME_LOOPS + " INTEGER );";
+                    + TaskTable.COLUMN_NAME_LOOPS + " INTEGER ,"
+                    + TaskTable.COLUMN_NAME_LOOPS_DONE + " INTEGER DEFAULT 0);";
     String createStatsTable =
             "CREATE TABLE " +StatsTable.TABLE_NAME + " ( "
-                    + StatsTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
-                    + StatsTable.COLUMN_NAME_DURATION + " INTEGER DEFAULT 0 ,"
-                    + StatsTable.COLUMN_NAME_YEAR + " INTEGER ,"
-                    + StatsTable.COLUMN_NAME_MONTH + " INTEGER ,"
-                    + StatsTable.COLUMN_NAME_DATE + " INTEGER ,"
-                    + StatsTable.COLUMN_NAME_STATE + " INTEGER );";
+                    + StatsTable.COLUMN_NAME_WORK_DURATION + " INTEGER DEFAULT 0 ,"
+                    + StatsTable.COLUMN_NAME_SHORT_DURATION + " INTEGER DEFAULT 0 ,"
+                    + StatsTable.COLUMN_NAME_LONG_DURATION + " INTEGER DEFAULT 0 ,"
+                    + StatsTable.COLUMN_NAME_YEAR + " INTEGER NOT NULL,"
+                    + StatsTable.COLUMN_NAME_MONTH + " INTEGER NOT NULL,"
+                    + StatsTable.COLUMN_NAME_DATE + " INTEGER NOT NULL,"
+                    + "PRIMARY KEY("
+                    + StatsTable.COLUMN_NAME_DATE + ","
+                    + StatsTable.COLUMN_NAME_MONTH + ","
+                    + StatsTable.COLUMN_NAME_YEAR + "));";
     db.execSQL(createReminderTable);
     db.execSQL(createTaskTable);
     db.execSQL(createStatsTable);
@@ -318,12 +324,14 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   //===
 
   //Task
-  public long addTask(String name, int loops,boolean isDone) {
+  public long addTask(String name, int loops,int loopsCompleted,boolean isDone) {
     try (SQLiteDatabase db = getWritableDatabase()) {
       ContentValues cv = new ContentValues();
       cv.put(TaskTable.COLUMN_NAME_TITLE, name);
       cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
       cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
+      cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE,loopsCompleted);
+
       return db.insert(TaskTable.TABLE_NAME, null, cv);
     } catch (Exception ignore) {
     }
@@ -350,13 +358,15 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
       int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
       int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+      int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
       int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
       do {
         String name = cursor.getString(titleIndex);
         int loops = cursor.getInt(loopIndex);
+        int loopsCompleted = cursor.getInt(loopCompletedIndex);
         int id = cursor.getInt(idIndex);
         boolean isComplete = cursor.getInt(completeIndex) > 0;
-        list.add(new TaskData(name, loops, id,isComplete));
+        list.add(new TaskData(name, loops,loopsCompleted, id,isComplete));
       } while (cursor.moveToNext());
     } catch (Exception ignore) {
     }
@@ -369,6 +379,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       cv.put(TaskTable.COLUMN_NAME_LOOPS,newData.numberPomodoros);
       cv.put(TaskTable.COLUMN_NAME_TITLE,newData.taskName);
       cv.put(TaskTable.COLUMN_NAME_IS_DONE,newData.isCompleted  ? 1 : 0);
+      cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE,newData.numberCompletedPomodoros);
       long updated = db.update(
               TaskTable.TABLE_NAME,
               cv,
@@ -436,28 +447,13 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       workCv.put(StatsTable.COLUMN_NAME_DATE,date);
       workCv.put(StatsTable.COLUMN_NAME_MONTH,month);
       workCv.put(StatsTable.COLUMN_NAME_YEAR,year);
-      workCv.put(StatsTable.COLUMN_NAME_DURATION,0);
-      workCv.put(StatsTable.COLUMN_NAME_STATE,TimerService.WORK_STATE);
+      workCv.put(StatsTable.COLUMN_NAME_WORK_DURATION,0);
+      workCv.put(StatsTable.COLUMN_NAME_SHORT_DURATION,0);
+      workCv.put(StatsTable.COLUMN_NAME_LONG_DURATION,0);
 
-      ContentValues shortCv = new ContentValues();
-      shortCv.put(StatsTable.COLUMN_NAME_DATE,date);
-      shortCv.put(StatsTable.COLUMN_NAME_MONTH,month);
-      shortCv.put(StatsTable.COLUMN_NAME_YEAR,year);
-      shortCv.put(StatsTable.COLUMN_NAME_DURATION,0);
-      shortCv.put(StatsTable.COLUMN_NAME_STATE,TimerService.SHORT_BREAK_STATE);
 
-      ContentValues longCv = new ContentValues();
-      longCv.put(StatsTable.COLUMN_NAME_DATE,date);
-      longCv.put(StatsTable.COLUMN_NAME_MONTH,month);
-      longCv.put(StatsTable.COLUMN_NAME_YEAR,year);
-      longCv.put(StatsTable.COLUMN_NAME_DURATION,0);
-      longCv.put(StatsTable.COLUMN_NAME_STATE,TimerService.LONG_BREAK_STATE);
-
-      return (
-              db.insert(StatsTable.TABLE_NAME,null,workCv)
-              * db.insert(StatsTable.TABLE_NAME,null,shortCv)
-              * db.insert(StatsTable.TABLE_NAME,null,longCv)
-      ) >= 0;
+      long res1 = db.insert(StatsTable.TABLE_NAME,null,workCv);
+      return res1 >= 0;
 
     }catch (Exception ignore){}
     return false;
@@ -473,16 +469,21 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
 
     try(SQLiteDatabase db = getWritableDatabase()) {
       ContentValues cv = new ContentValues();
-      cv.put(StatsTable.COLUMN_NAME_DURATION,time);
+      if(state == TimerService.WORK_STATE){
+        cv.put(StatsTable.COLUMN_NAME_WORK_DURATION,time);
+      }else if(state == TimerService.SHORT_BREAK_STATE){
+        cv.put(StatsTable.COLUMN_NAME_SHORT_DURATION,time);
+      }else{
+        cv.put(StatsTable.COLUMN_NAME_LONG_DURATION,time);
+      }
 
       int result = db.update(
               StatsTable.TABLE_NAME,
               cv,
               StatsTable.COLUMN_NAME_DATE + " = ? AND "
                       + StatsTable.COLUMN_NAME_MONTH + " = ? AND "
-                      + StatsTable.COLUMN_NAME_YEAR + " = ? AND "
-                      + StatsTable.COLUMN_NAME_STATE + " = ?",
-              new String[]{String.valueOf(date), String.valueOf(month), String.valueOf(year), String.valueOf(state)}
+                      + StatsTable.COLUMN_NAME_YEAR + " = ?",
+              new String[]{String.valueOf(date), String.valueOf(month), String.valueOf(year)}
       );
       return result > 0;
     }catch (Exception e){
@@ -510,32 +511,21 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         createTodayStats();
         return false;
       }
+      int workIndex = query.getColumnIndex(StatsTable.COLUMN_NAME_WORK_DURATION);
+      curWork = workIndex >= 0 ? query.getLong(workIndex) : curWork;
 
-      int indexDuration = query.getColumnIndex(StatsTable.COLUMN_NAME_DURATION);
-      int indexState = query.getColumnIndex(StatsTable.COLUMN_NAME_STATE);
-      do{
-        switch (query.getInt(indexState)){
-          case TimerService.WORK_STATE:{
-            curWork = query.getLong(indexDuration);
-            break;
-          }
-          case TimerService.SHORT_BREAK_STATE:{
-            curShort = query.getLong(indexDuration);
-            break;
-          }
-          case TimerService.LONG_BREAK_STATE:{
-            curLong = query.getLong(indexDuration);
-            break;
-          }
-        }
-      }while (query.moveToNext());
-      return true;
+      int shortIndex = query.getColumnIndex(StatsTable.COLUMN_NAME_SHORT_DURATION);
+      curShort = shortIndex >= 0 ? query.getLong(shortIndex) : curShort;
+
+      int longIndex = query.getColumnIndex(StatsTable.COLUMN_NAME_LONG_DURATION);
+      curLong = longIndex >= 0 ? query.getLong(longIndex) : curLong;
+
+      return query.getCount() == 3;
     }catch (Exception ignore){}
     createTodayStats();
     return false;
 
   }
-
   public synchronized boolean addTimeTodayStats(long workTime,long shortTime,long longTime){
     if(workTime != 0){
       if(replaceTodayStats(curWork + workTime, TimerService.WORK_STATE)){
@@ -563,7 +553,116 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
 
     return true;
   }
+  public static class TimerStatsData {
+    public int date;
+    public int month;
+    public int year;
+    public long workDur;
+    public long shortDur;
+    public long longDur;
+
+
+    TimerStatsData(int date,int month,int year,long workDur,long shortDur,long longDur){
+      this.date = date;
+      this.month = month;
+      this.year = year;
+      this.workDur = workDur;
+      this.shortDur = shortDur;
+      this.longDur = longDur;
+    }
+  }
+  public List<TimerStatsData> get30StatsBeforeToday(){
+    ArrayList<TimerStatsData> list = new ArrayList<>();
+
+    if(!isTodayCorrect()){
+      getTodayStats();
+    }
+
+    try(SQLiteDatabase db = getReadableDatabase()){
+      Calendar calendar = Calendar.getInstance();
+      calendar.set(year,month,date,0,0,0);
+      calendar.add(Calendar.DATE,-30);
+      int pastDate = calendar.get(Calendar.DATE);
+      int pastMonth = calendar.get(Calendar.MONTH);
+      int pastYear = calendar.get(Calendar.YEAR);
+
+      String selection = "? BETWEEN '"
+              +pastYear + "-" + pastMonth + "-" + pastDate +"' AND '"
+              +year + "-" + month + "-" + date + "'"  ;
+      String query = "SELECT * , date(substr('0000' || year,-4,4) || '-' || substr('00' || month,-2,2) || '-' || substr('00' || date,-2,2)) AS col_date FROM " + StatsTable.TABLE_NAME
+              + " WHERE col_date BETWEEN "
+              + " date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2)) AND date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2))"
+              + " ORDER BY col_date DESC ";
+
+      try(
+              Cursor cursor = db.rawQuery(query,new String[]{
+                      String.valueOf(pastYear), String.valueOf(pastMonth), String.valueOf(pastDate),
+                      String.valueOf(year), String.valueOf(month), String.valueOf(date)
+              });
+      ){
+        if(!cursor.moveToFirst()){
+          return list;
+        }
+        String s = cursor.getString(cursor.getColumnIndex("col_date"));
+        int dateIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_DATE);
+        int monthIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_MONTH);
+        int yearIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_YEAR);
+        int workIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_WORK_DURATION);
+        int shortIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_SHORT_DURATION);
+        int longIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_LONG_DURATION);
+
+        do {
+          list.add(new TimerStatsData(
+                  cursor.getInt(dateIndex),
+                  cursor.getInt(monthIndex),
+                  cursor.getInt(yearIndex),
+                  cursor.getLong(workIndex),
+                  cursor.getLong(shortIndex),
+                  cursor.getLong(longIndex)
+          ));
+        }while (cursor.moveToNext());
+
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }catch (Exception ignore){}
+
+    return list;
+  }
   //===
+
+  public void createSampleData(){
+    Calendar calendar = Calendar.getInstance();
+
+    try(SQLiteDatabase db = getWritableDatabase()){
+      for (int i = 1; i < 40; i++){
+        calendar.add(Calendar.DATE,-1);
+
+        int date = calendar.get(Calendar.DATE);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        Log.i("SAMPLE_DATA", String.valueOf(date) + "/" +month + "/" + year);
+
+        ContentValues workCv = new ContentValues();
+        workCv.put(StatsTable.COLUMN_NAME_DATE,date);
+        workCv.put(StatsTable.COLUMN_NAME_MONTH,month);
+        workCv.put(StatsTable.COLUMN_NAME_YEAR,year);
+        workCv.put(StatsTable.COLUMN_NAME_WORK_DURATION, (long)( (Math.random()*80) + 10)*1000 );
+        workCv.put(StatsTable.COLUMN_NAME_SHORT_DURATION, (long)( (Math.random()*80) + 10)*1000 );
+        workCv.put(StatsTable.COLUMN_NAME_LONG_DURATION, (long)( (Math.random()*80) + 10)*1000 );
+
+        try {
+          db.insert(StatsTable.TABLE_NAME,null,workCv);
+        }catch (Exception e){
+          e.printStackTrace();
+        }
+      }
+    }catch (Exception ignore){}
+
+
+
+  }
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

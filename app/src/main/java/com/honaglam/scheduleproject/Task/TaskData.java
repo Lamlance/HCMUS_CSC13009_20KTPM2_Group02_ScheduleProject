@@ -22,4 +22,13 @@ public class TaskData {
         this.isCompleted = isCompleted;
         this.id = id;
     }
+
+    public TaskData(String taskName, int numberPomodoros, int numberPomodorosCompleted ,int id,boolean isCompleted) {
+        this.taskName = taskName;
+        this.numberCompletedPomodoros = numberPomodorosCompleted;
+        this.numberPomodoros = numberPomodoros;
+        this.isCompleted = isCompleted;
+        this.id = id;
+    }
+
 }

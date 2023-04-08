@@ -43,6 +43,7 @@ import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -89,9 +90,20 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
+
+    if(taskDb.IS_DEV){
+      taskDb.createSampleData();
+    }
+
+    List<ReminderTaskDB.TimerStatsData> list = taskDb.get30StatsBeforeToday();
+    for (ReminderTaskDB.TimerStatsData data:list) {
+      String str = String.format(Locale.getDefault(),
+              "%d / %d / %d, Work: %d ,Short: %d, Long: %d",
+              data.date,data.month,data.year,data.workDur,data.shortDur,data.longDur);
+      Log.i("TASK_DATA",str);
+    }
 
     tasks.addAll(taskDb.getAllTask());
 
@@ -235,9 +247,9 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
 
-  public int addTask(String name, int loops,boolean isDone) {
+  public int addTask(String name, int loops, int loopsCompleted ,boolean isDone) {
     try {
-      int id = Math.toIntExact(taskDb.addTask(name, loops,isDone));
+      int id = Math.toIntExact(taskDb.addTask(name, loops,loopsCompleted,isDone));
       tasks.add(new TaskData(name, loops, id));
       return tasks.size() - 1;
     } catch (Exception ignore) {

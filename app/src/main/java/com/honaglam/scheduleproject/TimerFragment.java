@@ -184,7 +184,11 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
-      int newPos = activity.addTask(taskData.taskName, taskData.numberPomodoros,taskData.isCompleted);
+      int newPos = activity.addTask(
+              taskData.taskName,
+              taskData.numberPomodoros,
+              taskData.numberCompletedPomodoros,
+              taskData.isCompleted);
       taskRecyclerViewAdapter.notifyItemInserted(newPos);
     }
   }
@@ -212,7 +216,7 @@ public class TimerFragment extends Fragment {
               activity.taskDb.date,activity.taskDb.month,activity.taskDb.year,
               activity.taskDb.curWork,activity.taskDb.curShort,activity.taskDb.curLong,oldState,prevTimeState);
 
-      Log.i("Toady Stats",stats);
+      Log.i("Toady_Stats",stats);
     }
   }
 
@@ -224,8 +228,11 @@ public class TimerFragment extends Fragment {
         TaskRecyclerViewAdapter adapter = (TaskRecyclerViewAdapter) recyclerTask.getAdapter();
         if (adapter != null) {
           int selectedTaskIndex = adapter.getSelectedPosition();
-          activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
-          recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
+          if(selectedTaskIndex >= 0){
+            activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
+            activity.editTask(activity.tasks.get(selectedTaskIndex));
+            recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
+          }
         }
       } catch (Exception e) {
         e.printStackTrace();
