@@ -155,15 +155,31 @@ public class TimerService extends Service {
         // TODO: Set isAutoSwitchTask after adding state of timer setting done
         switchState();
         callTickCallBack(millisRemain);
+        new CountDownTimer(2000, 1000) {
+          public void onTick(long millisUntilFinished) {
+            // Do nothing
+          }
 
-        Log.d( "Running State: ", String.valueOf(runningState));
-        if (autoStartBreakSetting && autoStartPomodoroSetting){
-          run();
-        }
-        else {
-          runningState = 0;
-        }
-
+          public void onFinish() {
+            if (autoStartBreakSetting && autoStartPomodoroSetting) {
+              run();
+            } else if (autoStartPomodoroSetting && !autoStartBreakSetting) {
+              if (runningState != 1) {
+                runningState = 0;
+              } else {
+                run();
+              }
+            } else if (!autoStartPomodoroSetting && autoStartBreakSetting) {
+              if (runningState == 1) {
+                runningState = 0;
+              } else {
+                run();
+              }
+            } else {
+              runningState = 0;
+            }
+          }
+        }.start();
       }
     }
 
@@ -369,14 +385,18 @@ public class TimerService extends Service {
   }
 
   public void skipTimer() {
-    timer.cancel();
-    if (tickingMediaPlayer != null){
+    if (timer != null) {
+      timer.cancel();
+      timerHandler.removeCallbacks(timerRunnable);
+    }
+
+    if (tickingMediaPlayer != null) {
       tickingMediaPlayer.stop();
       tickingMediaPlayer.release();
       tickingMediaPlayer = null;
     }
 
-    timerHandler.removeCallbacks(timerRunnable);
+
     callTickCallBack(millisRemain);
     switchState();
     runningState = NONE_STATE;
