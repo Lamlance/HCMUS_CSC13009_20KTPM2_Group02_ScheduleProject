@@ -84,21 +84,23 @@ public class MainActivity extends AppCompatActivity {
 
   // User setting
   //  private UserSettings userSettings;
+  static final int IS_CALENDAR_FRAGMENT = 1;
+  static final int IS_TIMER_FRAGMENT = 2;
 
+  int currentFragment = IS_CALENDAR_FRAGMENT;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
-
+    fragmentManager = getSupportFragmentManager();
     taskDb = new ReminderTaskDB(this);
-
-
     tasks.addAll(taskDb.getAllTask());
 
     timerIntent = new Intent(this, TimerService.class);
-    bindService(timerIntent, new TimerConnectionService(), Context.BIND_AUTO_CREATE);
+    Log.i("BINDING_SERVICE","BIND SERVICE");
+    timerServiceConnection = new TimerConnectionService();
+    bindService(timerIntent,timerServiceConnection, Context.BIND_AUTO_CREATE);
 
     setSupportActionBar(findViewById(R.id.toolbar));
 
@@ -118,17 +120,12 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
-    fragmentManager = getSupportFragmentManager();
-    calendarFragment = CalendarFragment.newInstance();
-    timerFragment = TimerFragment.newInstance();
-    timerSettingFragment = TimerSetting.newInstance();
+    int stackCount = fragmentManager.getBackStackEntryCount();
+    for(int i = 0; i < stackCount; ++i) {
+      fragmentManager.popBackStack();
+    }
 
 
-    fragmentManager
-            .beginTransaction()
-            .replace(R.id.fragmentContainerView, calendarFragment, FRAGMENT_TAG_SCHEDULE)
-            .addToBackStack(FRAGMENT_TAG_SCHEDULE)
-            .commit();
   }
 
 
@@ -203,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
-  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack)  {
+  public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack) {
     if (timerService != null) {
       timerService.setStateChangeCallBack(stateChangeCallBack);
       return true;
@@ -248,6 +245,12 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
+
+    Log.i("ON_DESTROY","ACTIVITY DESTROYING");
+    if(timerServiceConnection != null){
+      Log.i("ON_DESTROY","ACTIVITY UNBINDING SERVICE");
+      unbindService(timerServiceConnection);
+    }
   }
 
 
@@ -355,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
     return reminderDataList.size();
   }
 
-  public void removeReminder(int pos)  {
+  public void removeReminder(int pos) {
     try {
       ReminderData data = reminderDataList.get(pos);
       int id = data.id;
@@ -392,10 +395,12 @@ public class MainActivity extends AppCompatActivity {
 
     return reminderDataList.size();
   }
-  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate){
+
+  public List<ReminderData> getSearchReminder(String name, long startDate, long endDate) {
     return taskDb.findReminders(name, startDate, endDate);
   }
-  class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener{
+
+  class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener {
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
       Toast.makeText(MainActivity.this, "Dark is on " + isOn, Toast.LENGTH_SHORT).show();
@@ -417,9 +422,11 @@ public class MainActivity extends AppCompatActivity {
 
       switch (id) {
         case R.id.nav_timer:
+          currentFragment = IS_TIMER_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select Timer", Toast.LENGTH_SHORT).show();
           return switchFragment_Pomodoro();
         case R.id.nav_schedule:
+          currentFragment = IS_CALENDAR_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
 
@@ -432,6 +439,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
+
+      calendarFragment = CalendarFragment.newInstance();
+      timerFragment = TimerFragment.newInstance();
+      timerSettingFragment = TimerSetting.newInstance();
+
+      if(currentFragment == IS_TIMER_FRAGMENT){
+        fragmentManager
+                .beginTransaction()
+                .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_SCHEDULE)
+                .addToBackStack(FRAGMENT_TAG_SCHEDULE)
+                .commit();
+      }else{
+        fragmentManager
+                .beginTransaction()
+                .replace(R.id.fragmentContainerView, calendarFragment, FRAGMENT_TAG_SCHEDULE)
+                .addToBackStack(FRAGMENT_TAG_SCHEDULE)
+                .commit();
+      }
+
+
+
+
     }
 
     @Override

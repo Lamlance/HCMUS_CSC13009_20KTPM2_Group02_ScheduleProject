@@ -369,6 +369,7 @@ public class TimerService extends Service {
 
   @Override
   public boolean onUnbind(Intent intent) {
+    Log.i("UNBIND_SERVICE","Service is being unbind");
     tickCallBack = null;
     return super.onUnbind(intent);
   }
