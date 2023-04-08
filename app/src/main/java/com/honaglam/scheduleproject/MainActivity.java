@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
 
   private static final String UUID_KEY = "SchedulerKey";
+  public boolean darkModeIsOn = false;
   private String userDBUuid = null;
 
   //Timer
@@ -399,8 +400,10 @@ public class MainActivity extends AppCompatActivity {
     public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
       Toast.makeText(MainActivity.this, "Dark is on " + isOn, Toast.LENGTH_SHORT).show();
       if (isOn == true) {
+        darkModeIsOn = true;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
       } else {
+        darkModeIsOn = false;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
       }
     }

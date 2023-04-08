@@ -1,95 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/SCREEN"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="wrap_content">
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  style="@style/SCREEN"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:orientation="vertical"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_height="wrap_content">
 
   <!-- Date picker -->
   <LinearLayout
-      android:orientation="horizontal"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
     <LinearLayout
-        android:paddingVertical="10dp"
-        android:layout_weight="1"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="5dp"
-        android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content">
+      android:paddingVertical="10dp"
+      android:layout_weight="1"
+      android:layout_marginStart="10dp"
+      android:layout_marginEnd="5dp"
+      android:orientation="vertical"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content">
       <TextView
-          style="@style/TEXT"
-          android:textSize="15sp"
-          android:text="From date"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content" />
+        style="@style/TEXT"
+        android:textSize="15sp"
+        android:text="From date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
       <androidx.appcompat.widget.AppCompatTextView
-          style="@style/TEXT"
-          android:autoSizeTextType="uniform"
-          android:id="@+id/txtFilterFromDate"
-          android:layout_marginVertical="10dp"
-          android:textSize="20sp"
-          android:textFontWeight="950"
-          android:text="@string/date_format"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          app:drawableLeftCompat="@drawable/baseline_calendar_month_24" />
+        style="@style/TEXT"
+        android:autoSizeTextType="uniform"
+        android:id="@+id/txtFilterFromDate"
+        android:layout_marginVertical="10dp"
+        android:textSize="20sp"
+        android:textFontWeight="950"
+        android:text="@string/date_format"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/baseline_calendar_month_24" />
     </LinearLayout>
     <LinearLayout
-        android:paddingVertical="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginStart="5dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content">
+      android:paddingVertical="10dp"
+      android:layout_marginEnd="10dp"
+      android:layout_marginStart="5dp"
+      android:layout_weight="1"
+      android:orientation="vertical"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content">
       <TextView
-          style="@style/TEXT"
-          android:textSize="15sp"
-          android:text="To date"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content" />
+        style="@style/TEXT"
+        android:textSize="15sp"
+        android:text="To date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
       <androidx.appcompat.widget.AppCompatTextView
-          style="@style/TEXT"
-          android:autoSizeTextType="uniform"
-          android:id="@+id/txtFilterToDate"
-          android:layout_marginVertical="10dp"
-          android:textSize="20sp"
-          android:textFontWeight="950"
-          android:text="@string/date_format"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          app:drawableLeftCompat="@drawable/baseline_calendar_month_24" />
+        style="@style/TEXT"
+        android:autoSizeTextType="uniform"
+        android:id="@+id/txtFilterToDate"
+        android:layout_marginVertical="10dp"
+        android:textSize="20sp"
+        android:textFontWeight="950"
+        android:text="@string/date_format"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/baseline_calendar_month_24" />
     </LinearLayout>
   </LinearLayout>
+
+<!-- TODO: fix the color of the text in dark mode -->
   <CheckBox
-      android:text="Show weekly reminder"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+    android:text="Show weekly reminder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
   <LinearLayout
-      android:layout_marginBottom="10dp"
-      android:gravity="end"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+    android:layout_marginBottom="10dp"
+    android:gravity="end"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <Button
-        style="@style/BUTTON"
-        android:id="@+id/btnFilterAccept"
-        android:layout_marginHorizontal="5dp"
-        android:text="Accept"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+      style="@style/BUTTON"
+      android:id="@+id/btnFilterClear"
+      android:text="Cancel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:backgroundTint="#DFDFDF"
+      android:textColor="#000000"
+      android:layout_marginRight="10dp"
+      />
     <Button
-        style="@style/BUTTON"
-        android:id="@+id/btnFilterClear"
-        android:layout_marginHorizontal="5dp"
-        android:text="Cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+      style="@style/BUTTON"
+      android:id="@+id/btnFilterAccept"
+      android:text="Accept"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="10dp"
+      android:layout_marginRight="10dp"
+      />
   </LinearLayout>
 
 </LinearLayout>

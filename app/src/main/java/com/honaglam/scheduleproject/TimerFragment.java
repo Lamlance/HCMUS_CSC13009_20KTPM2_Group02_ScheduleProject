@@ -1,10 +1,14 @@
 package com.honaglam.scheduleproject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -47,12 +51,13 @@ public class TimerFragment extends Fragment {
   private FloatingActionButton btnTimerStart;
   private FloatingActionButton btnGiveUp;
   private FloatingActionButton btnSkip;
+  private FloatingActionButton btnSetting;
 
-  /*
-  private Button btnTimer;
-  private Button btnGiveUp;
-  private Button btnSkip;
-  */
+
+//  private Button btnTimer;
+//  private Button btnGiveUp;
+//  private Button btnSkip;
+
   private Button btnAddTask;
   private FloatingActionButton timerSetting;
   private RecyclerView recyclerTask;
@@ -167,15 +172,45 @@ public class TimerFragment extends Fragment {
     getView().setBackgroundColor(color);
   }
 
+  @SuppressLint("ResourceAsColor")
   private void UpdateTimerBackground(int work_state) {
-    if (work_state == TimerService.WORK_STATE) {
-      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.work_color));
+    btnTimerStart = getView().findViewById(R.id.btnTimerStart);
+    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
+    btnSkip = getView().findViewById(R.id.btnSkip);
+    btnSetting = getView().findViewById(R.id.btnTimerSetting);
+    btnAddTask = getView().findViewById(R.id.btnAddTask);
+    if (activity.darkModeIsOn == true) {
+      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+      int backgroundButtonColor = getResources().getColor(R.color.image_btn_timer_fragment_background);
+      ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
+      int iconColor = getResources().getColor(R.color.image_btn_timer_fragment_icon);
+      ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
+
+      btnTimerStart.setBackgroundTintList(colorStateListBackground);
+      btnTimerStart.setImageTintList(colorStateListIcon);
+      btnGiveUp.setBackgroundTintList(colorStateListBackground);
+      btnGiveUp.setImageTintList(colorStateListIcon);
+      btnSkip.setBackgroundTintList(colorStateListBackground);
+      btnSkip.setImageTintList(colorStateListIcon);
+      btnSetting.setBackgroundTintList(colorStateListBackground);
+      btnSetting.setImageTintList(colorStateListIcon);
+
+      btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.add_btn_color_dark_mode));
+      btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.add_btn_text_color_dark_mode));
     }
-    if (work_state == TimerService.SHORT_BREAK_STATE) {
-      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.short_break_color));
-    }
-    if (work_state == TimerService.LONG_BREAK_STATE) {
-      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.long_break_color));
+    else {
+      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+      if (work_state == TimerService.WORK_STATE) {
+        requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.work_color));
+      }
+      if (work_state == TimerService.SHORT_BREAK_STATE) {
+        requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.short_break_color));
+      }
+      if (work_state == TimerService.LONG_BREAK_STATE) {
+        requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.long_break_color));
+      }
     }
   }
 

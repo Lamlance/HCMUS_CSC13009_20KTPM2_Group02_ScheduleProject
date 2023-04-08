@@ -128,6 +128,8 @@
       android:minEms="10"
       android:layout_width="0dp"
       android:layout_height="match_parent"/>
+
+<!--  TODO: fix the color of the icon in dark mode  -->
     <ImageButton
       android:id="@+id/btnSearchReminder"
       style="@style/IMAGE_BUTTON"
@@ -135,6 +137,8 @@
       android:src="@drawable/baseline_search_24_black"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"/>
+    <!--  TODO: fix the color of the icon in dark mode  -->
+
     <ImageButton
       android:id="@+id/btnFilterReminder"
       style="@style/IMAGE_BUTTON"
