@@ -1,25 +1,25 @@
 package com.honaglam.scheduleproject;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ImageButton;
@@ -75,6 +75,13 @@ public class CalendarFragment extends Fragment {
   ImageButton filterBtn;
   EditText txtSearchReminder;
 
+  LinearLayout layoutBigDateView;
+  LinearLayout layoutRemindersView;
+  LinearLayout layoutCalendarGrid;
+  ConstraintLayout layoutCalendarAll;
+
+  public static final int FULL_CALENDAR_VIEW = 1;
+
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
     Bundle args = new Bundle();
@@ -99,6 +106,13 @@ public class CalendarFragment extends Fragment {
 
     context = getContext();
     mainActivity = (MainActivity) getActivity();
+
+    layoutBigDateView = view.findViewById(R.id.layoutBigDateView);
+    layoutRemindersView = view.findViewById(R.id.layoutRemindersView);
+    layoutCalendarGrid = view.findViewById(R.id.layoutCalendarGrid);
+    layoutCalendarAll = view.findViewById(R.id.layoutCalendarAll);
+
+    //switchFragmentView(FULL_CALENDAR_VIEW);
 
     txtBigDate = view.findViewById(R.id.txtBigDateDisplay);
     txtBigWeekDate = view.findViewById(R.id.txtBigWeekDateDisplay);
@@ -256,9 +270,11 @@ public class CalendarFragment extends Fragment {
       */
 
       if(reminders != null){
+        int oldSize = mainActivity.reminderDataList.size();
         mainActivity.reminderDataList.clear();
         mainActivity.reminderDataList.addAll(reminders);
-        reminderRecyclerAdapter.notifyItemRangeChanged(0,mainActivity.reminderDataList.size());
+        reminderRecyclerAdapter.notifyItemRangeChanged(0,
+                Math.max(oldSize,mainActivity.reminderDataList.size()));
       }else{
         int sizeBefore = mainActivity.reminderDataList.size();
         mainActivity.reminderDataList.clear();
@@ -302,10 +318,10 @@ public class CalendarFragment extends Fragment {
     }
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-      int pos = reminderRecyclerAdapter.selectedItemPos;
-      mainActivity.removeReminder(pos);
-      reminderRecyclerAdapter.notifyItemRemoved(pos);
-      Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
+      //int pos = reminderRecyclerAdapter.selectedItemPos;
+      //mainActivity.removeReminder(pos);
+      //reminderRecyclerAdapter.notifyItemRemoved(pos);
+      //Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -313,4 +329,26 @@ public class CalendarFragment extends Fragment {
       super.onChildDraw(c, recyclerView, viewHolder, dX / 4, dY, actionState, isCurrentlyActive);
     }
   };
+
+  /*
+  private void switchFragmentView(int viewCode){
+    switch (viewCode){
+      case FULL_CALENDAR_VIEW:{
+        layoutRemindersView.setVisibility(View.GONE);
+        layoutBigDateView.setVisibility(View.GONE);
+        ViewGroup.LayoutParams params =  layoutCalendarAll.getLayoutParams();
+        params.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        layoutCalendarAll.setLayoutParams(params);
+
+        ConstraintSet set = new ConstraintSet();
+        set.clone(layoutCalendarAll);
+        set.constrainPercentWidth(R.id.layoutCalendarGrid,1);
+        set.constrainPercentHeight(R.id.layoutCalendarGrid,1);
+        set.constrainPercentWidth(R.id.layoutBigDateView,0);
+        set.applyTo(layoutCalendarAll);
+        break;
+      }
+    }
+  }
+  */
 }

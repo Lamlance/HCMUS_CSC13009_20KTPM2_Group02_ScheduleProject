@@ -1,11 +1,13 @@
 package com.honaglam.scheduleproject.Reminder;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.icu.text.DateFormat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
@@ -47,8 +49,12 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     holder.txtId.setText(dateFormat);
     holder.txtName.setText(data.Name);
 
+    holder.itemView.setBackgroundColor(position == selectedItemPos ?
+            ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
+            Color.TRANSPARENT);
 
   }
+
 
   @Override
   public int getItemCount() {
@@ -57,7 +63,10 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
   class ReminderItemClickCallBack implements ReminderViewHolder.SelectItemCallBack{
     @Override
     public void onClickPos(int pos) throws NotImplementedError {
+      int oldPos = selectedItemPos;
       selectedItemPos = pos;
+      notifyDataSetChanged();
+
     }
   }
 }

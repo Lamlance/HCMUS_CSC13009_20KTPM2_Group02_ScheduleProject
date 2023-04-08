@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject.Calendar;
 
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,7 +18,7 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
 
     TextView txtDate;
     OnClickPositionCallBack clickPositionCallBack = null;
-
+    LinearLayout layoutItemAll;
     public interface OnClickPositionCallBack {
         void clickAtPosition(int position) throws NotImplementedError;
     }
@@ -28,6 +29,7 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
         this.clickPositionCallBack = callBack;
 
         txtDate = itemView.findViewById(R.id.txtCalendarDateItem);
+        layoutItemAll = itemView.findViewById(R.id.layoutCalendarItemAll);
         this.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

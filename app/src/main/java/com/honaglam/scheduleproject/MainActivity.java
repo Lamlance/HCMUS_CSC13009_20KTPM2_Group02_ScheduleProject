@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     taskDb.getTodayStats();
 
     if(taskDb.IS_DEV){
-      taskDb.createSampleData();
+      //taskDb.createSampleData();
     }
 
     List<ReminderTaskDB.TimerStatsData> list = taskDb.get30StatsBeforeToday();

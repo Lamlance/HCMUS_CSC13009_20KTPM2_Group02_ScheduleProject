@@ -121,7 +121,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    btnAddTask = getView().findViewById(R.id.btnAddTask);
+    btnAddTask = view.findViewById(R.id.btnAddTask);
     btnAddTask.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
