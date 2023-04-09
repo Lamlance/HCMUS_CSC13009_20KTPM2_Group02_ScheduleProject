@@ -25,6 +25,8 @@ import kotlin.NotImplementedError;
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
+  private MediaPlayer alarmMediaPlayer;
+  private MediaPlayer tickingMediaPlayer;
 
   private static final long DEFAULT_WORK_TIME = 5000; //5second
   private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
@@ -152,9 +154,6 @@ public class TimerService extends Service {
   }
 
   class Timer implements Runnable {
-    private MediaPlayer alarmMediaPlayer;
-    private MediaPlayer tickingMediaPlayer;
-
     class PomodoroTimerCountDown extends CountDownTimer {
       public PomodoroTimerCountDown(long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
@@ -202,26 +201,48 @@ public class TimerService extends Service {
           playLoopSound.start();
         }
 
-        // TODO: Set isAutoSwitchTask after adding state of timer setting done
-
         switchState();
         callTickCallBack(millisRemain);
+        
         isRunning = false;
+
+        new CountDownTimer(2000, 1000) {
+          public void onTick(long millisUntilFinished) {
+            // Do nothing
+          }
+
+          public void onFinish() {
+            if (autoStartBreakSetting && autoStartPomodoroSetting) {
+              run();
+            } else if (autoStartPomodoroSetting && !autoStartBreakSetting) {
+              if (runningState != 1) {
+                runningState = 0;
+              } else {
+                run();
+              }
+            } else if (!autoStartPomodoroSetting && autoStartBreakSetting) {
+              if (runningState == 1) {
+                runningState = 0;
+              } else {
+                run();
+              }
+            } else {
+              runningState = 0;
+            }
+          }
+        }.start();
       }
     }
 
     @Override
     public void run() {
-      //runningState = WORK_STATE;
       try {
         tickingMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.count_down_sound);
       } catch (Exception e) {
         e.printStackTrace();
       }
-
       timer = new PomodoroTimerCountDown(millisRemain, 1000);
       timer.start();
-
     }
   }
 
@@ -326,16 +347,18 @@ public class TimerService extends Service {
   }
 
   public void pauseTimer() {
-    if (isRunning) {
+    if (isRunning && timer != null) {
       timer.cancel();
       isRunning = false;
+      timer.cancel();
+      timer = null;
+      timerHandler.removeCallbacks(timerRunnable);
     }
     if (tickCallBack == null) {
       return;
     }
     callTickCallBack(millisRemain);
   }
-
   public void resetTimer() {
     millisRemain = workMillis;
     if (isRunning) {
@@ -344,6 +367,13 @@ public class TimerService extends Service {
       callTickCallBack(millisRemain);
       isRunning = false;
     }
+  }
+
+
+  @Override
+  public void onDestroy() {
+    timer.cancel();
+    super.onDestroy();
   }
 
   public void setStateTime(
@@ -429,11 +459,21 @@ public class TimerService extends Service {
 
   public void skipTimer() {
 
-    if (isRunning) {
+    if (isRunning && timer != null) {
       timer.cancel();
       isRunning = false;
+      timerHandler.removeCallbacks(timerRunnable);
+
     }
 
+    if (tickingMediaPlayer != null) {
+      tickingMediaPlayer.stop();
+      tickingMediaPlayer.release();
+      tickingMediaPlayer = null;
+    }
+
+
+    callTickCallBack(millisRemain);
     switchState();
     callTickCallBack(millisRemain);
   }

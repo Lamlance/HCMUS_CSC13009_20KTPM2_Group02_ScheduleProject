@@ -196,6 +196,14 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
+  public boolean pauseTimer() {
+    if (timerService != null) {
+      timerService.pauseTimer();
+      return true;
+    }
+    return false;
+  }
+
   public boolean resetTimer() {
     if (timerService != null) {
       timerService.resetTimer();
