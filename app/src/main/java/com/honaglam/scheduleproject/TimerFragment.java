@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -115,7 +116,7 @@ public class TimerFragment extends Fragment {
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        activity.resetTimer();
+        activity.pauseTimer();
       }
     });
 
