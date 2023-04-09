@@ -11,12 +11,15 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.CycleInterpolator;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -40,7 +43,8 @@ import kotlin.NotImplementedError;
 public class ReminderAddDialog extends Dialog {
   public interface ReminderDataCallBack {
     void onSubmit(String name, int hour24h, int minute);
-    void onSubmitWeekly(String name, int hour24h, int minute,HashSet<Integer> dailyReminder);
+
+    void onSubmitWeekly(String name, int hour24h, int minute, HashSet<Integer> dailyReminder);
   }
 
   private static final HashMap<String, Integer> DATE_TO_CALENDAR_INT = new HashMap<String, Integer>() {{
@@ -74,11 +78,11 @@ public class ReminderAddDialog extends Dialog {
     this.currCalendar = current;
   }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.dialog_reminder_add);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    setContentView(R.layout.dialog_reminder_add);
 
     timePicker = findViewById(R.id.timeReminderDialog);
     timePicker.setIs24HourView(true);
@@ -92,16 +96,17 @@ public class ReminderAddDialog extends Dialog {
       }
     });
     linearLayoutDailyBtn = findViewById(R.id.layoutAddReminderDaily);
-    for (int i = 0; i < linearLayoutDailyBtn.getChildCount(); i++){
+    for (int i = 0; i < linearLayoutDailyBtn.getChildCount(); i++) {
       View v = linearLayoutDailyBtn.getChildAt(i);
-      if(v instanceof AppCompatToggleButton){
+      if (v instanceof AppCompatToggleButton) {
         ((AppCompatToggleButton) v).setOnCheckedChangeListener(new DateToggleButtonClick());
-        String txt =  ((AppCompatToggleButton) v).getText().toString();
+        String txt = ((AppCompatToggleButton) v).getText().toString();
         ((AppCompatToggleButton) v).setChecked(DATE_TO_CALENDAR_INT.get(txt) == currCalendar.get(Calendar.DAY_OF_WEEK));
       }
     }
     switchDaily = findViewById(R.id.switchAddReminderDaily);
     switchDaily.setOnCheckedChangeListener(new SwitchDailyClick());
+
 
     setEnableDaily(false);
   }
@@ -128,9 +133,9 @@ public class ReminderAddDialog extends Dialog {
       }
 
       try {
-        if(switchDaily.isChecked()){
-          dataCallBack.onSubmitWeekly(name,hour,minute,dailyReminder);
-        }else{
+        if (switchDaily.isChecked()) {
+          dataCallBack.onSubmitWeekly(name, hour, minute, dailyReminder);
+        } else {
           dataCallBack.onSubmit(name, hour, minute);
         }
       } catch (Exception ignore) {
@@ -138,27 +143,29 @@ public class ReminderAddDialog extends Dialog {
       ReminderAddDialog.this.dismiss();
     }
   }
+
   class SwitchDailyClick implements CompoundButton.OnCheckedChangeListener {
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
       setEnableDaily(b);
     }
   }
-  class DateToggleButtonClick implements CompoundButton.OnCheckedChangeListener{
+
+  class DateToggleButtonClick implements CompoundButton.OnCheckedChangeListener {
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
       try {
-        if(DATE_TO_CALENDAR_INT.get(compoundButton.getText()) == currCalendar.get(Calendar.DAY_OF_WEEK) ){
+        if (DATE_TO_CALENDAR_INT.get(compoundButton.getText()) == currCalendar.get(Calendar.DAY_OF_WEEK)) {
           compoundButton.setChecked(true);
           return;
         }
 
-        if(b){
+        if (b) {
           dailyReminder.add(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
-        }else{
+        } else {
           dailyReminder.remove(DATE_TO_CALENDAR_INT.get(compoundButton.getText()));
         }
-      }catch (Exception e){
+      } catch (Exception e) {
         e.printStackTrace();
       }
 

@@ -32,6 +32,13 @@
     <receiver android:name=".Reminder.ReminderBroadcastReceiver"
         android:enabled="true"
         android:exported="false"/>
+    <receiver android:name=".TimerService$ServiceControlBroadCastReceiver"
+        android:enabled="true"
+        android:exported="false">
+      <intent-filter>
+        <action android:name="com.hoanglam.scheduleproject.controltimer" />
+      </intent-filter>
+    </receiver>
   </application>
 
 </manifest>
