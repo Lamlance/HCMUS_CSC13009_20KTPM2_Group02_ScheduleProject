@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -14,9 +16,6 @@ import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-
-import android.util.Log;
-import android.view.View;
 
 import androidx.core.app.NotificationCompat;
 
@@ -65,6 +64,12 @@ public class TimerService extends Service {
 
   }
 
+  private static final long NOTIFICATION_FLAG_WELCOME = -1;
+  private static final long NOTIFICATION_FLAG_WORK_FINISHED = -2;
+  private static final long NOTIFICATION_FLAG_BREAK_FINISHED = -3;
+
+  BroadcastReceiver receiver;
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -92,14 +97,55 @@ public class TimerService extends Service {
             .setContentIntent(pendingIntent)
             .setOnlyAlertOnce(true);
 
+
+    receiver = new ServiceControlBroadCastReceiver();
+    IntentFilter serviceControlFilter = new IntentFilter();
+    serviceControlFilter.addAction("com.hoanglam.scheduleproject.controltimer");
+    registerReceiver(receiver,serviceControlFilter);
+
     // timerFragment = new TimerFragment();
   }
 
-  public Notification makeServiceNotification(String detail) {
-    notificationBuilder.setContentText(detail);
-    return notificationBuilder.build();
+  @Override
+  public void onDestroy() {
+    timer.cancel();
+    unregisterReceiver(receiver);
+    super.onDestroy();
   }
 
+  public Notification makeServiceNotification(long time) {
+    notificationBuilder.setContentText(makeTimeString(time));
+    notificationBuilder.clearActions();
+
+    if(time == NOTIFICATION_FLAG_WORK_FINISHED || time == NOTIFICATION_FLAG_BREAK_FINISHED){
+      String action = (time == NOTIFICATION_FLAG_WORK_FINISHED) ? "Start break" : "Start focusing";
+
+      Intent broadcastServiceControlIntent = new Intent("com.hoanglam.scheduleproject.controltimer");
+      PendingIntent pendingIntent = PendingIntent.getBroadcast(
+              this,
+              0,broadcastServiceControlIntent,
+              PendingIntent.FLAG_IMMUTABLE);
+      notificationBuilder.addAction(R.mipmap.ic_launcher_round,action,pendingIntent);
+    }
+
+    return notificationBuilder.build();
+  }
+  private String makeTimeString(long time){
+    if(time == NOTIFICATION_FLAG_WELCOME){
+      return "Hello user";
+    }
+    if(time == NOTIFICATION_FLAG_WORK_FINISHED){
+      return "Work time had finished. Start your break~~";
+    }
+    if(time == NOTIFICATION_FLAG_BREAK_FINISHED){
+      return "Break time finished. Let's start working! ";
+    }
+
+
+    int minute = (int) Math.floor((double)time / 60000.0);
+    int seconds = (int)Math.floor((double)time / 1000.0) - (minute*60);
+    return (minute+":"+seconds);
+  }
   public void updateServiceNotification(Notification notification) {
     NotificationManager notificationManager = getSystemService(NotificationManager.class);
     notificationManager.notify(NOTIFICATION_ID, notification);
@@ -118,7 +164,7 @@ public class TimerService extends Service {
       @Override
       public void onTick(long l) {
         millisRemain = l;
-        updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+        updateServiceNotification(makeServiceNotification(l));
 
         try {
           if (tickingMediaPlayer != null && !tickingMediaPlayer.isPlaying() && millisRemain < 4000) {
@@ -135,7 +181,9 @@ public class TimerService extends Service {
       @Override
       public void onFinish() {
         millisRemain = 0;
-
+        updateServiceNotification(makeServiceNotification(
+                runningState == WORK_STATE ? NOTIFICATION_FLAG_WORK_FINISHED : NOTIFICATION_FLAG_BREAK_FINISHED
+        ));
         if (tickingMediaPlayer != null) {
           // Stop the tickling sound and release media player
           tickingMediaPlayer.stop();
@@ -263,8 +311,8 @@ public class TimerService extends Service {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    startForeground(NOTIFICATION_ID, makeServiceNotification("Hello !"));
-    updateServiceNotification(makeServiceNotification("Hello User"));
+    startForeground(NOTIFICATION_ID, makeServiceNotification(-1));
+    updateServiceNotification(makeServiceNotification(-1));
     return super.onStartCommand(intent, flags, startId);
   }
 
@@ -296,13 +344,6 @@ public class TimerService extends Service {
       callTickCallBack(millisRemain);
       isRunning = false;
     }
-  }
-
-
-  @Override
-  public void onDestroy() {
-    timer.cancel();
-    super.onDestroy();
   }
 
   public void setStateTime(
@@ -400,6 +441,13 @@ public class TimerService extends Service {
   public class LocalBinder extends Binder {
     TimerService getService() {
       return TimerService.this;
+    }
+  }
+
+  public class ServiceControlBroadCastReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      startTimer(); ;
     }
   }
 
