@@ -8,17 +8,21 @@
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
 
+  <color name="text_work_state_background_color">#a44e4e</color>
+  <color name="text_short_break_state_background_color">#417b80</color>
+  <color name="text_long_break_state_background_color">#426c8a</color>
+
   <color name="work_color">#CE5959</color>
   <color name="background_button_work_color">#E6A8A8</color>
   <color name="button_work_color">#E06060</color>
 
-  <color name="short_break_color">#337746</color>
-  <color name="background_button_short_break_color">#9bd3aa</color>
-  <color name="button_short_break_color">#56b671</color>
+  <color name="short_break_color">#38858A</color>
+  <color name="background_button_short_break_color">#88cace</color>
+  <color name="button_short_break_color">#38858a</color>
 
-  <color name="long_break_color">#146C94</color>
-  <color name="background_button_long_break_color">#65BDE6</color>
-  <color name="button_long_break_color">#1FA3E0</color>
+  <color name="long_break_color">#397097</color>
+  <color name="background_button_long_break_color">#629bc3</color>
+  <color name="button_long_break_color">#3c769f</color>
 
   <color name="red_700">#B03602</color>
 

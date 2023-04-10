@@ -15,8 +15,50 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:layout_marginTop="25dp">
 
+    <TextView
+      android:id="@+id/txtPomodoro"
+      style="@style/TEXT"
+      android:background="@drawable/rounded_background"
+      android:layout_width="wrap_content"
+      android:layout_height="40dp"
+      android:layout_gravity="center_horizontal"
+      android:gravity="center"
+      android:layout_marginTop="0dp"
+      android:layout_weight="2"
+      android:text="Pomodoro"
+      android:textColor="#ffffff"
+      android:textSize="20sp"
+      tools:ignore="HardcodedText" />
+    <TextView
+      android:id="@+id/txtShortBreak"
+      android:background="@drawable/rounded_background"
+      style="@style/TEXT"
+      android:layout_width="wrap_content"
+      android:layout_height="40dp"
+      android:layout_gravity="center_horizontal"
+      android:gravity="center"
+      android:layout_marginTop="0dp"
+      android:layout_weight="2"
+      android:text="Short Break"
+      android:textColor="#ffffff"
+      android:textSize="20sp"
+      tools:ignore="HardcodedText" />
+    <TextView
+      android:id="@+id/txtLongBreak"
+      android:background="@drawable/rounded_background"
+      style="@style/TEXT"
+      android:layout_width="wrap_content"
+      android:layout_height="40dp"
+      android:layout_gravity="center_horizontal"
+      android:gravity="center"
+      android:layout_marginTop="0dp"
+      android:layout_weight="2"
+      android:text="Long Break"
+      android:textColor="#ffffff"
+      android:textSize="20sp"
+      tools:ignore="HardcodedText" />
   </LinearLayout>
 
   <TextView
@@ -30,7 +72,7 @@
     android:layout_weight="2"
     android:text="25:00"
     android:textColor="#ffffff"
-    android:textSize="80sp"
+    android:textSize="50sp"
     tools:ignore="HardcodedText" />
 
 <!-- TODO: change color of the buttons in light mode -->
@@ -118,6 +160,7 @@
     android:layout_weight="0.1"
     android:backgroundTint="#ffdad8"
     android:layout_gravity="center_horizontal"
+    android:textSize="18sp"
     app:cornerRadius="5dp"
     android:text="Add task"
     android:textColor="#410007"/>

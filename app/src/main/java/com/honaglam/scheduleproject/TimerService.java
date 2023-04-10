@@ -17,6 +17,7 @@ import android.os.IBinder;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.core.app.NotificationCompat;
 
@@ -60,6 +61,8 @@ public class TimerService extends Service {
   int cycleCount = 0;
   NotificationCompat.Builder notificationBuilder;
   TimerOnFinishCallback onFinishCallback;
+
+
   public TimerService() {
 
   }
