@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+    //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
     setContentView(R.layout.activity_main);
 
     fragmentManager = getSupportFragmentManager();
@@ -272,7 +272,9 @@ public class MainActivity extends AppCompatActivity {
     edit.putLong(PREF_KEY_WORK_TIME, settings.workMillis);
     edit.putLong(PREF_KEY_SHORT_TIME, settings.shortBreakMillis);
     edit.putLong(PREF_KEY_LONG_TIME, settings.longBreakMillis);
-    edit.putString(PREF_KEY_ALARM, settings.alarmUri.toString());
+    if(settings.alarmUri != null){
+      edit.putString(PREF_KEY_ALARM, settings.alarmUri.toString());
+    }
     edit.putBoolean(PREF_KEY_AUTO_BREAK, settings.autoStartBreakSetting);
     edit.putBoolean(PREF_KEY_AUTO_POMODORO, settings.autoStartPomodoroSetting);
     edit.putLong(PREF_KEY_LONG_INTERVAL, settings.longBreakInterValSetting);
@@ -488,10 +490,10 @@ public class MainActivity extends AppCompatActivity {
       Toast.makeText(MainActivity.this, "Dark is on " + isOn, Toast.LENGTH_SHORT).show();
       if (isOn == true) {
         darkModeIsOn = true;
-        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
       } else {
         darkModeIsOn = false;
-        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
       }
     }
   }
@@ -527,6 +529,7 @@ public class MainActivity extends AppCompatActivity {
 
       calendarFragment = CalendarFragment.newInstance();
       timerFragment = TimerFragment.newInstance();
+      statisticFragment = StatisticFragment.newInstance();
 
       fragmentManager
               .beginTransaction()

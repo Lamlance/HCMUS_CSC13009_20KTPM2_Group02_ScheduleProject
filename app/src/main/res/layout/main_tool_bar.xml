@@ -17,11 +17,11 @@
       android:layout_height="match_parent"
       android:gravity="center">
       <Button
+
         android:id="@+id/toolbarBtn"
-        style="@style/BUTTON"
+          style="@style/SCREEN"
         android:drawableLeft="@drawable/baseline_dehaze_24_white"
         android:text=""
-        android:background="?attr/colorPrimary"
         android:layout_width="40dp"
         android:layout_height="match_parent" />
       <androidx.appcompat.widget.Toolbar
@@ -29,7 +29,7 @@
         app:titleTextColor="@color/white"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary" />
+          style="@style/SCREEN" />
     </LinearLayout>
 
 

@@ -21,6 +21,7 @@
   <!-- Screen background if dark mode is on-->
   <style name="SCREEN">
     <item name="android:background">#000000</item>
+    <item name="backgroundTint">#000000</item>
   </style>
 
   <!-- Text color if dark mode is on-->

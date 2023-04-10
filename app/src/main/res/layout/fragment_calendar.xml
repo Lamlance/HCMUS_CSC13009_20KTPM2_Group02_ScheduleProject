@@ -150,14 +150,12 @@
         <ImageButton
             android:id="@+id/btnSearchReminder"
             style="@style/IMAGE_BUTTON"
-            android:backgroundTint="@color/white"
             android:src="@drawable/baseline_search_24_black"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
         <ImageButton
             android:id="@+id/btnFilterReminder"
             style="@style/IMAGE_BUTTON"
-            android:backgroundTint="@color/white"
             android:src="@drawable/baseline_filter_alt_24_black"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
