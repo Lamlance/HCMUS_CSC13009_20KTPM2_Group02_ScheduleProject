@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
     });
 
     int stackCount = fragmentManager.getBackStackEntryCount();
-    for(int i = 0; i < stackCount; ++i) {
+    for (int i = 0; i < stackCount; ++i) {
       fragmentManager.popBackStack();
     }
 
@@ -227,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
     }
     return false;
   }
-
 
 
   public boolean pauseTimer() {
@@ -328,9 +327,9 @@ public class MainActivity extends AppCompatActivity {
   protected void onDestroy() {
     super.onDestroy();
 
-    Log.i("ON_DESTROY","ACTIVITY DESTROYING");
-    if(timerServiceConnection != null){
-      Log.i("ON_DESTROY","ACTIVITY UNBINDING SERVICE");
+    Log.i("ON_DESTROY", "ACTIVITY DESTROYING");
+    if (timerServiceConnection != null) {
+      Log.i("ON_DESTROY", "ACTIVITY UNBINDING SERVICE");
       unbindService(timerServiceConnection);
     }
   }
@@ -525,23 +524,15 @@ public class MainActivity extends AppCompatActivity {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
       timerService.setStateTime(loadTimerSettingPref());
 
-
       calendarFragment = CalendarFragment.newInstance();
       timerFragment = TimerFragment.newInstance();
 
-      if(currentFragment == IS_TIMER_FRAGMENT){
-        fragmentManager
-                .beginTransaction()
-                .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_SCHEDULE)
-                .addToBackStack(FRAGMENT_TAG_SCHEDULE)
-                .commit();
-      }else{
-        fragmentManager
-                .beginTransaction()
-                .replace(R.id.fragmentContainerView, calendarFragment, FRAGMENT_TAG_SCHEDULE)
-                .addToBackStack(FRAGMENT_TAG_SCHEDULE)
-                .commit();
-      }
+      fragmentManager
+              .beginTransaction()
+              .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_TIMER)
+              .addToBackStack(FRAGMENT_TAG_TIMER)
+              .commit();
+
     }
 
     @Override
