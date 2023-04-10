@@ -318,6 +318,9 @@ public class CalendarFragment extends Fragment {
     }
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+      if(direction == ItemTouchHelper.LEFT){
+        reminderRecyclerAdapter.swipeItem(reminderRecyclerAdapter.selectedItemPos);
+      }
       //int pos = reminderRecyclerAdapter.selectedItemPos;
       //mainActivity.removeReminder(pos);
       //reminderRecyclerAdapter.notifyItemRemoved(pos);
@@ -326,29 +329,9 @@ public class CalendarFragment extends Fragment {
 
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-      super.onChildDraw(c, recyclerView, viewHolder, dX / 4, dY, actionState, isCurrentlyActive);
+      super.onChildDraw(c, recyclerView, viewHolder, 0, 0, actionState, isCurrentlyActive);
     }
   };
 
-  /*
-  private void switchFragmentView(int viewCode){
-    switch (viewCode){
-      case FULL_CALENDAR_VIEW:{
-        layoutRemindersView.setVisibility(View.GONE);
-        layoutBigDateView.setVisibility(View.GONE);
-        ViewGroup.LayoutParams params =  layoutCalendarAll.getLayoutParams();
-        params.height = ConstraintLayout.LayoutParams.MATCH_PARENT;
-        layoutCalendarAll.setLayoutParams(params);
 
-        ConstraintSet set = new ConstraintSet();
-        set.clone(layoutCalendarAll);
-        set.constrainPercentWidth(R.id.layoutCalendarGrid,1);
-        set.constrainPercentHeight(R.id.layoutCalendarGrid,1);
-        set.constrainPercentWidth(R.id.layoutBigDateView,0);
-        set.applyTo(layoutCalendarAll);
-        break;
-      }
-    }
-  }
-  */
 }

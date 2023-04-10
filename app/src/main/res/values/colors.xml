@@ -12,4 +12,6 @@
   <color name="short_break_color">#4CAF50</color>
   <color name="long_break_color">#2196F3</color>
   <color name="red_700">#B03602</color>
+  <color name="red_500">#F44336</color>
+
 </resources>

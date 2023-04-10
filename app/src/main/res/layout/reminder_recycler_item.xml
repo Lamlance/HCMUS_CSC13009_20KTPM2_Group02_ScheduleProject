@@ -1,41 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/SCREEN"
-    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/SCREEN"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-  <LinearLayout
-      android:layout_margin="10dp"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="horizontal">
+
     <ImageView
+        android:paddingHorizontal="10dp"
+        android:id="@+id/imageReminderIcon"
         style="@style/IMAGE_BUTTON"
-        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
         android:src="@drawable/baseline_notifications_active_24"
-        android:layout_width="30dp"
-        android:layout_height="30dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:paddingVertical="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/imageReminderIcon"
+        app:layout_constraintRight_toLeftOf="@+id/layoutReminderMenu"
+
+        app:layout_constraintTop_toTopOf="parent">
+
       <TextView
-          style="@style/TEXT"
-          android:textSize="25sp"
-          tools:text="1001"
           android:id="@+id/txtRecyclerRemindersId"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content" />
+          style="@style/TEXT"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="25sp"
+          app:layout_constraintLeft_toLeftOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+          tools:text="1001" />
+
       <TextView
-        style="@style/TEXT"
           android:id="@+id/txtRecyclerRemindersTime"
+          style="@style/TEXT"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
           android:textSize="15sp"
-          tools:text="1001"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content" />
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintLeft_toLeftOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/txtRecyclerRemindersId"
+
+          tools:text="1001" />
     </LinearLayout>
 
-  </LinearLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutReminderMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@color/red_500"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+      <ImageButton
+          android:layout_width="wrap_content"
+          android:layout_height="0dp"
+          android:backgroundTint="@color/red_500"
+          android:src="@drawable/baseline_delete_24"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintRight_toRightOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

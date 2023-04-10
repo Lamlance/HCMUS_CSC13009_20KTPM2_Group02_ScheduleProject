@@ -28,6 +28,7 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
   ReminderListGetter reminderListGetter = null;
 
   public int selectedItemPos = -1;
+  public int swipePos = -1;
   public ReminderRecyclerAdapter(Context context, ReminderListGetter getter){
     this.context = context;
     this.reminderListGetter = getter;
@@ -52,9 +53,19 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     holder.itemView.setBackgroundColor(position == selectedItemPos ?
             ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
             Color.TRANSPARENT);
-
+    holder.openMenu(selectedItemPos == position);
   }
 
+  public void swipeItem(int pos){
+    int oldSwipe = swipePos;
+    swipePos = pos;
+    if(oldSwipe >= 0 && oldSwipe < reminderListGetter.get().size()){
+      notifyItemChanged(oldSwipe);
+    }
+    if(swipePos >= 0){
+      notifyItemChanged(swipePos);
+    }
+  }
 
   @Override
   public int getItemCount() {
