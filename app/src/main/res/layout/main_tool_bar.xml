@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--  TODO: change color of the header in dark mode-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    style="@style/SCREEN"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  style="@style/SCREEN"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".MainActivity">
   <com.google.android.material.appbar.AppBarLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center">
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="center">
       <Button
-          android:id="@+id/toolbarBtn"
-          android:drawableLeft="@drawable/baseline_dehaze_24_white"
-          android:text=""
-          android:background="?attr/colorPrimary"
-          android:layout_width="40dp"
-          android:layout_height="match_parent" />
+        android:id="@+id/toolbarBtn"
+        style="@style/BUTTON"
+        android:drawableLeft="@drawable/baseline_dehaze_24_white"
+        android:text=""
+        android:background="?attr/colorPrimary"
+        android:layout_width="40dp"
+        android:layout_height="match_parent" />
       <androidx.appcompat.widget.Toolbar
-          android:id="@+id/toolbar"
-          app:titleTextColor="@color/white"
-          android:layout_width="match_parent"
-          android:layout_height="?attr/actionBarSize"
-          android:background="?attr/colorPrimary" />
+        android:id="@+id/toolbar"
+        app:titleTextColor="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary" />
     </LinearLayout>
 
 

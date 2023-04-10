@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_STATISTIC = "statstic";
 
   private static final String UUID_KEY = "SchedulerKey";
+  public boolean darkModeIsOn = false;
   private String userDBUuid = null;
 
   //Timer
@@ -98,13 +99,17 @@ public class MainActivity extends AppCompatActivity {
   ArrayList<TaskData> tasks = new ArrayList<>();
   // User setting
   //  private UserSettings userSettings;
+  static final int IS_CALENDAR_FRAGMENT = 1;
+  static final int IS_TIMER_FRAGMENT = 2;
 
+  int currentFragment = IS_CALENDAR_FRAGMENT;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
+    fragmentManager = getSupportFragmentManager();
     userTimerSetting = getSharedPreferences("userTimerSetting", MODE_PRIVATE);
 
     timerIntent = new Intent(this, TimerService.class);
@@ -137,17 +142,18 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
+    int stackCount = fragmentManager.getBackStackEntryCount();
+    for(int i = 0; i < stackCount; ++i) {
+      fragmentManager.popBackStack();
+    }
+
+
     fragmentManager = getSupportFragmentManager();
     calendarFragment = CalendarFragment.newInstance();
     timerFragment = TimerFragment.newInstance();
     //timerSettingFragment = TimerSetting.newInstance();
     statisticFragment = StatisticFragment.newInstance();
 
-    fragmentManager
-            .beginTransaction()
-            .replace(R.id.fragmentContainerView, calendarFragment, FRAGMENT_TAG_SCHEDULE)
-            .addToBackStack(FRAGMENT_TAG_SCHEDULE)
-            .commit();
   }
 
 
@@ -228,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
     }
     return false;
   }
+
 
 
   public boolean pauseTimer() {
@@ -327,6 +334,12 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
+
+    Log.i("ON_DESTROY","ACTIVITY DESTROYING");
+    if(timerServiceConnection != null){
+      Log.i("ON_DESTROY","ACTIVITY UNBINDING SERVICE");
+      unbindService(timerServiceConnection);
+    }
   }
 
 
@@ -481,8 +494,10 @@ public class MainActivity extends AppCompatActivity {
     public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
       Toast.makeText(MainActivity.this, "Dark is on " + isOn, Toast.LENGTH_SHORT).show();
       if (isOn == true) {
+        darkModeIsOn = true;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
       } else {
+        darkModeIsOn = false;
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
       }
     }
@@ -496,9 +511,11 @@ public class MainActivity extends AppCompatActivity {
 
       switch (id) {
         case R.id.nav_timer:
+          currentFragment = IS_TIMER_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select Timer", Toast.LENGTH_SHORT).show();
           return switchFragment_Pomodoro();
         case R.id.nav_schedule:
+          currentFragment = IS_CALENDAR_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select Schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
         case R.id.nav_statistic:
@@ -514,6 +531,25 @@ public class MainActivity extends AppCompatActivity {
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
       timerService.setStateTime(loadTimerSettingPref());
+
+
+      calendarFragment = CalendarFragment.newInstance();
+      timerFragment = TimerFragment.newInstance();
+      timerSettingFragment = TimerSetting.newInstance();
+
+      if(currentFragment == IS_TIMER_FRAGMENT){
+        fragmentManager
+                .beginTransaction()
+                .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_SCHEDULE)
+                .addToBackStack(FRAGMENT_TAG_SCHEDULE)
+                .commit();
+      }else{
+        fragmentManager
+                .beginTransaction()
+                .replace(R.id.fragmentContainerView, calendarFragment, FRAGMENT_TAG_SCHEDULE)
+                .addToBackStack(FRAGMENT_TAG_SCHEDULE)
+                .commit();
+      }
     }
 
     @Override

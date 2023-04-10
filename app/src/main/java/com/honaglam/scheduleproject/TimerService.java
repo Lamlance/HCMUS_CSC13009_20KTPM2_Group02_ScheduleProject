@@ -17,6 +17,9 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import androidx.core.app.NotificationCompat;
 
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
@@ -64,6 +67,8 @@ public class TimerService extends Service {
   int cycleCount = 0;
   NotificationCompat.Builder notificationBuilder;
   TimerOnFinishCallback onFinishCallback;
+
+
   public TimerService() {
 
   }
@@ -434,6 +439,7 @@ public class TimerService extends Service {
 
   @Override
   public boolean onUnbind(Intent intent) {
+    Log.i("UNBIND_SERVICE","Service is being unbind");
     tickCallBack = null;
     return super.onUnbind(intent);
   }

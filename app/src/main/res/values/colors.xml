@@ -7,6 +7,37 @@
   <color name="teal_700">#FF018786</color>
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
+
+  <color name="text_work_state_background_color">#a44e4e</color>
+  <color name="text_short_break_state_background_color">#417b80</color>
+  <color name="text_long_break_state_background_color">#426c8a</color>
+
+  <color name="work_color">#CE5959</color>
+  <color name="background_button_work_color">#E6A8A8</color>
+  <color name="button_work_color">#E06060</color>
+
+  <color name="short_break_color">#38858A</color>
+  <color name="background_button_short_break_color">#88cace</color>
+  <color name="button_short_break_color">#38858a</color>
+
+  <color name="long_break_color">#397097</color>
+  <color name="background_button_long_break_color">#629bc3</color>
+  <color name="button_long_break_color">#3c769f</color>
+
+  <color name="red_700">#B03602</color>
+
+  <color name="add_btn_color_light_mode">#FFDAF8</color>
+  <color name="add_btn_text_color_light_mode">#410007</color>
+  <color name="add_btn_color_dark_mode">#2E2E2E</color>
+  <color name="add_btn_text_color_dark_mode">#E6E6E6</color>
+
+  <color name="image_btn_timer_fragment_background">#2E2E2E</color>
+  <color name="image_btn_timer_fragment_icon">#E6E6E6</color>
+
+  <color name="image_btn_timer_fragment_lightmode_background">#BACDDB</color>
+  <color name="image_btn_timer_fragment_lightmode_icon">#CE5959</color>
+
+
   <color name="selected_white">#80D2D2D2</color>
   <color name="work_color">#FF5722</color>
   <color name="short_break_color">#4CAF50</color>
