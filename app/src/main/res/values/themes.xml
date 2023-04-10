@@ -19,7 +19,7 @@
   <!-- Light mode -->
   <!-- Screen background if dark light is on-->
   <style name="SCREEN">
-    <item name="android:background">#FFFFFF</item>
+    <item name="android:background">#CE5959</item>
   </style>
 
   <!-- Text background if light mode is on-->
