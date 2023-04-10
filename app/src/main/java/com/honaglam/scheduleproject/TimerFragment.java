@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -182,6 +183,11 @@ public class TimerFragment extends Fragment {
     txtPomodoro = getView().findViewById(R.id.txtPomodoro);
     txtShortBreak = getView().findViewById(R.id.txtShortBreak);
     txtLongBreak = getView().findViewById(R.id.txtLongBreak);
+
+    Drawable rounded_background = getResources().getDrawable(R.drawable.rounded_background);
+    txtPomodoro.setBackground(rounded_background);
+    txtShortBreak.setBackground(rounded_background);
+    txtLongBreak.setBackground(rounded_background);
 
     btnTimerStart = getView().findViewById(R.id.btnTimerStart);
     btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
