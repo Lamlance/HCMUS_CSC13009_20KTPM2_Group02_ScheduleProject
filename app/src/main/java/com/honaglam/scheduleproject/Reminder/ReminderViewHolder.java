@@ -1,10 +1,14 @@
 package com.honaglam.scheduleproject.Reminder;
 
+import android.animation.LayoutTransition;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import com.honaglam.scheduleproject.R;
 
@@ -13,12 +17,13 @@ import kotlin.NotImplementedError;
 public class ReminderViewHolder extends RecyclerView.ViewHolder{
   TextView txtId;
   TextView txtName;
-
+  ConstraintLayout layoutMenu;
   SelectItemCallBack callBack;
   public ReminderViewHolder(@NonNull View itemView) {
     super(itemView);
     txtName = itemView.findViewById(R.id.txtRecyclerRemindersId);
     txtId = itemView.findViewById(R.id.txtRecyclerRemindersTime);
+    layoutMenu = itemView.findViewById(R.id.layoutReminderMenu);
   }
 
   public void  setSelectItemCallback(SelectItemCallBack callBack){
@@ -45,6 +50,10 @@ public class ReminderViewHolder extends RecyclerView.ViewHolder{
         return true;
       }
     });
+  }
+
+  public void openMenu(boolean isOpen){
+    layoutMenu.setVisibility(isOpen ? View.VISIBLE : View.GONE);
   }
 
   public interface SelectItemCallBack {

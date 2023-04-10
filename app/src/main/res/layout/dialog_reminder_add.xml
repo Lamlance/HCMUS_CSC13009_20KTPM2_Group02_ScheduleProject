@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:paddingLeft="10dp"
-  android:paddingRight="10dp"
-  android:orientation="vertical">
-
-  <LinearLayout
+  android:layout_marginHorizontal="10dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-
+  <LinearLayout
     <TextView
       style="@style/TEXT"
       android:layout_width="wrap_content"
@@ -31,11 +26,26 @@
       android:layout_height="wrap_content"
       android:maxLength="20" />
 
+
     <TimePicker
       android:id="@+id/timeReminderDialog"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:timePickerMode="spinner" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+      <CheckBox
+          android:textSize="15sp"
+          android:gravity="center"
+          android:text="Remind me 1 day before"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <LinearLayout
       android:layout_width="match_parent"
@@ -70,12 +80,11 @@
 
 <!-- TODO: need to change color when click on a day in dark mode-->
     <LinearLayout
-      android:layout_marginBottom="30dp"
-      style="@style/BUTTON"
-      android:id="@+id/layoutAddReminderDaily"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal">
+        android:layout_marginBottom="10dp"
+        android:id="@+id/layoutAddReminderDaily"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
 
       <androidx.appcompat.widget.AppCompatToggleButton
         android:background="@drawable/selector_date_daily_btn"

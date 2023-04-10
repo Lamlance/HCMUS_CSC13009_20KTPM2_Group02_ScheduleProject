@@ -36,4 +36,13 @@
 
   <color name="image_btn_timer_fragment_lightmode_background">#BACDDB</color>
   <color name="image_btn_timer_fragment_lightmode_icon">#CE5959</color>
+
+
+  <color name="selected_white">#80D2D2D2</color>
+  <color name="work_color">#FF5722</color>
+  <color name="short_break_color">#4CAF50</color>
+  <color name="long_break_color">#2196F3</color>
+  <color name="red_700">#B03602</color>
+  <color name="red_500">#F44336</color>
+
 </resources>

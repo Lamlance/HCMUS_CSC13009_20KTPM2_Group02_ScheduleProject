@@ -25,7 +25,7 @@ public class AddTaskDialog extends Dialog {
   Button btnDown;
   Button btnSave;
   Button btnCancel;
-
+  TaskData tempData = new TaskData("",0,-1);
   AddTaskDialogListener listener;
 
   public AddTaskDialog(@NonNull Context context, AddTaskDialogListener listener) {
@@ -33,7 +33,6 @@ public class AddTaskDialog extends Dialog {
     this.listener = listener;
     setContentView(R.layout.add_task_dialog);
 
-    TaskData tempData = new TaskData("");
 
     // Set width for dialog
     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -96,12 +95,12 @@ public class AddTaskDialog extends Dialog {
 
   public AddTaskDialog(@NonNull Context context,
                        AddTaskDialogListener listener,
-                       String taskName, int numberPomodoros) {
+                       TaskData oldData) {
     super(context);
     this.listener = listener;
     setContentView(R.layout.add_task_dialog);
 
-    TaskData tempData = new TaskData(taskName, numberPomodoros);
+    TaskData tempData = new TaskData(oldData.taskName, oldData.numberPomodoros,oldData.id);
 
     // Set width for dialog
     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();

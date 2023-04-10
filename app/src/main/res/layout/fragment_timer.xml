@@ -109,7 +109,7 @@
       app:backgroundTint="#410007"
       android:layout_marginLeft="9dp"
       android:layout_marginRight="9dp"
-      app:tint="#ffdad8"
+      app:tint="#ffffff"
       app:maxImageSize="35dp"
       app:elevation="3dp"
       app:pressedTranslationZ="20dp"

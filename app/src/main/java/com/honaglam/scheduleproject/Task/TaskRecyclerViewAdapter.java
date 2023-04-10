@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject.Task;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,39 +24,11 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
 
   private int selectedPosition = -1;
 
-  TaskViewHolder.OnClickPositionCallBack deleteTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
-    @Override
-    public void clickAtPosition(int position) throws NotImplementedError {
-      dataGet.getList().remove(position);
-      notifyItemRemoved(position);
-    }
-  };
+  TaskViewHolder.OnClickPositionCallBack deleteTaskCallback;
 
-  TaskViewHolder.OnClickPositionCallBack checkTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
-    @Override
-    public void clickAtPosition(int position) throws NotImplementedError {
-      dataGet.getList().get(position).isCompleted = !dataGet.getList().get(position).isCompleted;
-      notifyItemChanged(position);
-    }
-  };
+  TaskViewHolder.OnClickPositionCallBack checkTaskCallback;
 
-  TaskViewHolder.OnClickPositionCallBack editTaskCallback = new TaskViewHolder.OnClickPositionCallBack() {
-    @Override
-    public void clickAtPosition(int position) throws NotImplementedError {
-      AddTaskDialog.AddTaskDialogListener listener = new AddTaskDialog.AddTaskDialogListener() {
-        @Override
-        public void onDataPassed(TaskData taskData) {
-
-          dataGet.getList().set(position, taskData);
-          notifyItemChanged(position);
-        }
-      };
-      String taskName = dataGet.getList().get(position).taskName;
-      int numberPomodoros = dataGet.getList().get(position).numberPomodoros;
-      AddTaskDialog addTaskDialog = new AddTaskDialog(context, listener, taskName, numberPomodoros);
-      addTaskDialog.show();
-    }
-  };
+  TaskViewHolder.OnClickPositionCallBack editTaskCallback;
 
 
   public interface GetListCallback {
@@ -64,9 +37,18 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
 
   GetListCallback dataGet;
 
-  public TaskRecyclerViewAdapter(Context context, GetListCallback callback) {
+  public TaskRecyclerViewAdapter(
+          Context context,
+          GetListCallback callback,
+          TaskViewHolder.OnClickPositionCallBack deleteTaskCallback,
+          TaskViewHolder.OnClickPositionCallBack checkTaskCallback,
+          TaskViewHolder.OnClickPositionCallBack editTaskCallback
+  ) {
     this.context = context;
     dataGet = callback;
+    this.deleteTaskCallback = deleteTaskCallback;
+    this.checkTaskCallback = checkTaskCallback;
+    this.editTaskCallback = editTaskCallback;
   }
 
   @NonNull
@@ -84,10 +66,23 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
 
   @Override
   public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-    holder.txtTaskName.setText(dataGet.getList().get(position).taskName);
+    TaskData taskData = dataGet.getList().get(position);
+
+    holder.txtTaskName.setText(taskData.taskName);
     holder.txtCountPomodoro.setText(
-            dataGet.getList().get(position).numberCompletedPomodoros + "/ " + dataGet.getList().get(position).numberPomodoros);
-    holder.checkBoxCompleteTask.setChecked(dataGet.getList().get(position).isCompleted);
+            taskData.numberCompletedPomodoros + "/ " + taskData.numberPomodoros);
+    holder.checkBoxCompleteTask.setChecked(taskData.isCompleted);
+    if(taskData.isCompleted){
+      holder.txtTaskName.setPaintFlags(
+              holder.txtTaskName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
+      );
+    }else{
+      if((holder.txtTaskName.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) == Paint.STRIKE_THRU_TEXT_FLAG){
+        holder.txtTaskName.setPaintFlags(
+                holder.txtTaskName.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG
+        );
+      }
+    }
 
     holder.itemView.setOnClickListener(new View.OnClickListener() {
       @Override

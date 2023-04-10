@@ -13,6 +13,12 @@
         android:icon="@drawable/baseline_access_time_24"
         android:title="Pomodoro Timer" />
 
+    <item
+        android:id="@+id/nav_statistic"
+        android:icon="@drawable/baseline_bar_chart_24"
+        android:title="Report"
+        />
+
     <item android:id="@+id/nav_switchTheme"
         android:title="Dark Mode"
         android:icon="@drawable/baseline_dark_mode_24"

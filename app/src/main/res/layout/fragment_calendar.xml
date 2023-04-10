@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   style="@style/SCREEN"
   xmlns:tools="http://schemas.android.com/tools"
@@ -11,145 +11,163 @@
   android:paddingRight="10dp"
   android:layout_marginTop="15dp">
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <LinearLayout
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:layout_marginEnd="20dp"
+      android:layout_marginBottom="20dp"
 
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintBottom_toBottomOf="parent"
-
-      app:layout_constraintWidth_percent=".25"
-      app:layout_constraintWidth_default="percent"
-
-      android:orientation="vertical">
-      <TextView
-        android:id="@+id/txtBigDateDisplay"
-        style="@style/TEXT"
-        android:textFontWeight="900"
-        android:textSize="40sp"
-        android:layout_weight="1"
-        android:textAlignment="center"
-        android:text="31"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-      <TextView
-        android:id="@+id/txtBigWeekDateDisplay"
-        style="@style/TEXT"
-        android:textSize="20sp"
-        android:layout_weight="1"
-        android:textAlignment="center"
-        android:text="Tue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    </LinearLayout>
-    <!-- Calendar -->
-    <LinearLayout
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-
-      app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-
-      app:layout_constraintWidth_percent=".75"
-      app:layout_constraintWidth_default="percent">
-      <!-- Calender Nav -->
-      <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent">
-        <ImageButton
-          android:id="@+id/btnDecreaseMonth"
-          style="@style/IMAGE_BUTTON"
-          android:layout_weight="1"
-          android:src="@drawable/baseline_arrow_left_24_black"
-          app:iconTint="@color/black"
-          android:scaleType="fitXY"
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:background="@android:color/transparent" />
-        <TextView
-          style="@style/TEXT"
-          android:textAlignment="center"
-          android:layout_weight="1"
-          tools:text="March 2023"
-          android:textSize="25sp"
-          android:id="@+id/txtSelectDate"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"/>
-        <ImageButton
-          android:id="@+id/btnIncreaseMonth"
-          style="@style/IMAGE_BUTTON"
-          android:layout_weight="1"
-          android:src="@drawable/baseline_arrow_right_24_black"
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:scaleType="fitXY"
-          android:background="@android:color/transparent"
-          android:textColor="@color/purple_700"/>
-      </LinearLayout>
-      <!-- Calender View -->
-      <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <androidx.recyclerview.widget.RecyclerView
-          android:id="@+id/recyclerCalendar"
-          app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-          app:spanCount="7"
-          android:layout_width="match_parent"
-          android:layout_columnSpan="7"
-          android:numColumns="7"
-          android:gravity="center"
-          android:layout_height="wrap_content"/>
-      </LinearLayout>
-      <Button
-        android:id="@+id/btnSetReminder"
-        style="@style/BUTTON"
-        android:text="Set Reminder"
-        android:layout_marginHorizontal="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    </LinearLayout>
-  </androidx.constraintlayout.widget.ConstraintLayout>
-
+      android:id="@+id/btnSetReminder"
+      android:src="@drawable/baseline_add_24"
+      android:layout_alignParentBottom="true"
+      android:layout_gravity="end|bottom"
+      android:layout_alignParentEnd="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" />
 
   <LinearLayout
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutCalendarAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+      <LinearLayout
+          android:id="@+id/layoutBigDateView"
 
-    <EditText
-      android:id="@+id/txtEditSearchReminder"
-      android:hint="Search a reminder name"
-      android:layout_weight="1"
-      android:minEms="10"
-      android:layout_width="0dp"
-      android:layout_height="match_parent"/>
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
 
-    <ImageButton
-      android:id="@+id/btnSearchReminder"
-      style="@style/IMAGE_BUTTON"
-      android:src="@drawable/baseline_search_24_black"
-      android:layout_width="wrap_content"
-      android:layout_height="match_parent"/>
+          app:layout_constraintLeft_toLeftOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
 
-    <ImageButton
-      android:id="@+id/btnFilterReminder"
-      style="@style/IMAGE_BUTTON"
-      android:src="@drawable/baseline_filter_alt_24_black"
-      android:layout_width="wrap_content"
-      android:layout_height="match_parent"/>
+          app:layout_constraintWidth_percent=".25"
+          app:layout_constraintWidth_default="percent"
+
+          android:orientation="vertical">
+        <TextView
+            android:id="@+id/txtBigDateDisplay"
+            style="@style/TEXT"
+            android:textFontWeight="900"
+            android:textSize="40sp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="31"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/txtBigWeekDateDisplay"
+            style="@style/TEXT"
+            android:textSize="20sp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="Tue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+      </LinearLayout>
+      <!-- Calendar -->
+      <LinearLayout
+          android:id="@+id/layoutCalendarGrid"
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:orientation="vertical"
+          app:layout_constraintRight_toRightOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+
+          app:layout_constraintWidth_percent=".75"
+          app:layout_constraintWidth_default="percent">
+        <!-- Calender Nav -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent">
+          <ImageButton
+              android:id="@+id/btnDecreaseMonth"
+              style="@style/IMAGE_BUTTON"
+              android:layout_weight="1"
+              android:src="@drawable/baseline_arrow_left_24_black"
+              app:iconTint="@color/black"
+              android:scaleType="fitXY"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@android:color/transparent" />
+          <TextView
+              style="@style/TEXT"
+              android:textAlignment="center"
+              android:layout_weight="1"
+              tools:text="March 2023"
+              android:textSize="25sp"
+              android:id="@+id/txtSelectDate"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+          <ImageButton
+              android:id="@+id/btnIncreaseMonth"
+              style="@style/IMAGE_BUTTON"
+              android:layout_weight="1"
+              android:src="@drawable/baseline_arrow_right_24_black"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:scaleType="fitXY"
+              android:background="@android:color/transparent"
+              android:textColor="@color/purple_700"/>
+        </LinearLayout>
+        <!-- Calender View -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+          <androidx.recyclerview.widget.RecyclerView
+              android:id="@+id/recyclerCalendar"
+              app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+              app:spanCount="7"
+              android:layout_width="match_parent"
+              android:layout_columnSpan="7"
+              android:numColumns="7"
+              android:gravity="center"
+              android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+      </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/layoutRemindersView"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+      <LinearLayout
+          android:layout_marginStart="10dp"
+          android:orientation="horizontal"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/txtEditSearchReminder"
+            android:hint="Search a reminder name"
+            android:layout_weight="1"
+            android:minEms="10"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"/>
+        <ImageButton
+            android:id="@+id/btnSearchReminder"
+            style="@style/IMAGE_BUTTON"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/baseline_search_24_black"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+        <ImageButton
+            android:id="@+id/btnFilterReminder"
+            style="@style/IMAGE_BUTTON"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/baseline_filter_alt_24_black"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+      </LinearLayout>
+      <!-- Reminder list -->
+      <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/recyclerReminders"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent" />
+    </LinearLayout>
   </LinearLayout>
 
-  <!-- Reminder list -->
-  <androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/recyclerReminders"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

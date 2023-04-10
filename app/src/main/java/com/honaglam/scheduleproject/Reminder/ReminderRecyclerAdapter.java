@@ -1,11 +1,13 @@
 package com.honaglam.scheduleproject.Reminder;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.icu.text.DateFormat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
@@ -26,6 +28,7 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
   ReminderListGetter reminderListGetter = null;
 
   public int selectedItemPos = -1;
+  public int swipePos = -1;
   public ReminderRecyclerAdapter(Context context, ReminderListGetter getter){
     this.context = context;
     this.reminderListGetter = getter;
@@ -47,7 +50,21 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     holder.txtId.setText(dateFormat);
     holder.txtName.setText(data.Name);
 
+    holder.itemView.setBackgroundColor(position == selectedItemPos ?
+            ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
+            Color.TRANSPARENT);
+    holder.openMenu(selectedItemPos == position);
+  }
 
+  public void swipeItem(int pos){
+    int oldSwipe = swipePos;
+    swipePos = pos;
+    if(oldSwipe >= 0 && oldSwipe < reminderListGetter.get().size()){
+      notifyItemChanged(oldSwipe);
+    }
+    if(swipePos >= 0){
+      notifyItemChanged(swipePos);
+    }
   }
 
   @Override
@@ -57,7 +74,10 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
   class ReminderItemClickCallBack implements ReminderViewHolder.SelectItemCallBack{
     @Override
     public void onClickPos(int pos) throws NotImplementedError {
+      int oldPos = selectedItemPos;
       selectedItemPos = pos;
+      notifyDataSetChanged();
+
     }
   }
 }

@@ -1,5 +1,7 @@
 package com.honaglam.scheduleproject;
 
+import static com.honaglam.scheduleproject.TimerSetting.TIMER_SETTING_RESULT_KEY;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentResultListener;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -17,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -34,6 +38,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 //import com.honaglam.scheduleproject.UserSetting.UserSettings;
 
 import java.io.File;
@@ -43,11 +48,13 @@ import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
   public static final String FRAGMENT_TAG_TIMER = "pomodoro_timer";
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
+  public static final String FRAGMENT_TAG_STATISTIC = "statstic";
 
   private static final String UUID_KEY = "SchedulerKey";
   public boolean darkModeIsOn = false;
@@ -76,12 +83,20 @@ public class MainActivity extends AppCompatActivity {
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
-  private TimerSetting timerSettingFragment;
+  private StatisticFragment statisticFragment;
 
+
+  SharedPreferences userTimerSetting;
+  static final String PREF_KEY_WORK_TIME = "work_time";
+  static final String PREF_KEY_SHORT_TIME = "short_time";
+  static final String PREF_KEY_LONG_TIME = "long_time";
+  static final String PREF_KEY_AUTO_BREAK = "auto_break";
+  static final String PREF_KEY_AUTO_POMODORO = "auto_pomodoro";
+  static final String PREF_KEY_LONG_INTERVAL = "long_interval";
+  static final String PREF_KEY_ALARM = "alarm";
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
-
   // User setting
   //  private UserSettings userSettings;
   static final int IS_CALENDAR_FRAGMENT = 1;
@@ -93,15 +108,22 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
     fragmentManager = getSupportFragmentManager();
-    taskDb = new ReminderTaskDB(this);
-    tasks.addAll(taskDb.getAllTask());
+    userTimerSetting = getSharedPreferences("userTimerSetting", MODE_PRIVATE);
 
     timerIntent = new Intent(this, TimerService.class);
-    Log.i("BINDING_SERVICE","BIND SERVICE");
-    timerServiceConnection = new TimerConnectionService();
-    bindService(timerIntent,timerServiceConnection, Context.BIND_AUTO_CREATE);
+    bindService(timerIntent, new TimerConnectionService(), Context.BIND_AUTO_CREATE);
 
+    taskDb = new ReminderTaskDB(this);
+    taskDb.getTodayStats();
+
+
+    if (taskDb.IS_DEV) {
+      //taskDb.createSampleData();
+    }
+
+    tasks.addAll(taskDb.getAllTask());
     setSupportActionBar(findViewById(R.id.toolbar));
 
     drawerLayout = findViewById(R.id.drawerLayout);
@@ -125,6 +147,12 @@ public class MainActivity extends AppCompatActivity {
       fragmentManager.popBackStack();
     }
 
+
+    fragmentManager = getSupportFragmentManager();
+    calendarFragment = CalendarFragment.newInstance();
+    timerFragment = TimerFragment.newInstance();
+    //timerSettingFragment = TimerSetting.newInstance();
+    statisticFragment = StatisticFragment.newInstance();
 
   }
 
@@ -153,14 +181,15 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
-  public boolean switchFragment_TimerSetting() {
-    if (timerSettingFragment.isVisible()) {
+
+  public boolean switchFragment_Statistic() {
+    if (statisticFragment.isVisible()) {
       return false;
     }
     fragmentManager
             .beginTransaction()
-            .replace(R.id.fragmentContainerView, timerSettingFragment, "SettingFragment")
-            .addToBackStack("SettingFragment")
+            .replace(R.id.fragmentContainerView, statisticFragment, FRAGMENT_TAG_STATISTIC)
+            .addToBackStack(FRAGMENT_TAG_STATISTIC)
             .commit();
     return true;
   }
@@ -183,13 +212,12 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean resetTimer() {
-    if (timerService != null) {
-      timerService.resetTimer();
-      return true;
-    }
-    return false;
+
+  public boolean switchFragment_TimerSetting() {
+    TimerSetting.newInstance(loadTimerSettingPref()).show(fragmentManager, "SettingFragment");
+    return true;
   }
+
 
   public boolean setTimerOnTickCallBack(TimerService.TimerTickCallBack tickCallBack) {
     if (timerService != null) {
@@ -199,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-
   public boolean setTimerStateChangeCallBack(TimerService.TimerStateChangeCallBack stateChangeCallBack) {
     if (timerService != null) {
       timerService.setStateChangeCallBack(stateChangeCallBack);
@@ -208,9 +235,20 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal) {
+
+
+  public boolean pauseTimer() {
     if (timerService != null) {
-      timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound, autoStartBreak, autoStartPomodoro, longBreakInterVal);
+      timerService.pauseTimer();
+      return true;
+    }
+    return false;
+  }
+
+  public boolean resetTimer() {
+    if (timerService != null) {
+      timerService.resetTimer();
+      return true;
     }
     return false;
   }
@@ -224,6 +262,10 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
+  public boolean addStatsTime(long workTime, long shortTime, long longTime) {
+    return taskDb.addTimeTodayStats(workTime, shortTime, longTime);
+  }
+
   public long getCurrentRemainMillis() {
     if (timerService != null) {
       return timerService.millisRemain;
@@ -231,14 +273,61 @@ public class MainActivity extends AppCompatActivity {
     return -1;
   }
 
-  public int addTask(String name, int loops) {
+  public UserTimerSettings saveTimerSettingPref(
+          UserTimerSettings settings) {
+    SharedPreferences.Editor edit = userTimerSetting.edit();
+    edit.putLong(PREF_KEY_WORK_TIME, settings.workMillis);
+    edit.putLong(PREF_KEY_SHORT_TIME, settings.shortBreakMillis);
+    edit.putLong(PREF_KEY_LONG_TIME, settings.longBreakMillis);
+    edit.putString(PREF_KEY_ALARM, settings.alarmUri.toString());
+    edit.putBoolean(PREF_KEY_AUTO_BREAK, settings.autoStartBreakSetting);
+    edit.putBoolean(PREF_KEY_AUTO_POMODORO, settings.autoStartPomodoroSetting);
+    edit.putLong(PREF_KEY_LONG_INTERVAL, settings.longBreakInterValSetting);
+    edit.apply();
+
+    timerService.setStateTime(settings);
+    return settings;
+  }
+
+  public UserTimerSettings loadTimerSettingPref() {
+    long workTime = userTimerSetting.getLong(PREF_KEY_WORK_TIME, TimerService.DEFAULT_WORK_TIME);
+    long shortTime = userTimerSetting.getLong(PREF_KEY_SHORT_TIME, TimerService.DEFAULT_SHORT_BREAK_TIME);
+    long longTime = userTimerSetting.getLong(PREF_KEY_LONG_TIME, TimerService.DEFAULT_LONG_BREAK_TIME);
+    boolean autoBreak = userTimerSetting.getBoolean(PREF_KEY_AUTO_BREAK, false);
+    boolean autoWork = userTimerSetting.getBoolean(PREF_KEY_AUTO_POMODORO, false);
+    long longInterval = userTimerSetting.getLong(PREF_KEY_LONG_INTERVAL, 4);
+    String uri = userTimerSetting.getString(PREF_KEY_ALARM, null);
+    Uri alarm = null;
+    if (uri != null) {
+      alarm = Uri.parse(uri);
+    }
+
+    return new UserTimerSettings(
+            workTime, shortTime, longTime,
+            alarm, autoBreak, autoWork, longInterval
+    );
+  }
+
+  public int addTask(String name, int loops, int loopsCompleted, boolean isDone) {
     try {
-      int id = Math.toIntExact(taskDb.addTask(name, loops));
+      int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone));
       tasks.add(new TaskData(name, loops, id));
       return tasks.size() - 1;
     } catch (Exception ignore) {
     }
     return -1;
+  }
+
+  public int editTask(TaskData data) {
+    return taskDb.editTask(data) ? tasks.size() - 1 : -1;
+  }
+
+  public boolean makeTaskHistory(int id) {
+    return taskDb.makeTaskHistory(id);
+  }
+
+  public boolean deleteTask(int id) {
+    return taskDb.deleteTask(id);
   }
   //===
 
@@ -289,10 +378,8 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception ignore) {
     }
 
-
     return reminderDataList.size();
   }
-
 
   public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
     ArrayList<ReminderData> reminders = new ArrayList<ReminderData>();
@@ -374,6 +461,7 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  /*
   public int getReminderAt(int date, int month, int year) {
     List<ReminderData> data = taskDb.getReminderAt(date, month, year);
     Log.d("DataLength", String.valueOf(data.size()));
@@ -385,6 +473,7 @@ public class MainActivity extends AppCompatActivity {
 
     return Math.max(oldSize, newSize);
   }
+  */
 
   public int searchReminder(String name, long startDate, long endDate) {
     List<ReminderData> newList = taskDb.findReminders(name, startDate, endDate);
@@ -427,9 +516,11 @@ public class MainActivity extends AppCompatActivity {
           return switchFragment_Pomodoro();
         case R.id.nav_schedule:
           currentFragment = IS_CALENDAR_FRAGMENT;
-          Toast.makeText(MainActivity.this, "Select schedule", Toast.LENGTH_SHORT).show();
+          Toast.makeText(MainActivity.this, "Select Schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
-
+        case R.id.nav_statistic:
+          Toast.makeText(MainActivity.this, "Select Report", Toast.LENGTH_SHORT).show();
+          return switchFragment_Statistic();
       }
       return false;
     }
@@ -439,6 +530,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
+      timerService.setStateTime(loadTimerSettingPref());
+
 
       calendarFragment = CalendarFragment.newInstance();
       timerFragment = TimerFragment.newInstance();
@@ -457,15 +550,11 @@ public class MainActivity extends AppCompatActivity {
                 .addToBackStack(FRAGMENT_TAG_SCHEDULE)
                 .commit();
       }
-
-
-
-
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
+
     }
   }
-
 }
