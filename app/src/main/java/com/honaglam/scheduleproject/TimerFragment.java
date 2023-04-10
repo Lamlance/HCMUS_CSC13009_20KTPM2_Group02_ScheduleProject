@@ -201,15 +201,66 @@ public class TimerFragment extends Fragment {
     }
     else {
       AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
       if (work_state == TimerService.WORK_STATE) {
         requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.work_color));
+
+        int backgroundButtonColor = getResources().getColor(R.color.background_button_work_color);
+        ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
+        int iconColor = getResources().getColor(R.color.button_work_color);
+        ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
+
+        btnTimerStart.setBackgroundTintList(colorStateListBackground);
+        btnTimerStart.setImageTintList(colorStateListIcon);
+        btnGiveUp.setBackgroundTintList(colorStateListBackground);
+        btnGiveUp.setImageTintList(colorStateListIcon);
+        btnSkip.setBackgroundTintList(colorStateListBackground);
+        btnSkip.setImageTintList(colorStateListIcon);
+        btnSetting.setBackgroundTintList(colorStateListBackground);
+        btnSetting.setImageTintList(colorStateListIcon);
+
+        btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.background_button_work_color));
+        btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.white));
+
       }
       if (work_state == TimerService.SHORT_BREAK_STATE) {
         requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.short_break_color));
+
+        int backgroundButtonColor = getResources().getColor(R.color.background_button_short_break_color);
+        ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
+        int iconColor = getResources().getColor(R.color.button_short_break_color);
+        ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
+
+        btnTimerStart.setBackgroundTintList(colorStateListBackground);
+        btnTimerStart.setImageTintList(colorStateListIcon);
+        btnGiveUp.setBackgroundTintList(colorStateListBackground);
+        btnGiveUp.setImageTintList(colorStateListIcon);
+        btnSkip.setBackgroundTintList(colorStateListBackground);
+        btnSkip.setImageTintList(colorStateListIcon);
+        btnSetting.setBackgroundTintList(colorStateListBackground);
+        btnSetting.setImageTintList(colorStateListIcon);
+
+        btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.background_button_short_break_color));
+        btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.white));
       }
       if (work_state == TimerService.LONG_BREAK_STATE) {
         requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.long_break_color));
+
+        int backgroundButtonColor = getResources().getColor(R.color.background_button_long_break_color);
+        ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
+        int iconColor = getResources().getColor(R.color.button_long_break_color);
+        ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
+
+        btnTimerStart.setBackgroundTintList(colorStateListBackground);
+        btnTimerStart.setImageTintList(colorStateListIcon);
+        btnGiveUp.setBackgroundTintList(colorStateListBackground);
+        btnGiveUp.setImageTintList(colorStateListIcon);
+        btnSkip.setBackgroundTintList(colorStateListBackground);
+        btnSkip.setImageTintList(colorStateListIcon);
+        btnSetting.setBackgroundTintList(colorStateListBackground);
+        btnSetting.setImageTintList(colorStateListIcon);
+
+        btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.background_button_long_break_color));
+        btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.white));
       }
     }
   }

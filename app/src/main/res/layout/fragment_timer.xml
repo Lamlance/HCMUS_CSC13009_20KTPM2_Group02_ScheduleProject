@@ -4,11 +4,20 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  android:background="#ba4949"
+  android:background="#CE5959"
   style="@style/SCREEN"
   android:orientation="vertical"
   android:weightSum="10"
+  android:paddingLeft="10dp"
+  android:paddingRight="10dp"
   tools:context=".TimerFragment">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+  </LinearLayout>
 
   <TextView
     android:id="@+id/txtTimer"
@@ -24,6 +33,7 @@
     android:textSize="80sp"
     tools:ignore="HardcodedText" />
 
+<!-- TODO: change color of the buttons in light mode -->
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="0dp"

@@ -6,7 +6,10 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   tools:context=".MainActivity"
-  android:orientation="vertical">
+  android:orientation="vertical"
+  android:paddingLeft="10dp"
+  android:paddingRight="10dp"
+  android:layout_marginTop="15dp">
 
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
@@ -129,20 +132,16 @@
       android:layout_width="0dp"
       android:layout_height="match_parent"/>
 
-<!--  TODO: fix the color of the icon in dark mode  -->
     <ImageButton
       android:id="@+id/btnSearchReminder"
       style="@style/IMAGE_BUTTON"
-      android:backgroundTint="@color/white"
       android:src="@drawable/baseline_search_24_black"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"/>
-    <!--  TODO: fix the color of the icon in dark mode  -->
 
     <ImageButton
       android:id="@+id/btnFilterReminder"
       style="@style/IMAGE_BUTTON"
-      android:backgroundTint="@color/white"
       android:src="@drawable/baseline_filter_alt_24_black"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"/>

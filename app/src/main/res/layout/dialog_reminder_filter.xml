@@ -6,13 +6,28 @@
   android:layout_width="match_parent"
   android:orientation="vertical"
   xmlns:tools="http://schemas.android.com/tools"
+  android:layout_marginTop="15dp"
+  android:paddingLeft="10dp"
+  android:paddingRight="10dp"
   android:layout_height="wrap_content">
 
+<!-- TODO: change the name of the title -->
+  <TextView
+    style="@style/TEXT"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Searching for date"
+    android:paddingLeft="10dp"
+    android:paddingBottom="5dp"
+    android:textStyle="bold"
+    android:textSize="26sp"/>
   <!-- Date picker -->
   <LinearLayout
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp">
+
     <LinearLayout
       android:paddingVertical="10dp"
       android:layout_weight="1"
@@ -27,6 +42,7 @@
         android:text="From date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+<!--  TODO: change color of date icon in dark mode    -->
       <androidx.appcompat.widget.AppCompatTextView
         style="@style/TEXT"
         android:autoSizeTextType="uniform"
@@ -67,7 +83,7 @@
     </LinearLayout>
   </LinearLayout>
 
-<!-- TODO: fix the color of the text in dark mode -->
+<!-- TODO: fix the color of the text of the checkbox in dark mode -->
   <CheckBox
     android:text="Show weekly reminder"
     android:layout_width="match_parent"

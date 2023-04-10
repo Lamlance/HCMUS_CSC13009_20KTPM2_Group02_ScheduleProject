@@ -7,9 +7,19 @@
   <color name="teal_700">#FF018786</color>
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
-  <color name="work_color">#FF5722</color>
-  <color name="short_break_color">#4CAF50</color>
-  <color name="long_break_color">#2196F3</color>
+
+  <color name="work_color">#CE5959</color>
+  <color name="background_button_work_color">#E6A8A8</color>
+  <color name="button_work_color">#E06060</color>
+
+  <color name="short_break_color">#337746</color>
+  <color name="background_button_short_break_color">#9bd3aa</color>
+  <color name="button_short_break_color">#56b671</color>
+
+  <color name="long_break_color">#146C94</color>
+  <color name="background_button_long_break_color">#65BDE6</color>
+  <color name="button_long_break_color">#1FA3E0</color>
+
   <color name="red_700">#B03602</color>
 
   <color name="add_btn_color_light_mode">#FFDAF8</color>
@@ -20,4 +30,6 @@
   <color name="image_btn_timer_fragment_background">#2E2E2E</color>
   <color name="image_btn_timer_fragment_icon">#E6E6E6</color>
 
+  <color name="image_btn_timer_fragment_lightmode_background">#BACDDB</color>
+  <color name="image_btn_timer_fragment_lightmode_icon">#CE5959</color>
 </resources>
