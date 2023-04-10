@@ -178,11 +178,7 @@ public class TimerFragment extends Fragment {
     getView().setBackgroundColor(color);
   }
 
-  @SuppressLint("ResourceAsColor")
   private void UpdateTimerBackground(int work_state) {
-    txtPomodoro = getView().findViewById(R.id.txtPomodoro);
-    txtShortBreak = getView().findViewById(R.id.txtShortBreak);
-    txtLongBreak = getView().findViewById(R.id.txtLongBreak);
 
     Drawable rounded_background = getResources().getDrawable(R.drawable.rounded_background);
     txtPomodoro.setBackground(rounded_background);

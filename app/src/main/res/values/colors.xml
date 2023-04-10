@@ -24,7 +24,6 @@
   <color name="background_button_long_break_color">#629bc3</color>
   <color name="button_long_break_color">#3c769f</color>
 
-  <color name="red_700">#B03602</color>
 
   <color name="add_btn_color_light_mode">#FFDAF8</color>
   <color name="add_btn_text_color_light_mode">#410007</color>
@@ -39,9 +38,11 @@
 
 
   <color name="selected_white">#80D2D2D2</color>
+  <!--
   <color name="work_color">#FF5722</color>
   <color name="short_break_color">#4CAF50</color>
   <color name="long_break_color">#2196F3</color>
+  -->
   <color name="red_700">#B03602</color>
   <color name="red_500">#F44336</color>
 

@@ -147,13 +147,6 @@ public class MainActivity extends AppCompatActivity {
       fragmentManager.popBackStack();
     }
 
-
-    fragmentManager = getSupportFragmentManager();
-    calendarFragment = CalendarFragment.newInstance();
-    timerFragment = TimerFragment.newInstance();
-    //timerSettingFragment = TimerSetting.newInstance();
-    statisticFragment = StatisticFragment.newInstance();
-
   }
 
 
@@ -535,7 +528,6 @@ public class MainActivity extends AppCompatActivity {
 
       calendarFragment = CalendarFragment.newInstance();
       timerFragment = TimerFragment.newInstance();
-      timerSettingFragment = TimerSetting.newInstance();
 
       if(currentFragment == IS_TIMER_FRAGMENT){
         fragmentManager
