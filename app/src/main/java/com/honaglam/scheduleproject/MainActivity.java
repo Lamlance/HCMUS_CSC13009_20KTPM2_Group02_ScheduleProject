@@ -1,5 +1,7 @@
 package com.honaglam.scheduleproject;
 
+import static com.honaglam.scheduleproject.TimerSetting.TIMER_SETTING_RESULT_KEY;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentResultListener;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -17,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -34,6 +38,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 //import com.honaglam.scheduleproject.UserSetting.UserSettings;
 
 import java.io.File;
@@ -76,8 +81,15 @@ public class MainActivity extends AppCompatActivity {
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
-  private TimerSetting timerSettingFragment;
 
+  SharedPreferences userTimerSetting ;
+  static final String PREF_KEY_WORK_TIME = "work_time";
+  static final String PREF_KEY_SHORT_TIME = "short_time";
+  static final String PREF_KEY_LONG_TIME = "long_time";
+  static final String PREF_KEY_AUTO_BREAK = "auto_break";
+  static final String PREF_KEY_AUTO_POMODORO = "auto_pomodoro";
+  static final String PREF_KEY_LONG_INTERVAL = "long_interval";
+  static final String PREF_KEY_ALARM = "alarm";
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
@@ -90,26 +102,20 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
+    userTimerSetting = getSharedPreferences("userTimerSetting",MODE_PRIVATE);
+
+    timerIntent = new Intent(this, TimerService.class);
+    bindService(timerIntent, new TimerConnectionService(), Context.BIND_AUTO_CREATE);
+
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
+
 
     if(taskDb.IS_DEV){
       //taskDb.createSampleData();
     }
 
-    List<ReminderTaskDB.TimerStatsData> list = taskDb.get30StatsBeforeToday();
-    for (ReminderTaskDB.TimerStatsData data:list) {
-      String str = String.format(Locale.getDefault(),
-              "%d / %d / %d, Work: %d ,Short: %d, Long: %d",
-              data.date,data.month,data.year,data.workDur,data.shortDur,data.longDur);
-      Log.i("TASK_DATA",str);
-    }
-
     tasks.addAll(taskDb.getAllTask());
-
-    timerIntent = new Intent(this, TimerService.class);
-    bindService(timerIntent, new TimerConnectionService(), Context.BIND_AUTO_CREATE);
-
     setSupportActionBar(findViewById(R.id.toolbar));
 
     drawerLayout = findViewById(R.id.drawerLayout);
@@ -131,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
     fragmentManager = getSupportFragmentManager();
     calendarFragment = CalendarFragment.newInstance();
     timerFragment = TimerFragment.newInstance();
-    timerSettingFragment = TimerSetting.newInstance();
+    //timerSettingFragment = TimerSetting.newInstance();
 
 
     fragmentManager
@@ -167,14 +173,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public boolean switchFragment_TimerSetting() {
-    if (timerSettingFragment.isVisible()) {
-      return false;
-    }
-    fragmentManager
-            .beginTransaction()
-            .replace(R.id.fragmentContainerView, timerSettingFragment, "SettingFragment")
-            .addToBackStack("SettingFragment")
-            .commit();
+    TimerSetting.newInstance(loadTimerSettingPref()).show(fragmentManager,"SettingFragment");
     return true;
   }
 
@@ -228,11 +227,38 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean setTimerTime(long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal) {
-    if (timerService != null) {
-      timerService.setStateTime(workTime, shortBreakTime, longBreakTime, alarmSound, autoStartBreak, autoStartPomodoro, longBreakInterVal);
+  public UserTimerSettings saveTimerSettingPref(
+          UserTimerSettings settings){
+    SharedPreferences.Editor edit = userTimerSetting.edit();
+    edit.putLong(PREF_KEY_WORK_TIME,settings.workMillis);
+    edit.putLong(PREF_KEY_SHORT_TIME,settings.shortBreakMillis);
+    edit.putLong(PREF_KEY_LONG_TIME,settings.longBreakMillis);
+    edit.putString(PREF_KEY_ALARM,settings.alarmUri.toString());
+    edit.putBoolean(PREF_KEY_AUTO_BREAK,settings.autoStartBreakSetting);
+    edit.putBoolean(PREF_KEY_AUTO_POMODORO,settings.autoStartPomodoroSetting);
+    edit.putLong(PREF_KEY_LONG_INTERVAL,settings.longBreakInterValSetting);
+    edit.apply();
+
+    timerService.setStateTime(settings);
+    return settings;
+  }
+  public UserTimerSettings loadTimerSettingPref(){
+    long workTime = userTimerSetting.getLong(PREF_KEY_WORK_TIME,TimerService.DEFAULT_WORK_TIME);
+    long shortTime = userTimerSetting.getLong(PREF_KEY_SHORT_TIME,TimerService.DEFAULT_SHORT_BREAK_TIME);
+    long longTime = userTimerSetting.getLong(PREF_KEY_LONG_TIME,TimerService.DEFAULT_LONG_BREAK_TIME);
+    boolean autoBreak = userTimerSetting.getBoolean(PREF_KEY_AUTO_BREAK,false);
+    boolean autoWork = userTimerSetting.getBoolean(PREF_KEY_AUTO_POMODORO,false);
+    long longInterval = userTimerSetting.getLong(PREF_KEY_LONG_INTERVAL,4);
+    String uri = userTimerSetting.getString(PREF_KEY_ALARM,null);
+    Uri alarm = null;
+    if(uri != null){
+      alarm = Uri.parse(uri);
     }
-    return false;
+
+    return new UserTimerSettings(
+            workTime,shortTime,longTime,
+            alarm,autoBreak,autoWork,longInterval
+    );
   }
 
   //TODO Timer On Finished
@@ -461,6 +487,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
+      timerService.setStateTime(loadTimerSettingPref());
     }
 
     @Override

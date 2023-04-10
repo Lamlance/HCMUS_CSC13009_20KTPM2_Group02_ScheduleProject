@@ -19,6 +19,8 @@ import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
 
+import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
+
 import kotlin.NotImplementedError;
 //import android.os.Looper;
 
@@ -28,9 +30,9 @@ public class TimerService extends Service {
   private MediaPlayer alarmMediaPlayer;
   private MediaPlayer tickingMediaPlayer;
 
-  private static final long DEFAULT_WORK_TIME = 5000; //5second
-  private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
-  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
+  public static final long DEFAULT_WORK_TIME = 5000; //5second
+  public static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
+  public static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
 
   //public static final int NONE_STATE = 0;
   public static final int WORK_STATE = 1;
@@ -336,8 +338,6 @@ public class TimerService extends Service {
     updateServiceNotification(makeServiceNotification(-1));
     return super.onStartCommand(intent, flags, startId);
   }
-
-
   public void startTimer() {
     if (!isRunning) {
       timerRunnable = new Timer();
@@ -345,7 +345,6 @@ public class TimerService extends Service {
       timerHandler.post(timerRunnable);
     }
   }
-
   public void pauseTimer() {
     if (isRunning && timer != null) {
       timer.cancel();
@@ -354,45 +353,32 @@ public class TimerService extends Service {
       timer = null;
       timerHandler.removeCallbacks(timerRunnable);
     }
-    if (tickCallBack == null) {
-      return;
-    }
     callTickCallBack(millisRemain);
   }
   public void resetTimer() {
     millisRemain = workMillis;
-    if (isRunning) {
+    if (isRunning && timer != null) {
       timer.cancel();
       timerHandler.removeCallbacks(timerRunnable);
-      callTickCallBack(millisRemain);
       isRunning = false;
     }
+    callTickCallBack(millisRemain);
+    callStateChangeCallBack(WORK_STATE,0,WORK_STATE);
   }
 
+  public void setStateTime(UserTimerSettings settings) {
+    pauseTimer();
 
-  @Override
-  public void onDestroy() {
-    timer.cancel();
-    super.onDestroy();
-  }
+    workMillis = settings.workMillis;
+    shortBreakMillis = settings.shortBreakMillis;
+    longBreakMillis = settings.shortBreakMillis;
+    millisRemain = settings.workMillis;
+    alarmUri = settings.alarmUri;
+    autoStartBreakSetting = settings.autoStartBreakSetting;
+    autoStartPomodoroSetting = settings.autoStartPomodoroSetting;
+    longBreakInterValSetting = settings.longBreakInterValSetting;
 
-  public void setStateTime(
-          long workTime, long shortBreakTime, long longBreakTime,
-          Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro,
-          long longBreakInterVal) {
-    if (isRunning) {
-      timer.cancel();
-      isRunning = false;
-    }
-    workMillis = workTime;
-    shortBreakMillis = shortBreakTime;
-    longBreakMillis = longBreakTime;
-    millisRemain = workTime;
-    alarmUri = alarmSound;
-    autoStartBreakSetting = autoStartBreak;
-    autoStartPomodoroSetting = autoStartPomodoro;
-    longBreakInterValSetting = longBreakInterVal;
-
+    resetTimer();
   }
 
   public int calculateCurrentState() {

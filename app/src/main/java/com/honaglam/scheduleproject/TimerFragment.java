@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,6 +29,7 @@ import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Task.TaskViewHolder;
+import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 import java.util.List;
 import java.util.Locale;
@@ -137,12 +139,7 @@ public class TimerFragment extends Fragment {
     //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
 
     timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
-    timerSetting.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        activity.switchFragment_TimerSetting();
-      }
-    });
+    timerSetting.setOnClickListener(new TimerSettingFragmentClick());
 
     btnSkip = (FloatingActionButton) getView().findViewById((R.id.btnSkip));
     btnSkip.setOnClickListener(new View.OnClickListener() {
@@ -205,6 +202,7 @@ public class TimerFragment extends Fragment {
     @Override
     public void onStateChange(int newState,long prevTimeState,int oldState) {
       UpdateTimerBackground(newState);
+
       activity.addStatsTime(
               oldState == TimerService.WORK_STATE ? prevTimeState : 0,
               oldState == TimerService.SHORT_BREAK_STATE ? prevTimeState : 0,
@@ -282,6 +280,25 @@ public class TimerFragment extends Fragment {
         taskRecyclerViewAdapter.notifyItemChanged(position);
       } catch (Exception ignore) {
       }
+    }
+  }
+
+  class TimerSettingFragmentClick implements View.OnClickListener{
+    @Override
+    public void onClick(View view) {
+      getParentFragmentManager().setFragmentResultListener(
+              TimerSetting.TIMER_SETTING_REQUEST_KEY,
+              TimerFragment.this,
+              new TimerSettingResultListener());
+      ((MainActivity)getActivity()).switchFragment_TimerSetting();
+    }
+  }
+
+  class TimerSettingResultListener implements FragmentResultListener{
+    @Override
+    public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+      UserTimerSettings settings = (UserTimerSettings) result.getSerializable(TimerSetting.TIMER_SETTING_RESULT_KEY);
+      ((MainActivity)getActivity()).saveTimerSettingPref(settings);
     }
   }
 }

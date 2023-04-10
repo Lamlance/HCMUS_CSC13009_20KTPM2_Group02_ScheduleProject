@@ -44,7 +44,7 @@
               android:gravity="center"
               android:text="@string/pomodoro"
               android:textAlignment="center"
-              android:textSize="20sp" />
+              android:textSize="15sp" />
           <NumberPicker
               android:id="@+id/workTime"
               android:layout_width="wrap_content"
@@ -63,7 +63,7 @@
               android:layout_gravity="center"
               android:text="@string/short_break"
               android:textAlignment="center"
-              android:textSize="20sp" />
+              android:textSize="15sp" />
           <NumberPicker
               android:id="@+id/shortBreak"
               android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
               android:gravity="center"
               android:text="@string/long_break"
               android:textAlignment="center"
-              android:textSize="20sp" />
+              android:textSize="15sp" />
           <NumberPicker
               android:id="@+id/longBreak"
               android:layout_width="wrap_content"
