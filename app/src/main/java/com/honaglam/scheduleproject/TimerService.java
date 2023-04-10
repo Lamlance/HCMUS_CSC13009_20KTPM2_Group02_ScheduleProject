@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -15,10 +17,9 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 
-import android.util.Log;
-import android.view.View;
-
 import androidx.core.app.NotificationCompat;
+
+import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 import kotlin.NotImplementedError;
 //import android.os.Looper;
@@ -26,10 +27,12 @@ import kotlin.NotImplementedError;
 public class TimerService extends Service {
   private final IBinder binder = new LocalBinder();
   CountDownTimer timer;
+  private MediaPlayer alarmMediaPlayer;
+  private MediaPlayer tickingMediaPlayer;
 
-  private static final long DEFAULT_WORK_TIME = 5000; //5second
-  private static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
-  private static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
+  public static final long DEFAULT_WORK_TIME = 5000; //5second
+  public static final long DEFAULT_SHORT_BREAK_TIME = 8000; //6second
+  public static final long DEFAULT_LONG_BREAK_TIME = 10000; //7second
 
   //public static final int NONE_STATE = 0;
   public static final int WORK_STATE = 1;
@@ -65,6 +68,12 @@ public class TimerService extends Service {
 
   }
 
+  private static final long NOTIFICATION_FLAG_WELCOME = -1;
+  private static final long NOTIFICATION_FLAG_WORK_FINISHED = -2;
+  private static final long NOTIFICATION_FLAG_BREAK_FINISHED = -3;
+
+  BroadcastReceiver receiver;
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -92,23 +101,61 @@ public class TimerService extends Service {
             .setContentIntent(pendingIntent)
             .setOnlyAlertOnce(true);
 
+
+    receiver = new ServiceControlBroadCastReceiver();
+    IntentFilter serviceControlFilter = new IntentFilter();
+    serviceControlFilter.addAction("com.hoanglam.scheduleproject.controltimer");
+    registerReceiver(receiver,serviceControlFilter);
+
     // timerFragment = new TimerFragment();
   }
 
-  public Notification makeServiceNotification(String detail) {
-    notificationBuilder.setContentText(detail);
-    return notificationBuilder.build();
+  @Override
+  public void onDestroy() {
+    timer.cancel();
+    unregisterReceiver(receiver);
+    super.onDestroy();
   }
 
+  public Notification makeServiceNotification(long time) {
+    notificationBuilder.setContentText(makeTimeString(time));
+    notificationBuilder.clearActions();
+
+    if(time == NOTIFICATION_FLAG_WORK_FINISHED || time == NOTIFICATION_FLAG_BREAK_FINISHED){
+      String action = (time == NOTIFICATION_FLAG_WORK_FINISHED) ? "Start break" : "Start focusing";
+
+      Intent broadcastServiceControlIntent = new Intent("com.hoanglam.scheduleproject.controltimer");
+      PendingIntent pendingIntent = PendingIntent.getBroadcast(
+              this,
+              0,broadcastServiceControlIntent,
+              PendingIntent.FLAG_IMMUTABLE);
+      notificationBuilder.addAction(R.mipmap.ic_launcher_round,action,pendingIntent);
+    }
+
+    return notificationBuilder.build();
+  }
+  private String makeTimeString(long time){
+    if(time == NOTIFICATION_FLAG_WELCOME){
+      return "Hello user";
+    }
+    if(time == NOTIFICATION_FLAG_WORK_FINISHED){
+      return "Work time had finished. Start your break~~";
+    }
+    if(time == NOTIFICATION_FLAG_BREAK_FINISHED){
+      return "Break time finished. Let's start working! ";
+    }
+
+
+    int minute = (int) Math.floor((double)time / 60000.0);
+    int seconds = (int)Math.floor((double)time / 1000.0) - (minute*60);
+    return (minute+":"+seconds);
+  }
   public void updateServiceNotification(Notification notification) {
     NotificationManager notificationManager = getSystemService(NotificationManager.class);
     notificationManager.notify(NOTIFICATION_ID, notification);
   }
 
   class Timer implements Runnable {
-    private MediaPlayer alarmMediaPlayer;
-    private MediaPlayer tickingMediaPlayer;
-
     class PomodoroTimerCountDown extends CountDownTimer {
       public PomodoroTimerCountDown(long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
@@ -118,7 +165,7 @@ public class TimerService extends Service {
       @Override
       public void onTick(long l) {
         millisRemain = l;
-        updateServiceNotification(makeServiceNotification(String.format("%d", l)));
+        updateServiceNotification(makeServiceNotification(l));
 
         try {
           if (tickingMediaPlayer != null && !tickingMediaPlayer.isPlaying() && millisRemain < 4000) {
@@ -135,7 +182,9 @@ public class TimerService extends Service {
       @Override
       public void onFinish() {
         millisRemain = 0;
-
+        updateServiceNotification(makeServiceNotification(
+                runningState == WORK_STATE ? NOTIFICATION_FLAG_WORK_FINISHED : NOTIFICATION_FLAG_BREAK_FINISHED
+        ));
         if (tickingMediaPlayer != null) {
           // Stop the tickling sound and release media player
           tickingMediaPlayer.stop();
@@ -154,26 +203,48 @@ public class TimerService extends Service {
           playLoopSound.start();
         }
 
-        // TODO: Set isAutoSwitchTask after adding state of timer setting done
-
         switchState();
         callTickCallBack(millisRemain);
+        
         isRunning = false;
+
+        new CountDownTimer(2000, 1000) {
+          public void onTick(long millisUntilFinished) {
+            // Do nothing
+          }
+
+          public void onFinish() {
+            if (autoStartBreakSetting && autoStartPomodoroSetting) {
+              run();
+            } else if (autoStartPomodoroSetting && !autoStartBreakSetting) {
+              if (runningState != 1) {
+                runningState = 0;
+              } else {
+                run();
+              }
+            } else if (!autoStartPomodoroSetting && autoStartBreakSetting) {
+              if (runningState == 1) {
+                runningState = 0;
+              } else {
+                run();
+              }
+            } else {
+              runningState = 0;
+            }
+          }
+        }.start();
       }
     }
 
     @Override
     public void run() {
-      //runningState = WORK_STATE;
       try {
         tickingMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.count_down_sound);
       } catch (Exception e) {
         e.printStackTrace();
       }
-
       timer = new PomodoroTimerCountDown(millisRemain, 1000);
       timer.start();
-
     }
   }
 
@@ -263,12 +334,10 @@ public class TimerService extends Service {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    startForeground(NOTIFICATION_ID, makeServiceNotification("Hello !"));
-    updateServiceNotification(makeServiceNotification("Hello User"));
+    startForeground(NOTIFICATION_ID, makeServiceNotification(-1));
+    updateServiceNotification(makeServiceNotification(-1));
     return super.onStartCommand(intent, flags, startId);
   }
-
-
   public void startTimer() {
     if (!isRunning) {
       timerRunnable = new Timer();
@@ -276,52 +345,40 @@ public class TimerService extends Service {
       timerHandler.post(timerRunnable);
     }
   }
-
   public void pauseTimer() {
-    if (isRunning) {
+    if (isRunning && timer != null) {
       timer.cancel();
       isRunning = false;
-    }
-    if (tickCallBack == null) {
-      return;
+      timer.cancel();
+      timer = null;
+      timerHandler.removeCallbacks(timerRunnable);
     }
     callTickCallBack(millisRemain);
   }
-
   public void resetTimer() {
     millisRemain = workMillis;
-    if (isRunning) {
+    if (isRunning && timer != null) {
       timer.cancel();
       timerHandler.removeCallbacks(timerRunnable);
-      callTickCallBack(millisRemain);
       isRunning = false;
     }
+    callTickCallBack(millisRemain);
+    callStateChangeCallBack(WORK_STATE,0,WORK_STATE);
   }
 
+  public void setStateTime(UserTimerSettings settings) {
+    pauseTimer();
 
-  @Override
-  public void onDestroy() {
-    timer.cancel();
-    super.onDestroy();
-  }
+    workMillis = settings.workMillis;
+    shortBreakMillis = settings.shortBreakMillis;
+    longBreakMillis = settings.shortBreakMillis;
+    millisRemain = settings.workMillis;
+    alarmUri = settings.alarmUri;
+    autoStartBreakSetting = settings.autoStartBreakSetting;
+    autoStartPomodoroSetting = settings.autoStartPomodoroSetting;
+    longBreakInterValSetting = settings.longBreakInterValSetting;
 
-  public void setStateTime(
-          long workTime, long shortBreakTime, long longBreakTime,
-          Uri alarmSound, boolean autoStartBreak, boolean autoStartPomodoro,
-          long longBreakInterVal) {
-    if (isRunning) {
-      timer.cancel();
-      isRunning = false;
-    }
-    workMillis = workTime;
-    shortBreakMillis = shortBreakTime;
-    longBreakMillis = longBreakTime;
-    millisRemain = workTime;
-    alarmUri = alarmSound;
-    autoStartBreakSetting = autoStartBreak;
-    autoStartPomodoroSetting = autoStartPomodoro;
-    longBreakInterValSetting = longBreakInterVal;
-
+    resetTimer();
   }
 
   public int calculateCurrentState() {
@@ -388,11 +445,21 @@ public class TimerService extends Service {
 
   public void skipTimer() {
 
-    if (isRunning) {
+    if (isRunning && timer != null) {
       timer.cancel();
       isRunning = false;
+      timerHandler.removeCallbacks(timerRunnable);
+
     }
 
+    if (tickingMediaPlayer != null) {
+      tickingMediaPlayer.stop();
+      tickingMediaPlayer.release();
+      tickingMediaPlayer = null;
+    }
+
+
+    callTickCallBack(millisRemain);
     switchState();
     callTickCallBack(millisRemain);
   }
@@ -400,6 +467,13 @@ public class TimerService extends Service {
   public class LocalBinder extends Binder {
     TimerService getService() {
       return TimerService.this;
+    }
+  }
+
+  public class ServiceControlBroadCastReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      startTimer(); ;
     }
   }
 
