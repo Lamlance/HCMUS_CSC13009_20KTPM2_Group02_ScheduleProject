@@ -20,18 +20,18 @@
   <!-- Night mode -->
   <!-- Screen background if dark mode is on-->
   <style name="TIMER_SCREEN">
-    <item name="android:background">#000000</item>
-    <item name="backgroundTint">#000000</item>
+    <item name="android:background">#0f0f0f</item>
+    <item name="backgroundTint">#0f0f0f</item>
   </style>
 
   <style name="CALENDAR_SCREEN">
-    <item name="android:background">#000000</item>
-    <item name="backgroundTint">#000000</item>
+    <item name="android:background">#0f0f0f</item>
+    <item name="backgroundTint">#0f0f0f</item>
   </style>
 
   <style name="REPORT_SCREEN">
-    <item name="android:background">#000000</item>
-    <item name="backgroundTint">#000000</item>
+    <item name="android:background">#0f0f0f</item>
+    <item name="backgroundTint">#0f0f0f</item>
   </style>
 
   <!-- Text color if dark mode is on-->
@@ -53,6 +53,6 @@
 
   <!-- Navigation header background if dark mode is on-->
   <style name="NAV">
-    <item name="android:background">#000000</item>
+    <item name="android:background">#0f0f0f</item>
   </style>
 </resources>

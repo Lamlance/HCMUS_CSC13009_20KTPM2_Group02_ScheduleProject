@@ -8,6 +8,8 @@
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
 
+  <color name="dark_mode_color">#0F0F0F</color>
+
   <color name="text_work_state_background_color">#a44e4e</color>
   <color name="text_short_break_state_background_color">#417b80</color>
   <color name="text_long_break_state_background_color">#426c8a</color>

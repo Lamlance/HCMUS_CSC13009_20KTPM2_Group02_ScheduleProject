@@ -349,7 +349,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                         TaskTable.TABLE_NAME,
                         null,
                         TaskTable.COLUMN_NAME_HISTORY + " = ? ",
-                        null,
+                        new String[]{"0"},
                         null,
                         null,
                         null
@@ -630,7 +630,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                 if (!cursor.moveToFirst()) {
                     return list;
                 }
-                String s = cursor.getString(cursor.getColumnIndex("col_date"));
                 int dateIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_DATE);
                 int monthIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_MONTH);
                 int yearIndex = cursor.getColumnIndex(StatsTable.COLUMN_NAME_YEAR);

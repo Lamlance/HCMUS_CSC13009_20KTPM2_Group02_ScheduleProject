@@ -195,7 +195,7 @@ public class TimerFragment extends Fragment {
     btnAddTask = getView().findViewById(R.id.btnAddTask);
     if (activity.darkModeIsOn == true) {
       AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.dark_mode_color));
       int backgroundButtonColor = getResources().getColor(R.color.image_btn_timer_fragment_background);
       ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
       int iconColor = getResources().getColor(R.color.image_btn_timer_fragment_icon);

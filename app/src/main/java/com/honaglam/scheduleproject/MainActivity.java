@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_TIMER = "pomodoro_timer";
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
   public static final String FRAGMENT_TAG_STATISTIC = "statstic";
+  public static final String FRAGMENT_TAG_HISTORY = "history";
 
   private static final String UUID_KEY = "SchedulerKey";
   public boolean darkModeIsOn = false;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
   private StatisticFragment statisticFragment;
+  private HistoryFragment historyFragment;
 
 
   SharedPreferences userTimerSetting;
@@ -101,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
   //  private UserSettings userSettings;
   static final int IS_CALENDAR_FRAGMENT = 1;
   static final int IS_TIMER_FRAGMENT = 2;
+  static final int IS_STATISTIC_FRAGMENT = 3;
+  static final int IS_HISTORY_FRAGMENT = 4;
 
   int currentFragment = IS_CALENDAR_FRAGMENT;
 
@@ -150,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-
+  // Switch to Pomodoro Fragment / Timer Fragment
   public boolean switchFragment_Pomodoro() {
     if (timerFragment.isVisible()) {
       return false;
@@ -163,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
+  // Switch to Schedule Fragment
   public boolean switchFragment_Schedule() {
     if (calendarFragment.isVisible()) {
       return false;
@@ -176,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
+  // Switch to Statistic Fragment
   public boolean switchFragment_Statistic() {
     if (statisticFragment.isVisible()) {
       return false;
@@ -184,6 +190,19 @@ public class MainActivity extends AppCompatActivity {
             .beginTransaction()
             .replace(R.id.fragmentContainerView, statisticFragment, FRAGMENT_TAG_STATISTIC)
             .addToBackStack(FRAGMENT_TAG_STATISTIC)
+            .commit();
+    return true;
+  }
+
+  // Switch to History Fragment
+  public boolean switchFragment_History() {
+    if (historyFragment.isVisible()) {
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, historyFragment, FRAGMENT_TAG_HISTORY)
+            .addToBackStack(FRAGMENT_TAG_HISTORY)
             .commit();
     return true;
   }
@@ -518,8 +537,13 @@ public class MainActivity extends AppCompatActivity {
           Toast.makeText(MainActivity.this, "Select Schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
         case R.id.nav_statistic:
+          currentFragment = IS_STATISTIC_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select Report", Toast.LENGTH_SHORT).show();
           return switchFragment_Statistic();
+        case R.id.nav_history:
+          currentFragment = IS_HISTORY_FRAGMENT;
+          Toast.makeText(MainActivity.this, "Select History", Toast.LENGTH_SHORT).show();
+          return switchFragment_History();
       }
       return false;
     }
@@ -534,6 +558,7 @@ public class MainActivity extends AppCompatActivity {
       calendarFragment = CalendarFragment.newInstance();
       timerFragment = TimerFragment.newInstance();
       statisticFragment = StatisticFragment.newInstance();
+      historyFragment = HistoryFragment.newInstance();
 
       fragmentManager
               .beginTransaction()

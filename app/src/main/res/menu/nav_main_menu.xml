@@ -5,19 +5,26 @@
     tools:showIn="navigation_view">
   <group android:checkableBehavior="single">
     <item
-        android:id="@+id/nav_schedule"
-        android:icon="@drawable/baseline_calendar_month_24"
-        android:title="Scheduler" />
-    <item
         android:id="@+id/nav_timer"
         android:icon="@drawable/baseline_access_time_24"
         android:title="Pomodoro Timer" />
+    <item
+
+      android:id="@+id/nav_schedule"
+      android:icon="@drawable/baseline_calendar_month_24"
+      android:title="Scheduler" />
 
     <item
         android:id="@+id/nav_statistic"
         android:icon="@drawable/baseline_bar_chart_24"
         android:title="Report"
         />
+
+    <item
+      android:id="@+id/nav_history"
+      android:icon="@drawable/baseline_history_24"
+      android:title="History"
+      />
 
     <item android:id="@+id/nav_switchTheme"
         android:title="Dark Mode"
