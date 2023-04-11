@@ -324,6 +324,10 @@ public class MainActivity extends AppCompatActivity {
   public boolean deleteTask(int id) {
     return taskDb.deleteTask(id);
   }
+
+  public boolean moveTaskToHistory(int id) {
+    return taskDb.makeTaskHistory(id);
+  }
   //===
 
   @Override

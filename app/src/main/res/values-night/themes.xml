@@ -19,7 +19,17 @@
 
   <!-- Night mode -->
   <!-- Screen background if dark mode is on-->
-  <style name="SCREEN">
+  <style name="TIMER_SCREEN">
+    <item name="android:background">#000000</item>
+    <item name="backgroundTint">#000000</item>
+  </style>
+
+  <style name="CALENDAR_SCREEN">
+    <item name="android:background">#000000</item>
+    <item name="backgroundTint">#000000</item>
+  </style>
+
+  <style name="REPORT_SCREEN">
     <item name="android:background">#000000</item>
     <item name="backgroundTint">#000000</item>
   </style>

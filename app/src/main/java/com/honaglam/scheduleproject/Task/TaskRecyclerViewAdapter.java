@@ -29,6 +29,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
   TaskViewHolder.OnClickPositionCallBack checkTaskCallback;
 
   TaskViewHolder.OnClickPositionCallBack editTaskCallback;
+  TaskViewHolder.OnClickPositionCallBack moveToHistoryCallback;
 
 
   public interface GetListCallback {
@@ -42,13 +43,15 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
           GetListCallback callback,
           TaskViewHolder.OnClickPositionCallBack deleteTaskCallback,
           TaskViewHolder.OnClickPositionCallBack checkTaskCallback,
-          TaskViewHolder.OnClickPositionCallBack editTaskCallback
+          TaskViewHolder.OnClickPositionCallBack editTaskCallback,
+          TaskViewHolder.OnClickPositionCallBack moveToHistoryCallback
   ) {
     this.context = context;
     dataGet = callback;
     this.deleteTaskCallback = deleteTaskCallback;
     this.checkTaskCallback = checkTaskCallback;
     this.editTaskCallback = editTaskCallback;
+    this.moveToHistoryCallback = moveToHistoryCallback;
   }
 
   @NonNull
@@ -58,7 +61,8 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
             LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false),
             deleteTaskCallback,
             checkTaskCallback,
-            editTaskCallback
+            editTaskCallback,
+            moveToHistoryCallback
     );
 
     return viewHolder;

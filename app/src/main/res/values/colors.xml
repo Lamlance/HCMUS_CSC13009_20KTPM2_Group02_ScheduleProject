@@ -46,4 +46,5 @@
   <color name="red_700">#B03602</color>
   <color name="red_500">#F44336</color>
 
+  <color name="transparent">#00FFFFFF</color>
 </resources>

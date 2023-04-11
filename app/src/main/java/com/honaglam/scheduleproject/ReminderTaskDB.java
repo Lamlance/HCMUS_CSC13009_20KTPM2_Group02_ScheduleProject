@@ -348,7 +348,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                 Cursor cursor = db.query(
                         TaskTable.TABLE_NAME,
                         null,
-                        null,
+                        TaskTable.COLUMN_NAME_HISTORY + " = ? ",
                         null,
                         null,
                         null,

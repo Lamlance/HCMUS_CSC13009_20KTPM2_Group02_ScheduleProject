@@ -106,7 +106,7 @@ public class TimerFragment extends Fragment {
       public List<TaskData> getList() {
         return activity.tasks;
       }
-    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback());
+    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback(), new MoveToHistoryCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
     return timerLayout;
@@ -411,6 +411,18 @@ public class TimerFragment extends Fragment {
       try {
         activity.editTask(activity.tasks.get(position));
         taskRecyclerViewAdapter.notifyItemChanged(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
+
+  class MoveToHistoryCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      try {
+        activity.moveTaskToHistory(activity.tasks.get(position).id);
+        activity.tasks.remove(position);
+        taskRecyclerViewAdapter.notifyItemRemoved(position);
       } catch (Exception ignore) {
       }
     }

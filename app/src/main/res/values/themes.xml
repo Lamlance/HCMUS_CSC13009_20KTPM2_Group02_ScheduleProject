@@ -18,7 +18,15 @@
 
   <!-- Light mode -->
   <!-- Screen background if dark light is on-->
-  <style name="SCREEN">
+  <style name="TIMER_SCREEN">
+    <item name="android:background">#E06060</item>
+  </style>
+
+  <style name="REPORT_SCREEN">
+    <item name="android:background">#FFFFFF</item>
+  </style>
+
+  <style name="CALENDAR_SCREEN">
     <item name="android:background">#FFFFFF</item>
   </style>
 
@@ -36,5 +44,10 @@
   <!-- Button background if light mode is on-->
   <style name="BUTTON">
     <item name="android:textColor">#FFF</item>
+  </style>
+
+  <style name="NAV_BUTTON">
+    <item name="android:background">#AA4646</item>
+    <item name="backgroundTint">#AA4646</item>
   </style>
 </resources>

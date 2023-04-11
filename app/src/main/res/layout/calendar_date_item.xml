@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    style="@style/SCREEN"
+    style="@style/CALENDAR_SCREEN"
     android:layout_width="match_parent"
     android:id="@+id/layoutCalendarItemAll"
     android:layout_height="wrap_content">
