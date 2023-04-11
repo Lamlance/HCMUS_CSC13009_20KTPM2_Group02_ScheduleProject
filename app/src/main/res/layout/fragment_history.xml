@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  tools:context=".HistoryFragment">
+
+  <com.google.android.material.button.MaterialButton
+    android:id="@+id/btnMoveToDoingTask"
+    style="@style/BUTTON"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="30dp"
+    android:gravity="center"
+    android:layout_weight="0.1"
+    android:backgroundTint="#ffdad8"
+    android:layout_gravity="center_horizontal"
+    android:textSize="18sp"
+    app:cornerRadius="5dp"
+    android:text="Add task"
+    android:textColor="#410007"/>
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerHistory"
+    android:layout_width="match_parent"
+    android:layout_gravity="center"
+    android:layout_height="0dp"
+    android:layout_weight="5"
+    android:padding="20dp" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>
