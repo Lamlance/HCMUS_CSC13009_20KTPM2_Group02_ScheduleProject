@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+      app:state_work="true"
+      android:color="@color/work_color" />
+  <item
+      app:state_short="true"
+      android:color="@color/short_break_color" />
+  <item
+      app:state_long="true"
+      android:color="@color/long_break_color" />
+</selector>

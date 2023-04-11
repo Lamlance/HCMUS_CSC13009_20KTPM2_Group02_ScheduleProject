@@ -1,12 +1,9 @@
 package com.honaglam.scheduleproject;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -30,11 +27,12 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Task.TaskViewHolder;
+import com.honaglam.scheduleproject.TimerViews.TimerFloatingButton;
+import com.honaglam.scheduleproject.TimerViews.TimerViewGroupLinear;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 import java.util.List;
@@ -55,11 +53,10 @@ public class TimerFragment extends Fragment {
   // TODO: Rename and change types of parameters
 
   private TextView txtTimer;
-  private FloatingActionButton btnTimerStart;
-  private FloatingActionButton btnGiveUp;
-  private FloatingActionButton btnSkip;
-  private FloatingActionButton btnSetting;
-
+  private TimerFloatingButton btnTimerStart;
+  private TimerFloatingButton btnGiveUp;
+  private TimerFloatingButton btnSkip;
+  private TimerViewGroupLinear layoutTimerFragment;
 
 //  private Button btnTimer;
 //  private Button btnGiveUp;
@@ -70,7 +67,7 @@ public class TimerFragment extends Fragment {
   public TextView txtPomodoro;
   public TextView txtShortBreak;
   public TextView txtLongBreak;
-  private FloatingActionButton timerSetting;
+  private TimerFloatingButton timerSetting;
   private RecyclerView recyclerTask;
   private Context context;
   private MainActivity activity;
@@ -116,10 +113,12 @@ public class TimerFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
+    layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
+
     txtTimer = view.findViewById(R.id.txtTimer);
     txtTimer.setTextSize(50);
 
-    btnTimerStart = (FloatingActionButton) view.findViewById(R.id.btnTimerStart);
+    btnTimerStart = (TimerFloatingButton) view.findViewById(R.id.btnTimerStart);
     btnTimerStart.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -127,7 +126,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    btnGiveUp = (FloatingActionButton) view.findViewById(R.id.btnTimerGiveUp);
+    btnGiveUp = (TimerFloatingButton) view.findViewById(R.id.btnTimerGiveUp);
     btnGiveUp.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -149,10 +148,10 @@ public class TimerFragment extends Fragment {
 
     //((MainActivity) getActivity()).setTimerOnTickCallBack(remainMillis -> UpdateTimeUI(remainMillis)); UI Update
 
-    timerSetting = (FloatingActionButton) getView().findViewById(R.id.btnTimerSetting);
+    timerSetting = (TimerFloatingButton) view.findViewById(R.id.btnTimerSetting);
     timerSetting.setOnClickListener(new TimerSettingFragmentClick());
 
-    btnSkip = (FloatingActionButton) getView().findViewById((R.id.btnSkip));
+    btnSkip = (TimerFloatingButton) view.findViewById((R.id.btnSkip));
     btnSkip.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -164,8 +163,8 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
-    UpdateTimeUI(cur);
+    //long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
+    //UpdateTimeUI(cur);
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -179,6 +178,7 @@ public class TimerFragment extends Fragment {
   }
 
   private void UpdateTimerBackground(int work_state) {
+    /*
     txtPomodoro = getView().findViewById(R.id.txtPomodoro);
     txtShortBreak = getView().findViewById(R.id.txtShortBreak);
     txtLongBreak = getView().findViewById(R.id.txtLongBreak);
@@ -193,6 +193,7 @@ public class TimerFragment extends Fragment {
     btnSkip = getView().findViewById(R.id.btnSkip);
     btnSetting = getView().findViewById(R.id.btnTimerSetting);
     btnAddTask = getView().findViewById(R.id.btnAddTask);
+    */
     if (activity.darkModeIsOn == true) {
       AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
       requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.black));
@@ -207,8 +208,8 @@ public class TimerFragment extends Fragment {
       btnGiveUp.setImageTintList(colorStateListIcon);
       btnSkip.setBackgroundTintList(colorStateListBackground);
       btnSkip.setImageTintList(colorStateListIcon);
-      btnSetting.setBackgroundTintList(colorStateListBackground);
-      btnSetting.setImageTintList(colorStateListIcon);
+      timerSetting.setBackgroundTintList(colorStateListBackground);
+      timerSetting.setImageTintList(colorStateListIcon);
 
       btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.add_btn_color_dark_mode));
       btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.add_btn_text_color_dark_mode));
@@ -230,84 +231,33 @@ public class TimerFragment extends Fragment {
       }
     }
     else {
-      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+      //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
       if (work_state == TimerService.WORK_STATE) {
-        requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.work_color));
 
-        int stateColor = getResources().getColor(R.color.text_work_state_background_color);
-        txtPomodoro.setBackgroundColor(stateColor);
-        txtShortBreak.setBackgroundColor(0x80FFFFFF);
-        txtLongBreak.setBackgroundColor(0x80FFFFFF);
+        Log.i("SET_STATE","SMTH");
+        btnTimerStart.setPomodoroState(TimerService.WORK_STATE);
+        btnSkip.setPomodoroState(TimerService.WORK_STATE);
+        btnGiveUp.setPomodoroState(TimerService.WORK_STATE);
+        timerSetting.setPomodoroState(TimerService.WORK_STATE);
+        layoutTimerFragment.setPomodoroState(TimerService.WORK_STATE);
 
-        int backgroundButtonColor = getResources().getColor(R.color.background_button_work_color);
-        ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
-        int iconColor = getResources().getColor(R.color.button_work_color);
-        ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
-
-        btnTimerStart.setBackgroundTintList(colorStateListBackground);
-        btnTimerStart.setImageTintList(colorStateListIcon);
-        btnGiveUp.setBackgroundTintList(colorStateListBackground);
-        btnGiveUp.setImageTintList(colorStateListIcon);
-        btnSkip.setBackgroundTintList(colorStateListBackground);
-        btnSkip.setImageTintList(colorStateListIcon);
-        btnSetting.setBackgroundTintList(colorStateListBackground);
-        btnSetting.setImageTintList(colorStateListIcon);
-
-        btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.background_button_work_color));
-        btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.white));
 
       }
       if (work_state == TimerService.SHORT_BREAK_STATE) {
-        requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.short_break_color));
-
-        int stateColor = getResources().getColor(R.color.text_short_break_state_background_color);
-        txtPomodoro.setBackgroundColor(stateColor);
-        txtPomodoro.setBackgroundColor(0x80FFFFFF);
-        txtShortBreak.setBackgroundColor(stateColor);
-        txtLongBreak.setBackgroundColor(0x80FFFFFF);
-
-        int backgroundButtonColor = getResources().getColor(R.color.background_button_short_break_color);
-        ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
-        int iconColor = getResources().getColor(R.color.button_short_break_color);
-        ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
-
-        btnTimerStart.setBackgroundTintList(colorStateListBackground);
-        btnTimerStart.setImageTintList(colorStateListIcon);
-        btnGiveUp.setBackgroundTintList(colorStateListBackground);
-        btnGiveUp.setImageTintList(colorStateListIcon);
-        btnSkip.setBackgroundTintList(colorStateListBackground);
-        btnSkip.setImageTintList(colorStateListIcon);
-        btnSetting.setBackgroundTintList(colorStateListBackground);
-        btnSetting.setImageTintList(colorStateListIcon);
-
-        btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.background_button_short_break_color));
-        btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.white));
+        Log.i("SET_STATE","SMTH");
+        btnTimerStart.setPomodoroState(TimerService.SHORT_BREAK_STATE);
+        btnSkip.setPomodoroState(TimerService.SHORT_BREAK_STATE);
+        btnGiveUp.setPomodoroState(TimerService.SHORT_BREAK_STATE);
+        timerSetting.setPomodoroState(TimerService.SHORT_BREAK_STATE);
+        layoutTimerFragment.setPomodoroState(TimerService.SHORT_BREAK_STATE);
       }
       if (work_state == TimerService.LONG_BREAK_STATE) {
-        requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.long_break_color));
-
-        int stateColor = getResources().getColor(R.color.text_long_break_state_background_color);
-        txtPomodoro.setBackgroundColor(stateColor);
-        txtPomodoro.setBackgroundColor(0x80FFFFFF);
-        txtShortBreak.setBackgroundColor(0x80FFFFFF);
-        txtLongBreak.setBackgroundColor(stateColor);
-
-        int backgroundButtonColor = getResources().getColor(R.color.background_button_long_break_color);
-        ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
-        int iconColor = getResources().getColor(R.color.button_long_break_color);
-        ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
-
-        btnTimerStart.setBackgroundTintList(colorStateListBackground);
-        btnTimerStart.setImageTintList(colorStateListIcon);
-        btnGiveUp.setBackgroundTintList(colorStateListBackground);
-        btnGiveUp.setImageTintList(colorStateListIcon);
-        btnSkip.setBackgroundTintList(colorStateListBackground);
-        btnSkip.setImageTintList(colorStateListIcon);
-        btnSetting.setBackgroundTintList(colorStateListBackground);
-        btnSetting.setImageTintList(colorStateListIcon);
-
-        btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.background_button_long_break_color));
-        btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.white));
+        Log.i("SET_STATE","SMTH");
+        btnTimerStart.setPomodoroState(TimerService.LONG_BREAK_STATE);
+        btnSkip.setPomodoroState(TimerService.LONG_BREAK_STATE);
+        btnGiveUp.setPomodoroState(TimerService.LONG_BREAK_STATE);
+        timerSetting.setPomodoroState(TimerService.LONG_BREAK_STATE);
+        layoutTimerFragment.setPomodoroState(TimerService.LONG_BREAK_STATE);
       }
     }
   }
