@@ -77,8 +77,8 @@ public class HistoryFragment extends Fragment {
     @Override
     public void clickAtPosition(int position) throws NotImplementedError {
       try {
-//        TODO: MOVE TASK TO TO DO TASK, NOT HISTORY
-        activity.moveTaskToHistory(activity.tasks.get(position).id);
+//        TODO: Complete function moveTaskToToDoTask->makeTaskToToDo
+        activity.moveTaskToToDoTask(activity.tasks.get(position).id);
         activity.tasks.remove(position);
         historyRecyclerViewAdapter.notifyItemRemoved(position);
       } catch (Exception ignore) {

@@ -426,6 +426,22 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         }
         return false;
     }
+
+    public boolean makeTaskToToDo(int id) {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
+            cv.put(TaskTable.COLUMN_NAME_HISTORY, 1);
+            long update = db.update(
+                    TaskTable.TABLE_NAME,
+                    cv,
+                    TaskTable.COLUMN_NAME_ID + "=?",
+                    new String[]{String.valueOf(id)}
+            );
+            return update > 0;
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
     //===
 
     //Stats

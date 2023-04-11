@@ -347,6 +347,10 @@ public class MainActivity extends AppCompatActivity {
   public boolean moveTaskToHistory(int id) {
     return taskDb.makeTaskHistory(id);
   }
+
+  public boolean moveTaskToToDoTask(int id) {
+    return taskDb.makeTaskToToDo(id);
+  }
   //===
 
   @Override
