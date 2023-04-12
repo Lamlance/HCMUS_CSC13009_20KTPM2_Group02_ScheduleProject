@@ -23,7 +23,7 @@ public class TimerViewGroupLinear extends LinearLayout {
   }
   public void setPomodoroState(int state){
     currState = state;
-    Log.i("SET_POMODORO_STATE","Draw state: " + currState);
+    //Log.i("SET_POMODORO_STATE","Draw state: " + currState);
     refreshDrawableState();
   }
   public void setPomodoroTheme(int theme){
@@ -33,7 +33,7 @@ public class TimerViewGroupLinear extends LinearLayout {
   @Override
   public int[] onCreateDrawableState(int extraSpace) {
     final int[] drawableState = super.onCreateDrawableState(extraSpace+3);
-    Log.i("DRAW_POMODORO_STATE","Draw state: " + currState);
+    //Log.i("DRAW_POMODORO_STATE","Draw state: " + currState);
     if(currState == TimerService.SHORT_BREAK_STATE){
       mergeDrawableStates(drawableState,STATE_SHORT);
     } else if (currState == TimerService.LONG_BREAK_STATE) {

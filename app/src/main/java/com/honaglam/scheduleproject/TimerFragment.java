@@ -72,6 +72,7 @@ public class TimerFragment extends Fragment {
   private Context context;
   private MainActivity activity;
 
+  int currentPomodoroState = TimerService.WORK_STATE;
   TaskRecyclerViewAdapter taskRecyclerViewAdapter;
   public static TimerFragment newInstance() {
     TimerFragment fragment = new TimerFragment();
@@ -95,8 +96,6 @@ public class TimerFragment extends Fragment {
     context = requireContext();
 
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-
-
     return timerLayout;
   }
 
@@ -168,7 +167,9 @@ public class TimerFragment extends Fragment {
       }
     });
 
+    UpdateTimerBackground(currentPomodoroState);
     setThemeId(activity.loadTimerSettingPref().prefTheme);
+    Log.i("DRAW_POMODORO_STATE","FRAGMENT VIEW CREATED");
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -183,7 +184,7 @@ public class TimerFragment extends Fragment {
 
   private void UpdateTimerBackground(int work_state) {
     //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
+    Log.i("DRAW_POMODORO_STATE","SETTING STATE " + work_state);
     if (
             work_state == TimerService.WORK_STATE
                     || work_state == TimerService.LONG_BREAK_STATE
@@ -242,6 +243,7 @@ public class TimerFragment extends Fragment {
   class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack {
     @Override
     public void onStateChange(int newState, long prevTimeState, int oldState) {
+      currentPomodoroState = newState;
       UpdateTimerBackground(newState);
 
       activity.addStatsTime(
