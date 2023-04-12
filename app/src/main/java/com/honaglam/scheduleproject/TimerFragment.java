@@ -106,7 +106,7 @@ public class TimerFragment extends Fragment {
       public List<TaskData> getList() {
         return activity.tasks;
       }
-    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback());
+    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback(), new MoveToHistoryCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
     return timerLayout;
@@ -183,11 +183,6 @@ public class TimerFragment extends Fragment {
     txtShortBreak = getView().findViewById(R.id.txtShortBreak);
     txtLongBreak = getView().findViewById(R.id.txtLongBreak);
 
-    Drawable rounded_background = getResources().getDrawable(R.drawable.rounded_background);
-    txtPomodoro.setBackground(rounded_background);
-    txtShortBreak.setBackground(rounded_background);
-    txtLongBreak.setBackground(rounded_background);
-
     btnTimerStart = getView().findViewById(R.id.btnTimerStart);
     btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
     btnSkip = getView().findViewById(R.id.btnSkip);
@@ -195,7 +190,7 @@ public class TimerFragment extends Fragment {
     btnAddTask = getView().findViewById(R.id.btnAddTask);
     if (activity.darkModeIsOn == true) {
       AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.dark_mode_color));
       int backgroundButtonColor = getResources().getColor(R.color.image_btn_timer_fragment_background);
       ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
       int iconColor = getResources().getColor(R.color.image_btn_timer_fragment_icon);
@@ -411,6 +406,18 @@ public class TimerFragment extends Fragment {
       try {
         activity.editTask(activity.tasks.get(position));
         taskRecyclerViewAdapter.notifyItemChanged(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
+
+  class MoveToHistoryCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      try {
+        activity.moveTaskToHistory(activity.tasks.get(position).id);
+        activity.tasks.remove(position);
+        taskRecyclerViewAdapter.notifyItemRemoved(position);
       } catch (Exception ignore) {
       }
     }

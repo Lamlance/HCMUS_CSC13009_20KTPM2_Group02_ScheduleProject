@@ -23,7 +23,7 @@
     android:textColor="#ffffff"
     android:padding="8dp"
     android:textStyle="normal"
-    android:layout_weight="6.5"/>
+    android:layout_weight="5"/>
 
   <TextView
     android:id="@+id/txtCountPomodoro"
@@ -45,7 +45,7 @@
     android:layout_height="wrap_content"
     android:layout_width="0dp"
     android:buttonTint="@color/white"
-    android:layout_weight="0.75" />
+    android:layout_weight="1" />
 
   <ImageButton
     android:id="@+id/imgBtnDeleteTask"
@@ -55,6 +55,15 @@
     android:layout_height="wrap_content"
     android:layout_width="0dp"
     android:buttonTint="@color/white"
-    android:layout_weight="0.75" />
+    android:layout_weight="1" />
+  <ImageButton
+    android:id="@+id/imgBtnMoveToHistory"
+    style="@style/IMAGE_BUTTON"
+    android:src="@drawable/baseline_archive_24"
+    android:background="@android:color/transparent"
+    android:layout_height="wrap_content"
+    android:layout_width="0dp"
+    android:buttonTint="@color/white"
+    android:layout_weight="1" />
 
 </LinearLayout>

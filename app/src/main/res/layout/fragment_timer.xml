@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#CE5959"
-    style="@style/SCREEN"
+    style="@style/TIMER_SCREEN"
     android:orientation="vertical"
     android:weightSum="10"
     android:paddingLeft="10dp"
@@ -20,7 +20,6 @@
     <TextView
         android:id="@+id/txtPomodoro"
         style="@style/TEXT"
-        android:background="@drawable/rounded_background"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_gravity="center_horizontal"
@@ -33,7 +32,6 @@
         tools:ignore="HardcodedText" />
     <TextView
         android:id="@+id/txtShortBreak"
-        android:background="@drawable/rounded_background"
         style="@style/TEXT"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
@@ -47,7 +45,6 @@
         tools:ignore="HardcodedText" />
     <TextView
         android:id="@+id/txtLongBreak"
-        android:background="@drawable/rounded_background"
         style="@style/TEXT"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
@@ -92,7 +89,7 @@
         android:layout_marginLeft="9dp"
         android:layout_marginRight="9dp"
         app:backgroundTint="#410006"
-        app:tint="#ffdad8"
+        app:tint="@color/transparent"
         app:maxImageSize="35dp"
         app:elevation="3dp"
         app:pressedTranslationZ="20dp"
@@ -109,8 +106,8 @@
         app:backgroundTint="#410007"
         android:layout_marginLeft="9dp"
         android:layout_marginRight="9dp"
-        app:tint="#ffdad8"
-        app:maxImageSize="35dp"
+      app:tint="@color/transparent"
+      app:maxImageSize="35dp"
         app:elevation="3dp"
         app:pressedTranslationZ="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -125,8 +122,9 @@
         android:layout_marginLeft="9dp"
         android:layout_marginRight="9dp"
         app:backgroundTint="#410007"
-        app:tint="#ffdad8"
-        app:maxImageSize="35dp"
+      app:tint="@color/transparent"
+
+      app:maxImageSize="35dp"
         app:elevation="3dp"
         app:pressedTranslationZ="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -141,8 +139,9 @@
         android:layout_marginLeft="9dp"
         android:layout_marginRight="9dp"
         app:backgroundTint="#410007"
-        app:tint="#ffdad8"
-        app:maxImageSize="35dp"
+      app:tint="@color/transparent"
+
+      app:maxImageSize="35dp"
         app:elevation="3dp"
         app:pressedTranslationZ="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
