@@ -73,7 +73,6 @@ public class TimerFragment extends Fragment {
   private MainActivity activity;
 
   TaskRecyclerViewAdapter taskRecyclerViewAdapter;
-
   public static TimerFragment newInstance() {
     TimerFragment fragment = new TimerFragment();
     Bundle args = new Bundle();
@@ -114,6 +113,10 @@ public class TimerFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
 
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
+
+    txtPomodoro = view.findViewById(R.id.txtPomodoro);
+    txtLongBreak = view.findViewById(R.id.txtLongBreak);
+    txtShortBreak = view.findViewById(R.id.txtShortBreak);
 
     txtTimer = view.findViewById(R.id.txtTimer);
     txtTimer.setTextSize(50);
@@ -163,8 +166,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-    //long cur = ((MainActivity) getActivity()).getCurrentRemainMillis();
-    //UpdateTimeUI(cur);
+
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -194,72 +196,33 @@ public class TimerFragment extends Fragment {
     btnSetting = getView().findViewById(R.id.btnTimerSetting);
     btnAddTask = getView().findViewById(R.id.btnAddTask);
     */
-    if (activity.darkModeIsOn == true) {
-      AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-      requireView().setBackgroundColor(ContextCompat.getColor(context, R.color.black));
-      int backgroundButtonColor = getResources().getColor(R.color.image_btn_timer_fragment_background);
-      ColorStateList colorStateListBackground = ColorStateList.valueOf(backgroundButtonColor);
-      int iconColor = getResources().getColor(R.color.image_btn_timer_fragment_icon);
-      ColorStateList colorStateListIcon = ColorStateList.valueOf(iconColor);
 
-      btnTimerStart.setBackgroundTintList(colorStateListBackground);
-      btnTimerStart.setImageTintList(colorStateListIcon);
-      btnGiveUp.setBackgroundTintList(colorStateListBackground);
-      btnGiveUp.setImageTintList(colorStateListIcon);
-      btnSkip.setBackgroundTintList(colorStateListBackground);
-      btnSkip.setImageTintList(colorStateListIcon);
-      timerSetting.setBackgroundTintList(colorStateListBackground);
-      timerSetting.setImageTintList(colorStateListIcon);
+    //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
-      btnAddTask.setBackgroundColor(ContextCompat.getColor(context, R.color.add_btn_color_dark_mode));
-      btnAddTask.setTextColor(ContextCompat.getColor(context, R.color.add_btn_text_color_dark_mode));
+    if (
+            work_state == TimerService.WORK_STATE
+                    || work_state == TimerService.LONG_BREAK_STATE
+                    || work_state == TimerService.SHORT_BREAK_STATE
+    ) {
 
-      if (work_state == TimerService.WORK_STATE) {
-        txtPomodoro.setBackgroundColor(0x80FFFFFF);
-        txtShortBreak.setBackgroundColor(Color.TRANSPARENT);
-        txtLongBreak.setBackgroundColor(Color.TRANSPARENT);
-      }
-      if (work_state == TimerService.SHORT_BREAK_STATE) {
-        txtPomodoro.setBackgroundColor(Color.TRANSPARENT);
-        txtShortBreak.setBackgroundColor(0x80FFFFFF);
-        txtLongBreak.setBackgroundColor(Color.TRANSPARENT);
-      }
-      if (work_state == TimerService.LONG_BREAK_STATE) {
-        txtPomodoro.setBackgroundColor(Color.TRANSPARENT);
-        txtShortBreak.setBackgroundColor(Color.TRANSPARENT);
-        txtLongBreak.setBackgroundColor(0x80FFFFFF);
-      }
+      txtPomodoro.setBackgroundColor(work_state == TimerService.WORK_STATE ? Color.BLACK : Color.WHITE);
+      txtShortBreak.setBackgroundColor(work_state == TimerService.SHORT_BREAK_STATE ? Color.BLACK : Color.WHITE);
+      txtLongBreak.setBackgroundColor(work_state == TimerService.LONG_BREAK_STATE ? Color.BLACK : Color.WHITE);
+
+      txtPomodoro.getBackground().setAlpha(work_state == TimerService.WORK_STATE ? 26 : 76);
+      txtShortBreak.getBackground().setAlpha(work_state == TimerService.SHORT_BREAK_STATE ? 26 : 76);
+      txtLongBreak.getBackground().setAlpha(work_state == TimerService.LONG_BREAK_STATE ? 26 : 76);
+
+      Log.i("SET_STATE", "SMTH");
+      btnTimerStart.setPomodoroState(work_state);
+      btnSkip.setPomodoroState(work_state);
+      btnGiveUp.setPomodoroState(work_state);
+      timerSetting.setPomodoroState(work_state);
+      layoutTimerFragment.setPomodoroState(work_state);
+
     }
-    else {
-      //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-      if (work_state == TimerService.WORK_STATE) {
-
-        Log.i("SET_STATE","SMTH");
-        btnTimerStart.setPomodoroState(TimerService.WORK_STATE);
-        btnSkip.setPomodoroState(TimerService.WORK_STATE);
-        btnGiveUp.setPomodoroState(TimerService.WORK_STATE);
-        timerSetting.setPomodoroState(TimerService.WORK_STATE);
-        layoutTimerFragment.setPomodoroState(TimerService.WORK_STATE);
 
 
-      }
-      if (work_state == TimerService.SHORT_BREAK_STATE) {
-        Log.i("SET_STATE","SMTH");
-        btnTimerStart.setPomodoroState(TimerService.SHORT_BREAK_STATE);
-        btnSkip.setPomodoroState(TimerService.SHORT_BREAK_STATE);
-        btnGiveUp.setPomodoroState(TimerService.SHORT_BREAK_STATE);
-        timerSetting.setPomodoroState(TimerService.SHORT_BREAK_STATE);
-        layoutTimerFragment.setPomodoroState(TimerService.SHORT_BREAK_STATE);
-      }
-      if (work_state == TimerService.LONG_BREAK_STATE) {
-        Log.i("SET_STATE","SMTH");
-        btnTimerStart.setPomodoroState(TimerService.LONG_BREAK_STATE);
-        btnSkip.setPomodoroState(TimerService.LONG_BREAK_STATE);
-        btnGiveUp.setPomodoroState(TimerService.LONG_BREAK_STATE);
-        timerSetting.setPomodoroState(TimerService.LONG_BREAK_STATE);
-        layoutTimerFragment.setPomodoroState(TimerService.LONG_BREAK_STATE);
-      }
-    }
   }
 
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
@@ -283,7 +246,7 @@ public class TimerFragment extends Fragment {
 
   class TimerStateChangeCallBack implements TimerService.TimerStateChangeCallBack {
     @Override
-    public void onStateChange(int newState,long prevTimeState,int oldState) {
+    public void onStateChange(int newState, long prevTimeState, int oldState) {
       UpdateTimerBackground(newState);
 
       activity.addStatsTime(
@@ -295,10 +258,10 @@ public class TimerFragment extends Fragment {
       String stats = String.format(
               Locale.getDefault(),
               "%d / %d / %d: Work: %d , Short: %d, Long: %d , PrevState: %d, Added time: %d",
-              activity.taskDb.date,activity.taskDb.month,activity.taskDb.year,
-              activity.taskDb.curWork,activity.taskDb.curShort,activity.taskDb.curLong,oldState,prevTimeState);
+              activity.taskDb.date, activity.taskDb.month, activity.taskDb.year,
+              activity.taskDb.curWork, activity.taskDb.curShort, activity.taskDb.curLong, oldState, prevTimeState);
 
-      Log.i("Toady_Stats",stats);
+      Log.i("Toady_Stats", stats);
     }
   }
 
@@ -310,7 +273,7 @@ public class TimerFragment extends Fragment {
         TaskRecyclerViewAdapter adapter = (TaskRecyclerViewAdapter) recyclerTask.getAdapter();
         if (adapter != null) {
           int selectedTaskIndex = adapter.getSelectedPosition();
-          if(selectedTaskIndex >= 0){
+          if (selectedTaskIndex >= 0) {
             activity.tasks.get(selectedTaskIndex).numberCompletedPomodoros += 1;
             activity.editTask(activity.tasks.get(selectedTaskIndex));
             recyclerTask.getAdapter().notifyItemChanged(selectedTaskIndex);
@@ -366,22 +329,22 @@ public class TimerFragment extends Fragment {
     }
   }
 
-  class TimerSettingFragmentClick implements View.OnClickListener{
+  class TimerSettingFragmentClick implements View.OnClickListener {
     @Override
     public void onClick(View view) {
       getParentFragmentManager().setFragmentResultListener(
               TimerSetting.TIMER_SETTING_REQUEST_KEY,
               TimerFragment.this,
               new TimerSettingResultListener());
-      ((MainActivity)getActivity()).switchFragment_TimerSetting();
+      ((MainActivity) getActivity()).switchFragment_TimerSetting();
     }
   }
 
-  class TimerSettingResultListener implements FragmentResultListener{
+  class TimerSettingResultListener implements FragmentResultListener {
     @Override
     public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
       UserTimerSettings settings = (UserTimerSettings) result.getSerializable(TimerSetting.TIMER_SETTING_RESULT_KEY);
-      ((MainActivity)getActivity()).saveTimerSettingPref(settings);
+      ((MainActivity) getActivity()).saveTimerSettingPref(settings);
     }
   }
 }

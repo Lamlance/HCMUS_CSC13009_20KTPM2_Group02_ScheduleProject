@@ -4,5 +4,13 @@
     <attr name="state_work" format="boolean" />
     <attr name="state_short" format="boolean" />
     <attr name="state_long" format="boolean" />
+    <attr name="pomodoro_theme0" format="boolean" />
+    <attr name="pomodoro_theme1" format="boolean" />
+    <attr name="pomodoro_theme2" format="boolean" />
+    <attr name="pomodoro_theme3" format="boolean" />
+    <attr name="pomodoro_theme4" format="boolean" />
+    <attr name="pomodoro_theme5" format="boolean" />
+    <attr name="pomodoro_theme6" format="boolean" />
+    <attr name="pomodoro_theme7" format="boolean" />
   </declare-styleable>
 </resources>

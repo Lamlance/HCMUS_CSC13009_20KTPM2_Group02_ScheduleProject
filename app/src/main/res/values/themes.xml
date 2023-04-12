@@ -30,6 +30,7 @@
   <!-- Image button background if dark mode is on-->
   <style name="IMAGE_BUTTON">
     <item name="android:backgroundTint">#E6E6E6</item>
+    <item name="backgroundColor">#E6E6E6</item>
   </style>
 
   <!-- Button background if light mode is on-->

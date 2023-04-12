@@ -13,7 +13,9 @@ public class UserTimerSettings implements Serializable {
   public boolean autoStartPomodoroSetting = false;
   public long longBreakInterValSetting = 4;
   public Uri alarmUri;
-
+  
+  int prefTheme = 0;
+  
   public UserTimerSettings(
           long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound,
           boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal

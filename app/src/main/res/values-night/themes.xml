@@ -2,13 +2,13 @@
   <!-- Base application theme. -->
   <style name="Theme.ScheduleProject" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
     <!-- Primary brand color. -->
-    <item name="colorPrimary">@color/purple_200</item>
-    <item name="colorPrimaryVariant">@color/purple_700</item>
-    <item name="colorOnPrimary">@color/black</item>
+    <item name="colorPrimary">#006d3b</item>
+    <item name="colorPrimaryVariant">#006d3b</item>
+    <item name="colorOnPrimary">#ffffff</item>
     <!-- Secondary brand color. -->
-    <item name="colorSecondary">@color/teal_200</item>
-    <item name="colorSecondaryVariant">@color/teal_200</item>
-    <item name="colorOnSecondary">@color/black</item>
+    <item name="colorSecondary">#4f6353</item>
+    <item name="colorSecondaryVariant">#4f6353</item>
+    <item name="colorOnSecondary">#ffffff</item>
     <!-- Status bar color. -->
     <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
 
@@ -38,7 +38,7 @@
   <!-- Image button background if dark mode is on-->
   <style name="IMAGE_BUTTON">
     <item name="android:backgroundTint">#2E2E2E</item>
-    <item name="android:tint">#E6E6E6</item>
+    <item name="backgroundColor">#2E2E2E</item>
   </style>
 
   <!-- Navigation header background if dark mode is on-->
