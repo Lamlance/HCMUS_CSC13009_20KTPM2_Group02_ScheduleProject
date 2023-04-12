@@ -38,6 +38,9 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.honaglam.scheduleproject.TimerViews.TimerThemeIconImage;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link TimerSetting#newInstance} factory method to
@@ -92,6 +95,8 @@ public class TimerSetting extends DialogFragment {
     // Inflate the layout for this fragment
     return inflater.inflate(R.layout.fragment_timer_setting, container, false);
   }
+
+  List<AppCompatImageView> themeIconView = new ArrayList<AppCompatImageView>();
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -183,9 +188,9 @@ public class TimerSetting extends DialogFragment {
       if(child instanceof AppCompatImageView){
         child.setOnClickListener(new OnThemeSelected(iconId));
         iconId++;
+        themeIconView.add((AppCompatImageView) child);
       }
     }
-
 
     setUserPref(userTimerSettings);
   }
@@ -193,8 +198,6 @@ public class TimerSetting extends DialogFragment {
   @NonNull
   @Override
   public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-
-
     return super.onCreateDialog(savedInstanceState);
   }
 
@@ -227,7 +230,17 @@ public class TimerSetting extends DialogFragment {
     }
     @Override
     public void onClick(View view) {
+      int oldTheme = TimerSetting.this.selectedTheme;
       TimerSetting.this.selectedTheme = theme;
+
+      if(view instanceof AppCompatImageView){
+        ((AppCompatImageView) view).setScaleX((float) 0.8);
+        ((AppCompatImageView) view).setScaleY((float) 0.8);
+      }
+      if(oldTheme >= 0){
+        themeIconView.get(oldTheme).setScaleX(1);
+        themeIconView.get(oldTheme).setScaleY(1);
+      }
     }
   }
 
