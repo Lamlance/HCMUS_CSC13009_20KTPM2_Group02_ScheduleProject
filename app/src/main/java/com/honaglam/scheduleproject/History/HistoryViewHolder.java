@@ -14,8 +14,8 @@ import com.honaglam.scheduleproject.Task.TaskViewHolder;
 import kotlin.NotImplementedError;
 
 public class HistoryViewHolder extends RecyclerView.ViewHolder{
-  TextView txtTaskName;
-  TextView txtCountPomodoro;
+  TextView txtTaskNameHistory;
+  TextView txtCountPomodoroHistory;
   ImageButton imgBtnMoveToTodoTask;
   HistoryViewHolder.OnClickPositionCallBack moveToTodoTaskCallback = null;
 
@@ -27,8 +27,8 @@ public class HistoryViewHolder extends RecyclerView.ViewHolder{
   public HistoryViewHolder(@NonNull View itemView,
                            HistoryViewHolder.OnClickPositionCallBack moveToTodoTaskCallback) {
     super(itemView);
-    this.txtTaskName = itemView.findViewById(R.id.txtTaskName);
-    this.txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
+    this.txtTaskNameHistory = itemView.findViewById(R.id.txtTaskNameHistory);
+    this.txtCountPomodoroHistory = itemView.findViewById(R.id.txtCountPomodoroHistory);
     this.imgBtnMoveToTodoTask = itemView.findViewById(R.id.imgBtnMoveToTodoTask);
     this.moveToTodoTaskCallback = moveToTodoTaskCallback;
 

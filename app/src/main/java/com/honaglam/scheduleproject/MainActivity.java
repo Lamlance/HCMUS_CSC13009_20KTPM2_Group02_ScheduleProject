@@ -1,17 +1,12 @@
 package com.honaglam.scheduleproject;
 
-import static com.honaglam.scheduleproject.TimerSetting.TIMER_SETTING_RESULT_KEY;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentResultListener;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -30,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -48,7 +42,6 @@ import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -99,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
+  List<TaskData> historyTasks = new ArrayList<>();
   // User setting
   //  private UserSettings userSettings;
   static final int IS_CALENDAR_FRAGMENT = 1;
@@ -122,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
-
+    historyTasks.addAll(listHistoryTasks());
 
     if (taskDb.IS_DEV) {
       //taskDb.createSampleData();
@@ -351,6 +345,10 @@ public class MainActivity extends AppCompatActivity {
   public boolean moveTaskToToDoTask(int id) {
     return taskDb.makeTaskToToDo(id);
   }
+
+  public List<TaskData> listHistoryTasks() {
+    return taskDb.getHistoryTask();
+  }
   //===
 
   @Override
@@ -545,6 +543,7 @@ public class MainActivity extends AppCompatActivity {
           Toast.makeText(MainActivity.this, "Select Report", Toast.LENGTH_SHORT).show();
           return switchFragment_Statistic();
         case R.id.nav_history:
+
           currentFragment = IS_HISTORY_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select History", Toast.LENGTH_SHORT).show();
           return switchFragment_History();

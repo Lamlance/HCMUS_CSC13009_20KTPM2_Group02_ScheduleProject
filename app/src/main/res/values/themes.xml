@@ -32,13 +32,13 @@
 
   <!-- Text background if light mode is on-->
   <style name="TEXT">
-    <item name="android:textColor">#000</item>
+    <item name="android:textColor">#2E2E2E</item>
   </style>
 
   <!-- Image button background if dark mode is on-->
   <style name="IMAGE_BUTTON">
     <item name="android:backgroundTint">#E6E6E6</item>
-    <item name="android:tint">#000</item>
+    <item name="android:tint">#2E2E2E</item>
   </style>
 
   <!-- Button background if light mode is on-->

@@ -183,11 +183,6 @@ public class TimerFragment extends Fragment {
     txtShortBreak = getView().findViewById(R.id.txtShortBreak);
     txtLongBreak = getView().findViewById(R.id.txtLongBreak);
 
-    Drawable rounded_background = getResources().getDrawable(R.drawable.rounded_background);
-    txtPomodoro.setBackground(rounded_background);
-    txtShortBreak.setBackground(rounded_background);
-    txtLongBreak.setBackground(rounded_background);
-
     btnTimerStart = getView().findViewById(R.id.btnTimerStart);
     btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
     btnSkip = getView().findViewById(R.id.btnSkip);

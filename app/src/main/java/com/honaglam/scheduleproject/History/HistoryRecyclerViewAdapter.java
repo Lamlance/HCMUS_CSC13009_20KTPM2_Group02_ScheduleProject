@@ -31,7 +31,6 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryView
   }
   GetListCallback dataGet;
 
-
   public HistoryRecyclerViewAdapter(
           Context context,
           GetListCallback callback,
@@ -39,7 +38,7 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryView
   ) {
     this.context = context;
     dataGet = callback;
-    this.moveToTodoTaskCallback = (HistoryViewHolder.OnClickPositionCallBack) moveToTodoTaskCallback;
+    this.moveToTodoTaskCallback = moveToTodoTaskCallback;
   }
 
   @NonNull
@@ -52,12 +51,17 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryView
     return viewHolder;
   }
 
+  @Override
   public void onBindViewHolder(@NonNull HistoryViewHolder holder, int position) {
+    Log.i("HISTORY_NAME","Task pos " + position);
+
     TaskData taskData = dataGet.getList().get(position);
 
-    holder.txtTaskName.setText(taskData.taskName);
-    holder.txtCountPomodoro.setText(taskData.numberCompletedPomodoros + "/ " + taskData.numberPomodoros);
+    Log.i("HISTORY_NAME","Task name " + taskData.taskName);
+    holder.txtTaskNameHistory.setText(taskData.taskName);
+    holder.txtCountPomodoroHistory.setText(taskData.numberCompletedPomodoros + "/ " + taskData.numberPomodoros);
   }
+
 
   @Override
   public long getItemId(int i) {
@@ -68,7 +72,7 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryView
     return dataGet.getList().size();
   }
 
-  public int getSelectedPosition() {
-    return this.selectedPosition;
-  }
+//  public int getSelectedPosition() {
+//    return this.selectedPosition;
+//  }
 }

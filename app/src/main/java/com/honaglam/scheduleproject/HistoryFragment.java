@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.honaglam.scheduleproject.History.HistoryRecyclerViewAdapter;
 import com.honaglam.scheduleproject.History.HistoryViewHolder;
 import com.honaglam.scheduleproject.Task.TaskData;
-import com.honaglam.scheduleproject.Task.TaskViewHolder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kotlin.NotImplementedError;
@@ -56,7 +57,7 @@ public class HistoryFragment extends Fragment {
     historyRecyclerViewAdapter = new HistoryRecyclerViewAdapter(context, new HistoryRecyclerViewAdapter.GetListCallback() {
               @Override
               public List<TaskData> getList() {
-                return activity.tasks;
+                return activity.historyTasks;
               }
             },  new MoveToToDoTaskCallback());
     recyclerHistory.setAdapter(historyRecyclerViewAdapter);
@@ -70,7 +71,10 @@ public class HistoryFragment extends Fragment {
     context = getContext();
     activity = (MainActivity) getActivity();
 
-
+    // TODO: List task history
+//    List<TaskData> test;
+//    test = activity.listHistoryTasks();
+//    Log.i("Tasks History: ", test.toString());
   }
 
   class MoveToToDoTaskCallback implements HistoryViewHolder.OnClickPositionCallBack {
