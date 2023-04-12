@@ -111,7 +111,7 @@ public class TimerFragment extends Fragment {
       public List<TaskData> getList() {
         return activity.tasks;
       }
-    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback());
+    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback(), new MoveToHistoryCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
@@ -182,23 +182,6 @@ public class TimerFragment extends Fragment {
   }
 
   private void UpdateTimerBackground(int work_state) {
-    /*
-    txtPomodoro = getView().findViewById(R.id.txtPomodoro);
-    txtShortBreak = getView().findViewById(R.id.txtShortBreak);
-    txtLongBreak = getView().findViewById(R.id.txtLongBreak);
-
-    Drawable rounded_background = getResources().getDrawable(R.drawable.rounded_background);
-    txtPomodoro.setBackground(rounded_background);
-    txtShortBreak.setBackground(rounded_background);
-    txtLongBreak.setBackground(rounded_background);
-
-    btnTimerStart = getView().findViewById(R.id.btnTimerStart);
-    btnGiveUp = getView().findViewById(R.id.btnTimerGiveUp);
-    btnSkip = getView().findViewById(R.id.btnSkip);
-    btnSetting = getView().findViewById(R.id.btnTimerSetting);
-    btnAddTask = getView().findViewById(R.id.btnAddTask);
-    */
-
     //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
     if (
@@ -221,6 +204,7 @@ public class TimerFragment extends Fragment {
       btnGiveUp.setPomodoroState(work_state);
       timerSetting.setPomodoroState(work_state);
       layoutTimerFragment.setPomodoroState(work_state);
+
 
     }
 
@@ -340,7 +324,19 @@ public class TimerFragment extends Fragment {
     }
   }
 
-  class TimerSettingFragmentClick implements View.OnClickListener {
+  class MoveToHistoryCallback implements TaskViewHolder.OnClickPositionCallBack {
+    @Override
+    public void clickAtPosition(int position) throws NotImplementedError {
+      try {
+        activity.moveTaskToHistory(activity.tasks.get(position).id);
+        activity.tasks.remove(position);
+        taskRecyclerViewAdapter.notifyItemRemoved(position);
+      } catch (Exception ignore) {
+      }
+    }
+  }
+
+  class TimerSettingFragmentClick implements View.OnClickListener{
     @Override
     public void onClick(View view) {
       getParentFragmentManager().setFragmentResultListener(

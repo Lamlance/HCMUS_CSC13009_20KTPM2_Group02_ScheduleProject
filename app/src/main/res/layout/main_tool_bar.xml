@@ -5,7 +5,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
-  style="@style/SCREEN"
+  style="@style/CALENDAR_SCREEN"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   tools:context=".MainActivity">
@@ -19,7 +19,7 @@
       <Button
 
         android:id="@+id/toolbarBtn"
-          style="@style/SCREEN"
+          style="@style/NAV_BUTTON"
         android:drawableLeft="@drawable/baseline_dehaze_24_white"
         android:text=""
         android:layout_width="40dp"
@@ -29,7 +29,7 @@
         app:titleTextColor="@color/white"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-          style="@style/SCREEN" />
+          style="@style/NAV_BUTTON" />
     </LinearLayout>
 
 

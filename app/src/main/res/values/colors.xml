@@ -8,6 +8,8 @@
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
 
+  <color name="dark_mode_color">#0F0F0F</color>
+
   <color name="text_work_state_background_color">#a44e4e</color>
   <color name="text_short_break_state_background_color">#417b80</color>
   <color name="text_long_break_state_background_color">#426c8a</color>
@@ -85,4 +87,6 @@
   <color name="short_break_color_theme7">#301B24</color>
   <color name="long_break_color_theme7">#24301B</color>
   <color name="image_btn_background_theme7">#816797</color>
+  
+  <color name="transparent">#00FFFFFF</color>
 </resources>

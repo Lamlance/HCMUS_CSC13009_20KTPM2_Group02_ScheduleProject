@@ -348,7 +348,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                 Cursor cursor = db.query(
                         TaskTable.TABLE_NAME,
                         null,
-                        TaskTable.COLUMN_NAME_HISTORY + " = ?",
+                        TaskTable.COLUMN_NAME_HISTORY + " = ? ",
                         new String[]{"0"},
                         null,
                         null,
@@ -425,6 +425,59 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         } catch (Exception ignore) {
         }
         return false;
+    }
+
+    // TODO: implement makeTaskToToDo
+    public boolean makeTaskToToDo(int id) {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
+            cv.put(TaskTable.COLUMN_NAME_HISTORY, 1);
+            long update = db.update(
+                    TaskTable.TABLE_NAME,
+                    cv,
+                    TaskTable.COLUMN_NAME_ID + "=?",
+                    new String[]{String.valueOf(id)}
+            );
+            return update > 0;
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    public List<TaskData> getHistoryTask() {
+        ArrayList<TaskData> list = new ArrayList<TaskData>();
+        try (
+                SQLiteDatabase db = getReadableDatabase();
+                Cursor cursor = db.query(
+                        TaskTable.TABLE_NAME,
+                        null,
+                        TaskTable.COLUMN_NAME_HISTORY + " > ? ",
+                        new String[]{"0"},
+                        null,
+                        null,
+                        null
+                );
+        ) {
+            if (!cursor.moveToFirst()) {
+                return list;
+            }
+            int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
+            int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
+            int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+            int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
+            int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
+            do {
+                String name = cursor.getString(titleIndex);
+                int loops = cursor.getInt(loopIndex);
+                int loopsCompleted = cursor.getInt(loopCompletedIndex);
+                int id = cursor.getInt(idIndex);
+                boolean isComplete = cursor.getInt(completeIndex) > 0;
+                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete));
+            } while (cursor.moveToNext());
+            Log.i("HISTORY","Find " + cursor.getCount());
+        } catch (Exception ignore) {
+        }
+        return list;
     }
     //===
 

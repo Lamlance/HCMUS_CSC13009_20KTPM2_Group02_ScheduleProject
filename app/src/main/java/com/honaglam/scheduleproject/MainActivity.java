@@ -1,17 +1,12 @@
 package com.honaglam.scheduleproject;
 
-import static com.honaglam.scheduleproject.TimerSetting.TIMER_SETTING_RESULT_KEY;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentResultListener;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -30,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -48,13 +42,13 @@ import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
   public static final String FRAGMENT_TAG_TIMER = "pomodoro_timer";
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
   public static final String FRAGMENT_TAG_STATISTIC = "statstic";
+  public static final String FRAGMENT_TAG_HISTORY = "history";
 
   private static final String UUID_KEY = "SchedulerKey";
   public boolean darkModeIsOn = false;
@@ -84,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
   private CalendarFragment calendarFragment;
   private TimerFragment timerFragment;
   private StatisticFragment statisticFragment;
+  private HistoryFragment historyFragment;
 
 
   SharedPreferences userTimerSetting;
@@ -98,10 +93,13 @@ public class MainActivity extends AppCompatActivity {
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
+  List<TaskData> historyTasks = new ArrayList<>();
   // User setting
   //  private UserSettings userSettings;
   static final int IS_CALENDAR_FRAGMENT = 1;
   static final int IS_TIMER_FRAGMENT = 2;
+  static final int IS_STATISTIC_FRAGMENT = 3;
+  static final int IS_HISTORY_FRAGMENT = 4;
 
   int currentFragment = IS_CALENDAR_FRAGMENT;
 
@@ -119,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
-
+    historyTasks.addAll(listHistoryTasks());
 
     if (taskDb.IS_DEV) {
       //taskDb.createSampleData();
@@ -151,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-
+  // Switch to Pomodoro Fragment / Timer Fragment
   public boolean switchFragment_Pomodoro() {
     if (timerFragment.isVisible()) {
       return false;
@@ -164,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
+  // Switch to Schedule Fragment
   public boolean switchFragment_Schedule() {
     if (calendarFragment.isVisible()) {
       return false;
@@ -177,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
+  // Switch to Statistic Fragment
   public boolean switchFragment_Statistic() {
     if (statisticFragment.isVisible()) {
       return false;
@@ -185,6 +185,19 @@ public class MainActivity extends AppCompatActivity {
             .beginTransaction()
             .replace(R.id.fragmentContainerView, statisticFragment, FRAGMENT_TAG_STATISTIC)
             .addToBackStack(FRAGMENT_TAG_STATISTIC)
+            .commit();
+    return true;
+  }
+
+  // Switch to History Fragment
+  public boolean switchFragment_History() {
+    if (historyFragment.isVisible()) {
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, historyFragment, FRAGMENT_TAG_HISTORY)
+            .addToBackStack(FRAGMENT_TAG_HISTORY)
             .commit();
     return true;
   }
@@ -327,6 +340,18 @@ public class MainActivity extends AppCompatActivity {
 
   public boolean deleteTask(int id) {
     return taskDb.deleteTask(id);
+  }
+
+  public boolean moveTaskToHistory(int id) {
+    return taskDb.makeTaskHistory(id);
+  }
+
+  public boolean moveTaskToToDoTask(int id) {
+    return taskDb.makeTaskToToDo(id);
+  }
+
+  public List<TaskData> listHistoryTasks() {
+    return taskDb.getHistoryTask();
   }
   //===
 
@@ -518,8 +543,14 @@ public class MainActivity extends AppCompatActivity {
           Toast.makeText(MainActivity.this, "Select Schedule", Toast.LENGTH_SHORT).show();
           return switchFragment_Schedule();
         case R.id.nav_statistic:
+          currentFragment = IS_STATISTIC_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select Report", Toast.LENGTH_SHORT).show();
           return switchFragment_Statistic();
+        case R.id.nav_history:
+
+          currentFragment = IS_HISTORY_FRAGMENT;
+          Toast.makeText(MainActivity.this, "Select History", Toast.LENGTH_SHORT).show();
+          return switchFragment_History();
       }
       return false;
     }
@@ -534,6 +565,7 @@ public class MainActivity extends AppCompatActivity {
       calendarFragment = CalendarFragment.newInstance();
       timerFragment = TimerFragment.newInstance();
       statisticFragment = StatisticFragment.newInstance();
+      historyFragment = HistoryFragment.newInstance();
 
       fragmentManager
               .beginTransaction()
