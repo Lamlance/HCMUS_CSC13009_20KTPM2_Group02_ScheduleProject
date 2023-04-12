@@ -95,7 +95,16 @@ public class TimerFragment extends Fragment {
     context = requireContext();
 
     LinearLayout timerLayout = (LinearLayout) inflater.inflate(R.layout.fragment_timer, container, false);
-    recyclerTask = timerLayout.findViewById(R.id.recyclerTask);
+
+
+    return timerLayout;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    recyclerTask = view.findViewById(R.id.recyclerTask);
     recyclerTask.setLayoutManager(new LinearLayoutManager(context));
     taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(context, new TaskRecyclerViewAdapter.GetListCallback() {
       @Override
@@ -104,13 +113,6 @@ public class TimerFragment extends Fragment {
       }
     }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
-
-    return timerLayout;
-  }
-
-  @Override
-  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
 
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
 
@@ -166,7 +168,7 @@ public class TimerFragment extends Fragment {
       }
     });
 
-
+    setThemeId(activity.loadTimerSettingPref().prefTheme);
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -222,6 +224,15 @@ public class TimerFragment extends Fragment {
 
     }
 
+
+  }
+
+  private void setThemeId(int themeId){
+    btnTimerStart.setPomodoroTheme(themeId);
+    btnSkip.setPomodoroTheme(themeId);
+    btnGiveUp.setPomodoroTheme(themeId);
+    timerSetting.setPomodoroTheme(themeId);
+    layoutTimerFragment.setPomodoroTheme(themeId);
 
   }
 
@@ -344,7 +355,8 @@ public class TimerFragment extends Fragment {
     @Override
     public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
       UserTimerSettings settings = (UserTimerSettings) result.getSerializable(TimerSetting.TIMER_SETTING_RESULT_KEY);
-      ((MainActivity) getActivity()).saveTimerSettingPref(settings);
+      setThemeId(settings.prefTheme);
+      activity.saveTimerSettingPref(settings);
     }
   }
 }

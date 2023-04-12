@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
@@ -54,9 +56,10 @@ public class TimerSetting extends DialogFragment {
   private Button confirmButton;
   private Button cancelButton;
 
-  GridView gridViewIcon;
+  GridLayout gridViewIcon;
   UserTimerSettings userTimerSettings;
 
+  int selectedTheme;
   private ActivityResultLauncher<Intent> soundPickerLauncher;
 
   public TimerSetting() {
@@ -85,8 +88,7 @@ public class TimerSetting extends DialogFragment {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     return inflater.inflate(R.layout.fragment_timer_setting, container, false);
   }
@@ -174,6 +176,16 @@ public class TimerSetting extends DialogFragment {
       }
     });
 
+    gridViewIcon = view.findViewById(R.id.layoutGridThemeIcon);
+    int iconId = 0;
+    for (int i = 0; i < gridViewIcon.getChildCount(); i++){
+      View child = gridViewIcon.getChildAt(i);
+      if(child instanceof AppCompatImageView){
+        child.setOnClickListener(new OnThemeSelected(iconId));
+        iconId++;
+      }
+    }
+
 
     setUserPref(userTimerSettings);
   }
@@ -202,9 +214,20 @@ public class TimerSetting extends DialogFragment {
       Bundle result = new Bundle();
       result.putSerializable(TIMER_SETTING_RESULT_KEY, new UserTimerSettings(
               workTime, shortBreak, longBreak,
-              final_uri, autoStartBreak, autoStartPomodoro, longBreakInterVal));
+              final_uri, autoStartBreak, autoStartPomodoro, longBreakInterVal,selectedTheme));
       getParentFragmentManager().setFragmentResult(TIMER_SETTING_REQUEST_KEY, result);
       TimerSetting.this.dismiss();
+    }
+  }
+
+  class OnThemeSelected implements View.OnClickListener{
+    int theme;
+    OnThemeSelected(int themeId){
+      theme = themeId;
+    }
+    @Override
+    public void onClick(View view) {
+      TimerSetting.this.selectedTheme = theme;
     }
   }
 
@@ -224,6 +247,7 @@ public class TimerSetting extends DialogFragment {
       String name = ringtone.getTitle(getContext());
     }
 
+    selectedTheme = settings.prefTheme;
   }
 
 }

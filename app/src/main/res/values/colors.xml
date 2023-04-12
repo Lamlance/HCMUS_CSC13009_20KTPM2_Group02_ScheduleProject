@@ -56,10 +56,10 @@
   <color name="long_break_color_theme1">#BC92A4</color>
   <color name="image_btn_background_theme1">#675D50</color>
 
-  <color name="work_color_theme2">#CFF5E7</color>
-  <color name="short_break_color_theme2">#E7CFF5</color>
-  <color name="long_break_color_theme2">#F5E7CF</color>
-  <color name="image_btn_background_theme2">#0D4C92</color>
+  <color name="work_color_theme2">#AECABF</color>
+  <color name="short_break_color_theme2">#BFAECA</color>
+  <color name="long_break_color_theme2">#CABFAE</color>
+  <color name="image_btn_background_theme2">#4C6C8F</color>
 
   <color name="work_color_theme3">#FFAAC4</color>
   <color name="short_break_color_theme3">#C4FFAA</color>

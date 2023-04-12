@@ -13,12 +13,13 @@ public class UserTimerSettings implements Serializable {
   public boolean autoStartPomodoroSetting = false;
   public long longBreakInterValSetting = 4;
   public Uri alarmUri;
-  
-  int prefTheme = 0;
+
+  public int prefTheme = 0;
   
   public UserTimerSettings(
           long workTime, long shortBreakTime, long longBreakTime, Uri alarmSound,
-          boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal
+          boolean autoStartBreak, boolean autoStartPomodoro, long longBreakInterVal,
+          int prefThemeId
   ){
     workMillis = workTime;
     shortBreakMillis = shortBreakTime;
@@ -27,6 +28,7 @@ public class UserTimerSettings implements Serializable {
     autoStartBreakSetting = autoStartBreak;
     autoStartPomodoroSetting = autoStartPomodoro;
     longBreakInterValSetting = longBreakInterVal;
+    prefTheme = prefThemeId;
   }
 
 }
