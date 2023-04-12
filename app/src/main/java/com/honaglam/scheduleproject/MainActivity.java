@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
   static final String PREF_KEY_AUTO_POMODORO = "auto_pomodoro";
   static final String PREF_KEY_LONG_INTERVAL = "long_interval";
   static final String PREF_KEY_ALARM = "alarm";
+  static final String PREF_KEY_THEME = "theme";
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
@@ -291,6 +292,7 @@ public class MainActivity extends AppCompatActivity {
     edit.putBoolean(PREF_KEY_AUTO_BREAK, settings.autoStartBreakSetting);
     edit.putBoolean(PREF_KEY_AUTO_POMODORO, settings.autoStartPomodoroSetting);
     edit.putLong(PREF_KEY_LONG_INTERVAL, settings.longBreakInterValSetting);
+    edit.putInt(PREF_KEY_THEME,settings.prefTheme);
     edit.apply();
 
     timerService.setStateTime(settings);
@@ -309,10 +311,12 @@ public class MainActivity extends AppCompatActivity {
     if (uri != null) {
       alarm = Uri.parse(uri);
     }
+    int prefTheme = userTimerSetting.getInt(PREF_KEY_THEME,0);
 
     return new UserTimerSettings(
             workTime, shortTime, longTime,
-            alarm, autoBreak, autoWork, longInterval
+            alarm, autoBreak, autoWork, longInterval,
+            prefTheme
     );
   }
 

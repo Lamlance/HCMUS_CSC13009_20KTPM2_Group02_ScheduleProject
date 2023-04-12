@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+      app:pomodoro_theme0="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme0" />
+  <item
+      app:pomodoro_theme0="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme0" />
+  <item
+      app:pomodoro_theme0="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme0" />
+
+  <item
+      app:pomodoro_theme1="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme1" />
+  <item
+      app:pomodoro_theme1="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme1" />
+  <item
+      app:pomodoro_theme1="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme1" />
+
+  <item
+      app:pomodoro_theme2="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme2" />
+  <item
+      app:pomodoro_theme2="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme2" />
+  <item
+      app:pomodoro_theme2="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme2" />
+
+  <item
+      app:pomodoro_theme3="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme3" />
+  <item
+      app:pomodoro_theme3="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme3" />
+  <item
+      app:pomodoro_theme3="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme3" />
+
+  <item
+      app:pomodoro_theme4="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme4" />
+  <item
+      app:pomodoro_theme4="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme4" />
+  <item
+      app:pomodoro_theme4="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme4" />
+
+  <item
+      app:pomodoro_theme5="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme5" />
+  <item
+      app:pomodoro_theme5="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme5" />
+  <item
+      app:pomodoro_theme5="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme5" />
+
+  <item
+      app:pomodoro_theme6="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme6" />
+  <item
+      app:pomodoro_theme6="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme6" />
+  <item
+      app:pomodoro_theme6="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme6" />
+
+  <item
+      app:pomodoro_theme7="true"
+      app:state_work="true"
+      android:color="@color/work_color_theme7" />
+  <item
+      app:pomodoro_theme7="true"
+      app:state_short="true"
+      android:color="@color/short_break_color_theme7" />
+  <item
+      app:pomodoro_theme7="true"
+      app:state_long="true"
+      android:color="@color/long_break_color_theme7" />
+</selector>

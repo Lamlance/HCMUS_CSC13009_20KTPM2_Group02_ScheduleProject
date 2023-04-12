@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+      app:pomodoro_theme0="true"
+      android:color="@color/image_btn_background_theme0" />
+  <item
+      app:pomodoro_theme1="true"
+      android:color="@color/image_btn_background_theme1" />
+  <item
+      app:pomodoro_theme2="true"
+      android:color="@color/image_btn_background_theme2" />
+  <item
+      app:pomodoro_theme3="true"
+      android:color="@color/image_btn_background_theme3" />
+  <item
+      app:pomodoro_theme4="true"
+      android:color="@color/image_btn_background_theme4" />
+  <item
+      app:pomodoro_theme5="true"
+      android:color="@color/image_btn_background_theme5" />
+  <item
+      app:pomodoro_theme6="true"
+      android:color="@color/image_btn_background_theme6" />
+  <item
+      app:pomodoro_theme7="true"
+      android:color="@color/image_btn_background_theme7" />
+</selector>

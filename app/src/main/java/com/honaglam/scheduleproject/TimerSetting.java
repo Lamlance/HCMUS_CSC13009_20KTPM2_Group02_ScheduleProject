@@ -2,6 +2,8 @@ package com.honaglam.scheduleproject;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
@@ -19,7 +23,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.GridLayout;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.media.Ringtone;
@@ -27,6 +35,7 @@ import android.media.RingtoneManager;
 
 import com.google.android.material.slider.Slider;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.honaglam.scheduleproject.TimerViews.TimerThemeIconImage;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 /**
@@ -47,19 +56,24 @@ public class TimerSetting extends DialogFragment {
   private Button confirmButton;
   private Button cancelButton;
 
+  GridLayout gridViewIcon;
   UserTimerSettings userTimerSettings;
 
+  int selectedTheme;
   private ActivityResultLauncher<Intent> soundPickerLauncher;
+
   public TimerSetting() {
     // Required empty public constructor
   }
+
   public static final String TIMER_SETTING_REQUEST_KEY = "timer_setting_request";
   public static final String TIMER_SETTING_RESULT_KEY = "timer_user_setting";
+
   // TODO: Rename and change types and number of parameters
   public static TimerSetting newInstance(UserTimerSettings userSettings) {
     TimerSetting fragment = new TimerSetting();
     Bundle args = new Bundle();
-    args.putSerializable(TIMER_SETTING_RESULT_KEY,userSettings);
+    args.putSerializable(TIMER_SETTING_RESULT_KEY, userSettings);
     fragment.setArguments(args);
     return fragment;
   }
@@ -74,16 +88,16 @@ public class TimerSetting extends DialogFragment {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
-
     return inflater.inflate(R.layout.fragment_timer_setting, container, false);
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+
+
     int minVal = 0;
     int maxVal = 120;
     // Set time for pomodoro work time and watch changed valued
@@ -137,20 +151,20 @@ public class TimerSetting extends DialogFragment {
     soundPickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
-      public void onActivityResult(ActivityResult result) {
-        if (result.getResultCode() == RESULT_OK) {
-          Uri uri = result.getData().getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-          if (uri == null) {
-            // If the user didn't pick a ringtone, use the default ringtone
-            uri = defaultUri;
-          }
-          selectedUri = uri;
-          Ringtone ringtone = RingtoneManager.getRingtone(getContext(), uri);
-          String name = ringtone.getTitle(getContext());
-          soundPicker.setText(name);
-        }
-      }
-    });
+              public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                  Uri uri = result.getData().getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                  if (uri == null) {
+                    // If the user didn't pick a ringtone, use the default ringtone
+                    uri = defaultUri;
+                  }
+                  selectedUri = uri;
+                  Ringtone ringtone = RingtoneManager.getRingtone(getContext(), uri);
+                  String name = ringtone.getTitle(getContext());
+                  soundPicker.setText(name);
+                }
+              }
+            });
     // Pass the setting to the timer Fragment upon confirm pressed
     confirmButton = view.findViewById(R.id.confirmButton);
     confirmButton.setOnClickListener(new OnConfirmSetting());
@@ -162,10 +176,29 @@ public class TimerSetting extends DialogFragment {
       }
     });
 
+    gridViewIcon = view.findViewById(R.id.layoutGridThemeIcon);
+    int iconId = 0;
+    for (int i = 0; i < gridViewIcon.getChildCount(); i++){
+      View child = gridViewIcon.getChildAt(i);
+      if(child instanceof AppCompatImageView){
+        child.setOnClickListener(new OnThemeSelected(iconId));
+        iconId++;
+      }
+    }
+
+
     setUserPref(userTimerSettings);
   }
 
-  class OnConfirmSetting implements View.OnClickListener{
+  @NonNull
+  @Override
+  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+
+    return super.onCreateDialog(savedInstanceState);
+  }
+
+  class OnConfirmSetting implements View.OnClickListener {
     @Override
     public void onClick(View view) {
       long workTime = pomodoroTimePicker.getValue() * (long) 1000;
@@ -179,18 +212,29 @@ public class TimerSetting extends DialogFragment {
       Log.d("longBreakInterVal: ", String.valueOf(longBreakInterVal));
       Uri final_uri = selectedUri;
       Bundle result = new Bundle();
-      result.putSerializable(TIMER_SETTING_RESULT_KEY,new UserTimerSettings(
-              workTime,shortBreak,longBreak,
-              final_uri,autoStartBreak,autoStartPomodoro,longBreakInterVal));
+      result.putSerializable(TIMER_SETTING_RESULT_KEY, new UserTimerSettings(
+              workTime, shortBreak, longBreak,
+              final_uri, autoStartBreak, autoStartPomodoro, longBreakInterVal,selectedTheme));
       getParentFragmentManager().setFragmentResult(TIMER_SETTING_REQUEST_KEY, result);
       TimerSetting.this.dismiss();
     }
   }
 
-  private void setUserPref(UserTimerSettings settings){
+  class OnThemeSelected implements View.OnClickListener{
+    int theme;
+    OnThemeSelected(int themeId){
+      theme = themeId;
+    }
+    @Override
+    public void onClick(View view) {
+      TimerSetting.this.selectedTheme = theme;
+    }
+  }
+
+  private void setUserPref(UserTimerSettings settings) {
     pomodoroTimePicker.setValue((int) (settings.workMillis / 1000));
     shortBreakPicker.setValue((int) (settings.shortBreakMillis / 1000));
-    longBreakPicker.setValue((int) (settings.longBreakMillis/1000));
+    longBreakPicker.setValue((int) (settings.longBreakMillis / 1000));
 
     longBreakIntervalSlider.setValue(settings.longBreakInterValSetting);
 
@@ -198,10 +242,12 @@ public class TimerSetting extends DialogFragment {
     autoStartPomodoroSwitch.setChecked(settings.autoStartPomodoroSetting);
 
     selectedUri = settings.alarmUri;
-    if(selectedUri != null){
+    if (selectedUri != null) {
       Ringtone ringtone = RingtoneManager.getRingtone(getContext(), selectedUri);
       String name = ringtone.getTitle(getContext());
     }
 
+    selectedTheme = settings.prefTheme;
   }
+
 }
