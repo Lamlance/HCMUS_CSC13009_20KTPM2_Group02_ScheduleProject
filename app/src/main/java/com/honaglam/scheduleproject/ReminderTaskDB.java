@@ -431,7 +431,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public boolean makeTaskToToDo(int id) {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues cv = new ContentValues();
-            cv.put(TaskTable.COLUMN_NAME_HISTORY, 1);
+            cv.put(TaskTable.COLUMN_NAME_HISTORY, 0);
             long update = db.update(
                     TaskTable.TABLE_NAME,
                     cv,

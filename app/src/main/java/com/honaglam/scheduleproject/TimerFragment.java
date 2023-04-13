@@ -331,6 +331,7 @@ public class TimerFragment extends Fragment {
     public void clickAtPosition(int position) throws NotImplementedError {
       try {
         activity.moveTaskToHistory(activity.tasks.get(position).id);
+        activity.historyTasks.add(activity.tasks.get(position));
         activity.tasks.remove(position);
         taskRecyclerViewAdapter.notifyItemRemoved(position);
       } catch (Exception ignore) {

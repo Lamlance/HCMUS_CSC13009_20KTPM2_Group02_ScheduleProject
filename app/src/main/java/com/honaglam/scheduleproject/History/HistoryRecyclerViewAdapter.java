@@ -65,7 +65,7 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryView
 
   @Override
   public long getItemId(int i) {
-    return i;
+    return dataGet.getList().get(i).id;
   }
   @Override
   public int getItemCount() {
