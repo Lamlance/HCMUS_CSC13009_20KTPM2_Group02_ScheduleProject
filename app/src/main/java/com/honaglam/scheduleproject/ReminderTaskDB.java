@@ -226,8 +226,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                         ReminderTable.TABLE_NAME,
                         null,
                         "( " + ReminderTable.COLUMN_NAME_TIME + " BETWEEN ? AND ? ) AND ("
-                                + ReminderTable.COLUMN_NAME_TITLE + " LIKE % ? % )",
-                        new String[]{String.valueOf(startDate), String.valueOf(endDate), nameSearch},
+                                + ReminderTable.COLUMN_NAME_TITLE + " LIKE ? )",
+                        new String[]{String.valueOf(startDate), String.valueOf(endDate), "%"+nameSearch+"%"},
                         null,
                         null,
                         ReminderTable.COLUMN_NAME_TIME)

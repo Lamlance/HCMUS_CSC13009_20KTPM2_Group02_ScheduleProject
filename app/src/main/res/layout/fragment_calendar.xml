@@ -159,6 +159,15 @@
             android:src="@drawable/baseline_filter_alt_24_black"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
+        <androidx.appcompat.widget.AppCompatToggleButton
+            android:id="@+id/btnToggleCalendar"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:textOn=""
+            android:textOff=""
+            android:drawableStart="@drawable/reminder_search_toggleview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
       </LinearLayout>
       <!-- Reminder list -->
       <androidx.recyclerview.widget.RecyclerView

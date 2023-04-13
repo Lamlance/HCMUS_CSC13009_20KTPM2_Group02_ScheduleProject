@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatToggleButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -75,9 +77,7 @@ public class CalendarFragment extends Fragment {
   ImageButton filterBtn;
   EditText txtSearchReminder;
 
-  LinearLayout layoutBigDateView;
-  LinearLayout layoutRemindersView;
-  LinearLayout layoutCalendarGrid;
+
   ConstraintLayout layoutCalendarAll;
 
   public static final int FULL_CALENDAR_VIEW = 1;
@@ -107,9 +107,7 @@ public class CalendarFragment extends Fragment {
     context = getContext();
     mainActivity = (MainActivity) getActivity();
 
-    layoutBigDateView = view.findViewById(R.id.layoutBigDateView);
-    layoutRemindersView = view.findViewById(R.id.layoutRemindersView);
-    layoutCalendarGrid = view.findViewById(R.id.layoutCalendarGrid);
+
     layoutCalendarAll = view.findViewById(R.id.layoutCalendarAll);
 
     //switchFragmentView(FULL_CALENDAR_VIEW);
@@ -180,6 +178,12 @@ public class CalendarFragment extends Fragment {
     //updateDateUI();
     calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
 
+    ((AppCompatToggleButton) view.findViewById(R.id.btnToggleCalendar)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override
+      public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
+        layoutCalendarAll.setVisibility(isOn ? View.GONE : View.VISIBLE);
+      }
+    });
   }
 
   private void AddReminder(String name) {
