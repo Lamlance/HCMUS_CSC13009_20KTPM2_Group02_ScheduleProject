@@ -4,6 +4,7 @@ import android.animation.LayoutTransition;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -19,11 +20,13 @@ public class ReminderViewHolder extends RecyclerView.ViewHolder{
   TextView txtName;
   ConstraintLayout layoutMenu;
   SelectItemCallBack callBack;
+  ImageButton btnDeleteReminder;
   public ReminderViewHolder(@NonNull View itemView) {
     super(itemView);
     txtName = itemView.findViewById(R.id.txtRecyclerRemindersId);
     txtId = itemView.findViewById(R.id.txtRecyclerRemindersTime);
     layoutMenu = itemView.findViewById(R.id.layoutReminderMenu);
+    btnDeleteReminder = itemView.findViewById(R.id.btnDeleteReminder);
   }
 
   public void  setSelectItemCallback(SelectItemCallBack callBack){

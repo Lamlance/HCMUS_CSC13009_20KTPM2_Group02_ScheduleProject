@@ -56,16 +56,6 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     holder.openMenu(selectedItemPos == position);
   }
 
-  public void swipeItem(int pos){
-    int oldSwipe = swipePos;
-    swipePos = pos;
-    if(oldSwipe >= 0 && oldSwipe < reminderListGetter.get().size()){
-      notifyItemChanged(oldSwipe);
-    }
-    if(swipePos >= 0){
-      notifyItemChanged(swipePos);
-    }
-  }
 
   @Override
   public int getItemCount() {
@@ -76,7 +66,15 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     public void onClickPos(int pos) throws NotImplementedError {
       int oldPos = selectedItemPos;
       selectedItemPos = pos;
-      notifyDataSetChanged();
+      int listSize = reminderListGetter.get().size();
+
+      if(oldPos >= 0 && oldPos < listSize){
+        notifyItemChanged(oldPos);
+      }
+      if(selectedItemPos >= 0 && selectedItemPos < listSize){
+        notifyItemChanged(selectedItemPos);
+      }
+
 
     }
   }

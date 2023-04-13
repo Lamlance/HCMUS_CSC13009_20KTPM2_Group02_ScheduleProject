@@ -148,8 +148,8 @@ public class CalendarFragment extends Fragment {
     });
     reminderRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
     reminderRecycler.setAdapter(reminderRecyclerAdapter);
-    ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
-    helper.attachToRecyclerView(reminderRecycler);
+    //ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
+    //helper.attachToRecyclerView(reminderRecycler);
 
     view.findViewById(R.id.btnSetReminder).setOnClickListener(new View.OnClickListener() {
       @Override
@@ -313,29 +313,6 @@ public class CalendarFragment extends Fragment {
     }
   }
 
-  ItemTouchHelper.SimpleCallback recyclerReminderSwipeHelper = new ItemTouchHelper.SimpleCallback(
-          0,
-          ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-    @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-      return false;
-    }
-    @Override
-    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-      if(direction == ItemTouchHelper.LEFT){
-        reminderRecyclerAdapter.swipeItem(reminderRecyclerAdapter.selectedItemPos);
-      }
-      //int pos = reminderRecyclerAdapter.selectedItemPos;
-      //mainActivity.removeReminder(pos);
-      //reminderRecyclerAdapter.notifyItemRemoved(pos);
-      //Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-      super.onChildDraw(c, recyclerView, viewHolder, 0, 0, actionState, isCurrentlyActive);
-    }
-  };
 
 
 }
