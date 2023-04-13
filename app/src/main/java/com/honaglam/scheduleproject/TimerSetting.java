@@ -255,6 +255,8 @@ public class TimerSetting extends DialogFragment {
     }
 
     selectedTheme = settings.prefTheme;
+    themeIconView.get(selectedTheme).setScaleX((float) 0.8);
+    themeIconView.get(selectedTheme).setScaleY((float) 0.8);
   }
 
 }
