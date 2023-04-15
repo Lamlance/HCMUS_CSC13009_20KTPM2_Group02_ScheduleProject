@@ -25,6 +25,7 @@
         android:text="Reminder name" />
 
     <EditText
+        android:hint="Enter the reminder name"
         android:id="@+id/txtEditNameReminder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,6 +49,7 @@
           android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <!--
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -62,6 +64,7 @@
           android:textSize="15sp" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
+    -->
 
     <!--  TODO: re-design this  -->
     <androidx.appcompat.widget.SwitchCompat

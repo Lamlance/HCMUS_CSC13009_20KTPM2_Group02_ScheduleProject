@@ -21,12 +21,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ReminderTaskDB extends SQLiteOpenHelper {
-  private static final int DB_VERSION = 26;
+  private static final int DB_VERSION = 27;
   public static final boolean IS_DEV = true;
   private static final String DB_NAME = "ScheduleProject.db";
   private static final String SQL_DROP_REMINDER_TABLE = "DROP TABLE IF EXISTS " + ReminderTable.TABLE_NAME;
   private static final String SQL_DROP_TASK_TABLE = "DROP TABLE IF EXISTS " + TaskTable.TABLE_NAME;
   private static final String SQL_DROP_STATS_TABLE = "DROP TABLE IF EXISTS " + StatsTable.TABLE_NAME;
+  private static final String SQL_DROP_TASK_REMINDER_TABLE = "DROP TABLE IF EXISTS " + TaskReminderTable.TABLE_NAME;
 
   private Context context;
   int date = -1;
@@ -178,9 +179,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     return -1;
   }
 
-
-
-  public List<TaskData> getAllTaskInDate(int year,int month,int date){
+  public List<TaskData> getAllReminderTaskInDate(int year,int month,int date){
     List<TaskData> taskDataList = new ArrayList<TaskData>();
     List<ReminderData> reminderData = getReminderAt(date,month,year);
 
@@ -429,14 +428,14 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     ArrayList<TaskData> list = new ArrayList<TaskData>();
     try (
             SQLiteDatabase db = getReadableDatabase();
-            Cursor cursor = db.query(
-                    TaskTable.TABLE_NAME,
-                    null,
-                    TaskTable.COLUMN_NAME_HISTORY + " = ? OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL",
-                    new String[]{"0"},
-                    null,
-                    null,
-                    null
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + TaskTable.TABLE_NAME + ".* "
+                            + "FROM " + TaskTable.TABLE_NAME
+                            + " LEFT JOIN " + TaskReminderTable.TABLE_NAME
+                            + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID
+                            + " = " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
+                            + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID + " IS NULL"
+                    ,null
             );
     ) {
       if (!cursor.moveToFirst()) {
@@ -455,7 +454,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         boolean isComplete = cursor.getInt(completeIndex) > 0;
         list.add(new TaskData(name, loops, loopsCompleted, id, isComplete));
       } while (cursor.moveToNext());
-    } catch (Exception ignore) {
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return list;
   }
@@ -843,6 +843,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       db.execSQL(SQL_DROP_REMINDER_TABLE);
       db.execSQL(SQL_DROP_TASK_TABLE);
       db.execSQL(SQL_DROP_STATS_TABLE);
+      db.execSQL(SQL_DROP_TASK_REMINDER_TABLE);
     } catch (Exception e) {
       e.printStackTrace();
     }

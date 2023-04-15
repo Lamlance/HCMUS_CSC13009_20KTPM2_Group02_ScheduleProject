@@ -130,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
     tasks.addAll(taskDb.getAllTask());
     setSupportActionBar(findViewById(R.id.toolbar));
 
+    Calendar calendar = Calendar.getInstance();
+    taskDb.getAllReminderTaskInDate(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DATE));
+
     drawerLayout = findViewById(R.id.drawerLayout);
     sideNavView = findViewById(R.id.navSideMenu);
     sideNavView.setNavigationItemSelectedListener(new SideNavItemSelect());
