@@ -42,6 +42,10 @@ import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -118,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
     historyTasks.addAll(listHistoryTasks());
-
+    Log.i("MAIN","Get all task size " + tasks.size());
     if (taskDb.IS_DEV) {
       //taskDb.createSampleData();
     }
@@ -353,6 +357,18 @@ public class MainActivity extends AppCompatActivity {
   public List<TaskData> listHistoryTasks() {
     return taskDb.getHistoryTask();
   }
+
+  public int makeTaskReminders(String name, long time,List<Integer> tasksIds){
+    try{
+      int reminderId = addReminderReturnId(name,time);
+      int result = taskDb.bindTaskToReminder(reminderId,tasksIds);
+      return result;
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    return -1;
+  }
+
   //===
 
   @Override
@@ -403,6 +419,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     return reminderDataList.size();
+  }
+
+  public int addReminderReturnId(String name, long time){
+    long result = taskDb.addReminder(name, time);
+
+    try {
+      int id = Math.toIntExact(result);
+
+      ReminderData reminderData = new ReminderData(name, time, id);
+      reminderDataList.add(reminderData);
+      //Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
+
+      notificationBuilder.setContentText(name);
+      Notification notification = notificationBuilder.build();
+
+
+      AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+      intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
+      intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
+      intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+      intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY, id);
+
+      PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent,
+              PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+      alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
+
+      return id;
+    } catch (Exception ignore) {
+    }
+
+    return -1;
   }
 
   public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
@@ -484,20 +532,6 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception ignore) {
     }
   }
-
-  /*
-  public int getReminderAt(int date, int month, int year) {
-    List<ReminderData> data = taskDb.getReminderAt(date, month, year);
-    Log.d("DataLength", String.valueOf(data.size()));
-
-    int oldSize = reminderDataList.size();
-    reminderDataList.clear();
-    reminderDataList.addAll(data);
-    int newSize = reminderDataList.size();
-
-    return Math.max(oldSize, newSize);
-  }
-  */
 
   public int searchReminder(String name, long startDate, long endDate) {
     List<ReminderData> newList = taskDb.findReminders(name, startDate, endDate);

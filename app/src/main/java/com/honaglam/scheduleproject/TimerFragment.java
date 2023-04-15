@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
@@ -35,6 +36,9 @@ import com.honaglam.scheduleproject.TimerViews.TimerFloatingButton;
 import com.honaglam.scheduleproject.TimerViews.TimerViewGroupLinear;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,6 +61,7 @@ public class TimerFragment extends Fragment {
   private TimerFloatingButton btnGiveUp;
   private TimerFloatingButton btnSkip;
   private TimerViewGroupLinear layoutTimerFragment;
+  private TimerFloatingButton btnTimerSetReminder;
 
 //  private Button btnTimer;
 //  private Button btnGiveUp;
@@ -80,6 +85,8 @@ public class TimerFragment extends Fragment {
     fragment.setArguments(args);
     return fragment;
   }
+
+  HashSet<Integer> checkedIdSet = new HashSet<Integer>();
 
   public TimerFragment() {
     // Required empty public constructor
@@ -110,7 +117,8 @@ public class TimerFragment extends Fragment {
       public List<TaskData> getList() {
         return activity.tasks;
       }
-    }, new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback(), new MoveToHistoryCallback());
+    },
+            new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback(), new MoveToHistoryCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
@@ -167,6 +175,16 @@ public class TimerFragment extends Fragment {
       }
     });
 
+    btnTimerSetReminder = view.findViewById(R.id.btnTimerSetReminder);
+    btnTimerSetReminder.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if(checkedIdSet.size() > 0){
+          new ReminderAddDialog(activity,new SetTimerReminderCallBack()).show();
+        }
+      }
+    });
+
     UpdateTimerBackground(currentPomodoroState);
     setThemeId(activity.loadTimerSettingPref().prefTheme);
     Log.i("DRAW_POMODORO_STATE","FRAGMENT VIEW CREATED");
@@ -205,7 +223,7 @@ public class TimerFragment extends Fragment {
       btnGiveUp.setPomodoroState(work_state);
       timerSetting.setPomodoroState(work_state);
       layoutTimerFragment.setPomodoroState(work_state);
-
+      btnTimerSetReminder.setPomodoroState(work_state);
 
     }
 
@@ -219,6 +237,26 @@ public class TimerFragment extends Fragment {
     timerSetting.setPomodoroTheme(themeId);
     layoutTimerFragment.setPomodoroTheme(themeId);
 
+  }
+
+  class SetTimerReminderCallBack implements ReminderAddDialog.ReminderDataCallBack{
+    @Override
+    public void onSubmit(String name, int hour24h, int minute) {}
+
+    @Override
+    public void onSubmit(String name, Calendar setDate) {
+      activity.makeTaskReminders(name,setDate.getTimeInMillis(),new ArrayList<Integer>(checkedIdSet));
+    }
+
+    @Override
+    public void onSubmitWeekly(String name, Calendar setDate, HashSet<Integer> dailyReminder) {
+      activity.addReminderWeekly(name,setDate.getTimeInMillis(),dailyReminder);
+    }
+
+    @Override
+    public void onSubmitWeekly(String name, int hour24h, int minute, HashSet<Integer> dailyReminder) {
+
+    }
   }
 
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
@@ -315,13 +353,17 @@ public class TimerFragment extends Fragment {
 
   class CheckTaskCallback implements TaskViewHolder.OnClickPositionCallBack {
     @Override
-    public void clickAtPosition(int position) throws NotImplementedError {
-      boolean isCompleted = activity.tasks.get(position).isCompleted;
-      activity.tasks.get(position).isCompleted = !isCompleted;
-      try {
-        activity.editTask(activity.tasks.get(position));
-        taskRecyclerViewAdapter.notifyItemChanged(position);
-      } catch (Exception ignore) {
+    public void clickAtPosition(int position) throws NotImplementedError {}
+
+    @Override
+    public void onClickCheckPosition(int pos, boolean isChecked) {
+      TaskData task = activity.tasks.get(pos);
+      if(task == null){return;}
+
+      if(isChecked){
+        checkedIdSet.add(task.id);
+      }else{
+        checkedIdSet.remove(task.id);
       }
     }
   }

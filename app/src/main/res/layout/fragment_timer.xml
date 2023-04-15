@@ -77,70 +77,94 @@
   <!-- TODO: change color of the buttons in light mode -->
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1.5"
+      android:layout_height="wrap_content"
       android:gravity="center_horizontal"
-      android:orientation="horizontal">
+      android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+      <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
+          app:tint="@drawable/timer_pomodoro_theme"
+          app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
+          android:id="@+id/btnTimerStart"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/play_arow"
+          android:layout_marginLeft="9dp"
+          android:layout_marginRight="9dp"
+          app:maxImageSize="35dp"
+          app:elevation="3dp"
+          app:pressedTranslationZ="20dp"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
-        app:tint="@drawable/timer_pomodoro_theme"
-        app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
-        android:id="@+id/btnTimerStart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/play_arow"
-        android:layout_marginLeft="9dp"
-        android:layout_marginRight="9dp"
-        app:maxImageSize="35dp"
-        app:elevation="3dp"
-        app:pressedTranslationZ="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+      <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
+          app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
+          app:tint="@drawable/timer_pomodoro_theme"
+          android:id="@+id/btnTimerGiveUp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/stop_button"
+          android:layout_marginLeft="9dp"
+          android:layout_marginRight="9dp"
+          app:maxImageSize="35dp"
+          app:elevation="3dp"
+          app:pressedTranslationZ="20dp"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent" />
+      <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
+          app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
+          app:tint="@drawable/timer_pomodoro_theme"
+          android:id="@+id/btnSkip"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/skip_arrow"
+          android:layout_marginLeft="9dp"
+          android:layout_marginRight="9dp"
+          app:maxImageSize="35dp"
+          app:elevation="3dp"
+          app:pressedTranslationZ="20dp"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent" />
+    </LinearLayout>
 
-    <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
-        app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
-        app:tint="@drawable/timer_pomodoro_theme"
-        android:id="@+id/btnTimerGiveUp"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/stop_button"
-        android:layout_marginLeft="9dp"
-        android:layout_marginRight="9dp"
-        app:maxImageSize="35dp"
-        app:elevation="3dp"
-        app:pressedTranslationZ="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
-        app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
-        app:tint="@drawable/timer_pomodoro_theme"
-        android:id="@+id/btnSkip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/skip_arrow"
-        android:layout_marginLeft="9dp"
-        android:layout_marginRight="9dp"
-        app:maxImageSize="35dp"
-        app:elevation="3dp"
-        app:pressedTranslationZ="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
-        app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
-        app:tint="@drawable/timer_pomodoro_theme"
-        android:id="@+id/btnTimerSetting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/setting_button"
-        android:layout_marginLeft="9dp"
-        android:layout_marginRight="9dp"
-        app:maxImageSize="35dp"
-        app:elevation="3dp"
-        app:pressedTranslationZ="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:orientation="horizontal">
+      <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
+          app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
+          app:tint="@drawable/timer_pomodoro_theme"
+          android:id="@+id/btnTimerSetting"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/setting_button"
+          android:layout_marginLeft="9dp"
+          android:layout_marginRight="9dp"
+          app:maxImageSize="35dp"
+          app:elevation="3dp"
+          app:pressedTranslationZ="20dp"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent" />
+      <com.honaglam.scheduleproject.TimerViews.TimerFloatingButton
+          android:id="@+id/btnTimerSetReminder"
+          app:backgroundTint="@drawable/timer_pomodoro_bg_theme"
+          app:tint="@drawable/timer_pomodoro_theme"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/baseline_calendar_month_24"
+          android:layout_marginLeft="9dp"
+          android:layout_marginRight="9dp"
+          app:maxImageSize="35dp"
+          app:elevation="3dp"
+          app:pressedTranslationZ="20dp"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent" />
+    </LinearLayout>
 
   </LinearLayout>
+
   <com.google.android.material.button.MaterialButton
       android:id="@+id/btnAddTask"
       style="@style/BUTTON"

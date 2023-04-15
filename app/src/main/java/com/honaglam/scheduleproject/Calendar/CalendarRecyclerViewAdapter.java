@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject.Calendar;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -180,14 +181,16 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
       return;
     }
-
+    int weekDate = position % 7;
     int date = posToDate(position);
+
+    Log.i("WEEK_DATE", "Date " + date + " is " + WEEKDAY_NAMES[weekDate] );
+
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
       holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
     }
-
   }
 
   private int dateToPos(int date) {

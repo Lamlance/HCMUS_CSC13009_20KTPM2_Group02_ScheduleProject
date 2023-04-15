@@ -3,6 +3,7 @@ package com.honaglam.scheduleproject.Task;
 
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -30,6 +31,9 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
 
   public interface OnClickPositionCallBack {
     void clickAtPosition(int position) throws NotImplementedError;
+    default void onClickCheckPosition(int pos, boolean isChecked){
+      OnClickPositionCallBack.this.clickAtPosition(pos);
+    }
   }
 
   public TaskViewHolder(@NonNull View itemView,
@@ -84,16 +88,13 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
       }
     });
 
-    this.checkBoxCompleteTask.setOnClickListener(new View.OnClickListener() {
+    this.checkBoxCompleteTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override
-      public void onClick(View view) {
-        try {
-          int position = getAdapterPosition();
-          checkTaskCallback.clickAtPosition(position);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+      public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        checkTaskCallback.onClickCheckPosition(TaskViewHolder.this.getAdapterPosition(),b);
       }
     });
   }
+
+
 }

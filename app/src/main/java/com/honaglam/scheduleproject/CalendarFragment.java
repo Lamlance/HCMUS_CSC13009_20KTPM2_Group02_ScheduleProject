@@ -77,10 +77,8 @@ public class CalendarFragment extends Fragment {
   ImageButton filterBtn;
   EditText txtSearchReminder;
 
-
   ConstraintLayout layoutCalendarAll;
 
-  public static final int FULL_CALENDAR_VIEW = 1;
 
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
@@ -145,7 +143,7 @@ public class CalendarFragment extends Fragment {
       public List<ReminderData> get() throws NotImplementedError {
         return mainActivity.reminderDataList;
       }
-    });
+    }, new DeleteReminderPos());
     reminderRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
     reminderRecycler.setAdapter(reminderRecyclerAdapter);
     //ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
@@ -262,7 +260,7 @@ public class CalendarFragment extends Fragment {
 
   class DateSelectCallBack implements CalendarRecyclerViewAdapter.SelectDateCallBackInterface {
     @Override
-    public void clickDate(int date, int month, int year, int weekDay,List<ReminderData> reminders) throws NotImplementedError {
+    public void clickDate(int date, int month, int year, int weekDay,List<ReminderData> reminders) {
       /*
       if ((date != selectedDate || month != selectedMonth || year != selectedYear)
               && (date * month * year * weekDay) > 0) {
@@ -313,6 +311,11 @@ public class CalendarFragment extends Fragment {
     }
   }
 
-
-
+  class DeleteReminderPos implements ReminderRecyclerAdapter.DeleteListCallBack{
+    @Override
+    public void deletePos(int pos) throws NotImplementedError {
+      mainActivity.removeReminder(pos);
+      reminderRecyclerAdapter.notifyItemRemoved(pos);
+    }
+  }
 }

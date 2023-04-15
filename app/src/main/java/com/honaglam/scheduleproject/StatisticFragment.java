@@ -78,6 +78,7 @@ public class StatisticFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.activity = (MainActivity) getActivity();
         float workHours = 0;
+
         if (this.activity != null) {
             this.data = this.activity.taskDb.get30StatsBeforeToday();
             Collections.reverse(this.data);
