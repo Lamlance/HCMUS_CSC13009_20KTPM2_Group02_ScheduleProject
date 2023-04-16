@@ -773,7 +773,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     try (SQLiteDatabase db = getReadableDatabase()) {
       Calendar calendar = Calendar.getInstance();
       calendar.set(year, month, date, 0, 0, 0);
-      calendar.add(Calendar.DATE, -30);
+      calendar.add(Calendar.DATE, -29);
       int pastDate = calendar.get(Calendar.DATE);
       int pastMonth = calendar.get(Calendar.MONTH);
       int pastYear = calendar.get(Calendar.YEAR);
@@ -842,9 +842,9 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         workCv.put(StatsTable.COLUMN_NAME_DATE, date);
         workCv.put(StatsTable.COLUMN_NAME_MONTH, month);
         workCv.put(StatsTable.COLUMN_NAME_YEAR, year);
-        workCv.put(StatsTable.COLUMN_NAME_WORK_DURATION, (long) ((Math.random() * 80) + 10) * 1000);
-        workCv.put(StatsTable.COLUMN_NAME_SHORT_DURATION, (long) ((Math.random() * 80) + 10) * 1000);
-        workCv.put(StatsTable.COLUMN_NAME_LONG_DURATION, (long) ((Math.random() * 80) + 10) * 1000);
+        workCv.put(StatsTable.COLUMN_NAME_WORK_DURATION, (long) ((Math.random() * 60) + 10) * 1000 * 60);
+        workCv.put(StatsTable.COLUMN_NAME_SHORT_DURATION, (long) ((Math.random() * 60) + 10) * 1000 * 60);
+        workCv.put(StatsTable.COLUMN_NAME_LONG_DURATION, (long) ((Math.random() * 60) + 10) * 1000 * 60);
 
         try {
           db.insert(StatsTable.TABLE_NAME, null, workCv);

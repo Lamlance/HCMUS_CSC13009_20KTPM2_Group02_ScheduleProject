@@ -276,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  //TODO Timer On Finished
   public boolean setTimerOnFinishCallback(TimerService.TimerOnFinishCallback onFinishCallback) {
     if (timerFragment != null) {
       timerService.setOnFinishCallback(onFinishCallback);
@@ -570,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
     int maxMonth = calendar.get(Calendar.MONTH);
     int maxYear = calendar.get(Calendar.YEAR);
 
-    calendar.set(Calendar.DATE,-30);
+    calendar.add(Calendar.DATE,-29);
     int minDate = calendar.get(Calendar.DATE);
     int minMonth = calendar.get(Calendar.MONTH);
     int minYear = calendar.get(Calendar.YEAR);
@@ -638,7 +637,7 @@ public class MainActivity extends AppCompatActivity {
 
     list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
 
-    return list;
+    return list.subList(Math.max(list.size() - 30, 0), list.size());
   }
 
   public List<ReminderData> getSearchReminder(String name, long startDate, long endDate) {
