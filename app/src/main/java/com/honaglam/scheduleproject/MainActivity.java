@@ -37,6 +37,8 @@ import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
+  Map<Integer,List<TaskData>> reminderTaskByReminderId = new HashMap<>();
   List<TaskData> historyTasks = new ArrayList<>();
   // User setting
   //  private UserSettings userSettings;
@@ -122,16 +125,21 @@ public class MainActivity extends AppCompatActivity {
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
     historyTasks.addAll(listHistoryTasks());
+    Calendar calendar = Calendar.getInstance();
+    reminderTaskByReminderId = taskDb
+            .getAllReminderTaskInDate(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DATE)-1);
+    final Collection<List<TaskData>> reminderTasks = reminderTaskByReminderId.values();
+    for(List<TaskData> taskDataList : reminderTasks){
+      tasks.addAll(taskDataList);
+    }
+
     Log.i("MAIN","Get all task size " + tasks.size());
-    if (taskDb.IS_DEV) {
+    if (ReminderTaskDB.IS_DEV) {
       //taskDb.createSampleData();
     }
 
     tasks.addAll(taskDb.getAllTask());
     setSupportActionBar(findViewById(R.id.toolbar));
-
-    Calendar calendar = Calendar.getInstance();
-    taskDb.getAllReminderTaskInDate(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DATE));
 
     drawerLayout = findViewById(R.id.drawerLayout);
     sideNavView = findViewById(R.id.navSideMenu);
@@ -544,6 +552,65 @@ public class MainActivity extends AppCompatActivity {
     Toast.makeText(this, "Search size " + reminderDataList.size(), Toast.LENGTH_SHORT).show();
 
     return reminderDataList.size();
+  }
+
+  List<ReminderTaskDB.TimerStatsData> get30StatsBeforeToday(){
+    List<ReminderTaskDB.TimerStatsData> list = taskDb.get30StatsBeforeToday();
+
+    Log.i("STATS_30","BEFORE ADD 30");
+    list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
+
+    Map<Integer,List<ReminderTaskDB.TimerStatsData>> statsByMonth = list.stream().collect(Collectors.groupingBy(s->s.month));
+    Set<Integer> monthsSet = statsByMonth.keySet();
+
+
+    Calendar calendar = Calendar.getInstance();
+    int maxDate = calendar.get(Calendar.DATE);
+    int maxMonth = calendar.get(Calendar.MONTH);
+
+    calendar.set(Calendar.DATE,-30);
+    int minDate = calendar.get(Calendar.DATE);
+    int minMonth = calendar.get(Calendar.MONTH);
+
+    for (int month:monthsSet) {
+      List<ReminderTaskDB.TimerStatsData> monthStatsList = statsByMonth.get(month);
+      if(monthStatsList == null || monthStatsList.size() <= 0){
+        continue;
+      }
+      HashSet<Integer> dateSet = monthStatsList.stream().map(s -> s.date).collect(Collectors.toCollection(HashSet::new));
+      int year = monthStatsList.get(0).year;
+
+      if(month == maxMonth){
+        for(int date = 1; date <= maxDate;date++){
+          if(!dateSet.contains(date)){
+            list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
+          }
+        }
+      } else if (month == minMonth) {
+        calendar.set(Calendar.YEAR,year);
+        calendar.set(Calendar.MONTH,month);
+        int maxDateInMonth = calendar.getActualMaximum(Calendar.DATE);
+        for(int date = minDate; date <= maxDateInMonth;date++){
+          if(!dateSet.contains(date)){
+            list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
+          }
+        }
+      }else{
+        calendar.set(Calendar.YEAR,year);
+        calendar.set(Calendar.MONTH,month);
+        int maxDateInMonth = calendar.getActualMaximum(Calendar.DATE);
+        for(int date = 1; date <= maxDateInMonth;date++){
+          if(!dateSet.contains(date)){
+            list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
+          }
+        }
+      }
+    }
+
+    Log.i("STATS_30","AFTER ADD 30");
+    list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
+
+    return list;
   }
 
   public List<ReminderData> getSearchReminder(String name, long startDate, long endDate) {

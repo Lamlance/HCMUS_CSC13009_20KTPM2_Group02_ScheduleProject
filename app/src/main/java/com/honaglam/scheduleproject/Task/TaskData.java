@@ -8,6 +8,8 @@ public class TaskData {
     public int numberPomodoros;
     public boolean isCompleted;
 
+    public int reminderId = -1;
+
     public TaskData(String taskName, int numberPomodoros,int id) {
         this.taskName = taskName;
         this.numberCompletedPomodoros = 0;

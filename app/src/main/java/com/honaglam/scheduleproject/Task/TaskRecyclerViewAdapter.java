@@ -9,11 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
 
 import java.util.List;
+import java.util.Map;
 
 import kotlin.NotImplementedError;
 
@@ -35,9 +37,12 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
   public interface GetListCallback {
     public List<TaskData> getList();
   }
+  public interface GetReminderTaskC{
+    Map<Integer,List<TaskData>> getReminderMap ();
+  }
 
+  @Nullable GetReminderTaskC mapGet = null;
   GetListCallback dataGet;
-
   public TaskRecyclerViewAdapter(
           Context context,
           GetListCallback callback,
@@ -53,6 +58,26 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     this.editTaskCallback = editTaskCallback;
     this.moveToHistoryCallback = moveToHistoryCallback;
   }
+
+  public TaskRecyclerViewAdapter(
+          Context context,
+          GetListCallback callback,
+          @Nullable GetReminderTaskC mapGetCallBack,
+          TaskViewHolder.OnClickPositionCallBack deleteTaskCallback,
+          TaskViewHolder.OnClickPositionCallBack checkTaskCallback,
+          TaskViewHolder.OnClickPositionCallBack editTaskCallback,
+          TaskViewHolder.OnClickPositionCallBack moveToHistoryCallback
+  ) {
+    this.context = context;
+    dataGet = callback;
+    this.deleteTaskCallback = deleteTaskCallback;
+    this.checkTaskCallback = checkTaskCallback;
+    this.editTaskCallback = editTaskCallback;
+    this.moveToHistoryCallback = moveToHistoryCallback;
+    this.mapGet = mapGetCallBack;
+  }
+
+
 
   @NonNull
   @Override

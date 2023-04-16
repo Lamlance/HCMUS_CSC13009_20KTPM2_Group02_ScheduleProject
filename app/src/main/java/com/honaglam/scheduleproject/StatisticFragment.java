@@ -80,7 +80,7 @@ public class StatisticFragment extends Fragment {
         float workHours = 0;
 
         if (this.activity != null) {
-            this.data = this.activity.taskDb.get30StatsBeforeToday();
+            this.data = this.activity.get30StatsBeforeToday();
             Collections.reverse(this.data);
             workHours = this.data.stream().mapToLong(e -> e.workDur).sum();
             workHours = workHours / (1000 * 60 * 60);
