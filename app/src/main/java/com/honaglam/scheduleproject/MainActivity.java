@@ -562,46 +562,65 @@ public class MainActivity extends AppCompatActivity {
     list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
 
     Map<Integer,List<ReminderTaskDB.TimerStatsData>> statsByMonth = list.stream().collect(Collectors.groupingBy(s->s.month));
-    Set<Integer> monthsSet = statsByMonth.keySet();
+    HashSet<Integer> monthsSet = new HashSet<Integer>(statsByMonth.keySet());
 
 
     Calendar calendar = Calendar.getInstance();
     int maxDate = calendar.get(Calendar.DATE);
     int maxMonth = calendar.get(Calendar.MONTH);
+    int maxYear = calendar.get(Calendar.YEAR);
 
     calendar.set(Calendar.DATE,-30);
     int minDate = calendar.get(Calendar.DATE);
     int minMonth = calendar.get(Calendar.MONTH);
+    int minYear = calendar.get(Calendar.YEAR);
+
+    Log.i("STATS_30","Min date " + minDate + " Min month " + minMonth);
+    Log.i("STATS_30","Max date " + maxDate + " Min month " + maxMonth);
+
+    Calendar maxCalendar = Calendar.getInstance();
+    maxCalendar.set(maxYear,maxMonth,maxDate,0,0,0);
+    calendar.set(minYear,minMonth,minDate,0,0,0);
+
+    while (calendar.before(maxCalendar)){
+      int month = calendar.get(Calendar.MONTH);
+      if(!monthsSet.contains(month)){
+        monthsSet.add(calendar.get(Calendar.MONTH));
+      }
+      calendar.add(Calendar.MONTH,1);
+    }
 
     for (int month:monthsSet) {
       List<ReminderTaskDB.TimerStatsData> monthStatsList = statsByMonth.get(month);
-      if(monthStatsList == null || monthStatsList.size() <= 0){
-        continue;
-      }
-      HashSet<Integer> dateSet = monthStatsList.stream().map(s -> s.date).collect(Collectors.toCollection(HashSet::new));
-      int year = monthStatsList.get(0).year;
+
+      HashSet<Integer> dateSet = (monthStatsList != null) ?
+              monthStatsList.stream().map(s -> s.date).collect(Collectors.toCollection(HashSet::new))
+              : null;
 
       if(month == maxMonth){
+        int year = dateSet == null ? maxYear : monthStatsList.get(0).year;
         for(int date = 1; date <= maxDate;date++){
-          if(!dateSet.contains(date)){
+          if(dateSet == null || !dateSet.contains(date)){
             list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
           }
         }
       } else if (month == minMonth) {
+        int year = dateSet == null ? minYear : monthStatsList.get(0).year;
         calendar.set(Calendar.YEAR,year);
         calendar.set(Calendar.MONTH,month);
         int maxDateInMonth = calendar.getActualMaximum(Calendar.DATE);
         for(int date = minDate; date <= maxDateInMonth;date++){
-          if(!dateSet.contains(date)){
+          if(dateSet == null || !dateSet.contains(date)){
             list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
           }
         }
       }else{
-        calendar.set(Calendar.YEAR,year);
+        int year = (month > maxMonth) ? maxYear - 1 : maxYear;
+
         calendar.set(Calendar.MONTH,month);
         int maxDateInMonth = calendar.getActualMaximum(Calendar.DATE);
         for(int date = 1; date <= maxDateInMonth;date++){
-          if(!dateSet.contains(date)){
+          if(dateSet == null || !dateSet.contains(date)){
             list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
           }
         }
