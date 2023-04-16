@@ -38,6 +38,7 @@ import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -608,6 +609,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     Log.i("STATS_30","AFTER ADD 30");
+    list.sort(Comparator.comparing(s->{
+        calendar.set(Calendar.DATE,s.date);
+        calendar.set(Calendar.MONTH,s.month);
+        calendar.set(Calendar.YEAR,s.year);
+        return calendar.getTimeInMillis();
+      }
+    ));
+
     list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
 
     return list;
