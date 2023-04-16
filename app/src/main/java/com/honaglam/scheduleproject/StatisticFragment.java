@@ -156,7 +156,7 @@ public class StatisticFragment extends Fragment {
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setGranularity(1f);
-        xAxis.setDrawGridLines(false);
+        xAxis.setDrawGridLines(true);
         xAxis.setDrawAxisLine(false);
         xAxis.setCenterAxisLabels(false);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
