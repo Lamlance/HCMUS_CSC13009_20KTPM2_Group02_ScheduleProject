@@ -8,11 +8,11 @@
     <item name="colorOnPrimaryContainer">#410007</item>
     <!-- Secondary brand color. -->
     <item name="colorSecondary">#e6bdbb</item>
-    <item name="colorOnSecondary">#442929</item>
-    <item name="colorSecondaryContainer">#5d3f3e</item>
+    <item name="colorOnSecondary">#ffffff</item>
+    <item name="colorSecondaryContainer">#ffdad8</item>
     <item name="colorOnSecondaryContainer">#ffdad8</item>
     <!--    Tertiary brand color -->
-    <item name="colorTertiary">#e4c18d</item>
+    <item name="colorTertiary">#745a2f</item>
     <item name="colorOnTertiary">#412d05</item>
     <item name="colorTertiaryContainer">#5a4319</item>
     <item name="colorOnTertiaryContainer">#ffdeac</item>

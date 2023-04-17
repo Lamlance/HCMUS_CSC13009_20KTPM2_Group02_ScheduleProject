@@ -70,7 +70,6 @@
 
       <Button
           android:id="@+id/btnAddReminderDialog"
-          style="@style/BUTTON"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginLeft="10dp"
@@ -93,7 +92,7 @@
         android:layout_marginBottom="10dp">
 
       <androidx.appcompat.widget.AppCompatToggleButton
-          style="@style/BUTTON"
+
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_weight="1"

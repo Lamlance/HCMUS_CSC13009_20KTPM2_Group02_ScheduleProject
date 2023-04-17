@@ -59,7 +59,6 @@
 
       <Button
         android:id="@+id/btnDown"
-        style="@style/BUTTON"
         android:text="Down"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,7 +67,6 @@
         android:layout_margin="5dp" />
       <Button
           android:id="@+id/btnUp"
-          style="@style/BUTTON"
           android:text="Up"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
@@ -87,7 +85,6 @@
 
     <Button
       android:id="@+id/btnCancelAddTask"
-      style="@style/BUTTON"
       android:text="Cancel"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -97,7 +94,6 @@
       />
     <Button
       android:id="@+id/btnSaveTask"
-      style="@style/BUTTON"
       android:text="Save"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
