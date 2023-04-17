@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ReminderTaskDB extends SQLiteOpenHelper {
   private static final int DB_VERSION = 27;
@@ -162,84 +163,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
   }
 
-  public int bindTaskToReminder(int reminderId,List<Integer> taskIdList){
-    try(SQLiteDatabase db =getWritableDatabase()){
-      int insertedCount = 0;
-      for(Integer taskId : taskIdList){
-        ContentValues cv = new ContentValues();
-        cv.put(TaskReminderTable.COLUMN_NAME_REMINDER_ID,reminderId);
-        cv.put(TaskReminderTable.COLUMN_NAME_TASK_ID,taskId);
-
-        long result = db.insert(TaskReminderTable.TABLE_NAME,null,cv);
-        insertedCount += (result >= 0) ? 1 : 0;
-      }
-      return insertedCount;
-    }catch (Exception e){
-      e.printStackTrace();
-    }
-    return -1;
-  }
-
-  public Map<ReminderData,List<TaskData>> getAllReminderTaskInDate(int year,int month,int date){
-    List<TaskData> taskDataList = new ArrayList<TaskData>();
-
-
-    List<ReminderData> reminderData = getReminderAt(date,month,year);
-    Map<Integer,List<ReminderData>> reminderDataIdMap = reminderData.stream()
-            .collect(Collectors.groupingBy(t->t.id));
-
-    try(SQLiteDatabase db = getReadableDatabase()){
-      List<Integer> reminderIds = reminderData.stream().map(d->d.id).collect(Collectors.toList());
-
-      String reminderIdArg = "";
-      for (int reminderId:reminderIds) {
-        reminderIdArg += reminderId + ",";
-      }
-      if(reminderIdArg.length() >= 2){
-        reminderIdArg = reminderIdArg.substring(0,reminderIdArg.length() - 1) ;
-      }else{
-        reminderIdArg = "";
-      }
-
-      try(Cursor cursor = db.rawQuery(
-              "SELECT "
-                      + TaskTable.TABLE_NAME + ".* , " + TaskReminderTable.COLUMN_NAME_REMINDER_ID
-                      + " FROM " + TaskTable.TABLE_NAME
-                      + " JOIN " + TaskReminderTable.TABLE_NAME
-                      + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID + " = "
-                      + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
-                      + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_REMINDER_ID
-                      + " IN (" + reminderIdArg + ")",null
-      )){
-        if(cursor.moveToFirst()){
-          int taskTitleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
-          int taskIdIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
-          int taskLoopsIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
-          int taskLoopDoneIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
-          int reminderIdIndex = cursor.getColumnIndex(TaskReminderTable.COLUMN_NAME_REMINDER_ID);
-
-          do{
-            String title = cursor.getString(taskTitleIndex);
-            int loops = cursor.getInt(taskLoopsIndex);
-            int loopsDone = cursor.getInt(taskLoopDoneIndex);
-            int taskId = cursor.getInt(taskIdIndex);
-            int reminderId = cursor.getInt(reminderIdIndex);
-
-            ReminderData reminder = reminderDataIdMap.get(reminderId).get(0);
-            TaskData task = new TaskData(title,loops,loopsDone,taskId,false);
-            task.reminderData = reminder;
-            taskDataList.add(task);
-          }while (cursor.moveToNext());
-        }
-      }catch (Exception e){
-        e.printStackTrace();
-      }
-
-    } catch (Exception e){
-      e.printStackTrace();
-    }
-    return taskDataList.stream().collect(Collectors.groupingBy(t->t.reminderData));
-  }
 
   public long addChildReminder(String name, long time, int fatherId) {
     try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -433,21 +356,86 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   //===
 
   //Task
-  public long addTask(String name, int loops, int loopsCompleted, boolean isDone) {
-    try (SQLiteDatabase db = getWritableDatabase()) {
-      ContentValues cv = new ContentValues();
-      cv.put(TaskTable.COLUMN_NAME_TITLE, name);
-      cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
-      cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
-      cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE, loopsCompleted);
+  public int bindTaskToReminder(int reminderId,List<Integer> taskIdList){
+    try(SQLiteDatabase db =getWritableDatabase()){
+      int insertedCount = 0;
+      for(Integer taskId : taskIdList){
+        ContentValues cv = new ContentValues();
+        cv.put(TaskReminderTable.COLUMN_NAME_REMINDER_ID,reminderId);
+        cv.put(TaskReminderTable.COLUMN_NAME_TASK_ID,taskId);
 
-      return db.insert(TaskTable.TABLE_NAME, null, cv);
-    } catch (Exception ignore) {
+        long result = db.insert(TaskReminderTable.TABLE_NAME,null,cv);
+        insertedCount += (result >= 0) ? 1 : 0;
+      }
+      return insertedCount;
+    }catch (Exception e){
+      e.printStackTrace();
     }
     return -1;
   }
 
-  public List<TaskData> getAllTask() {
+  private List<TaskData> getAllReminderTaskInDate(int year,int month,int date){
+    List<TaskData> taskDataList = new ArrayList<TaskData>();
+
+
+    List<ReminderData> reminderData = getReminderAt(date,month,year);
+    Map<Integer,List<ReminderData>> reminderDataIdMap = reminderData.stream()
+            .collect(Collectors.groupingBy(t->t.id));
+
+    try(SQLiteDatabase db = getReadableDatabase()){
+      List<Integer> reminderIds = reminderData.stream().map(d->d.id).collect(Collectors.toList());
+
+      String reminderIdArg = "";
+      for (int reminderId:reminderIds) {
+        reminderIdArg += reminderId + ",";
+      }
+      if(reminderIdArg.length() >= 2){
+        reminderIdArg = reminderIdArg.substring(0,reminderIdArg.length() - 1) ;
+      }else{
+        reminderIdArg = "";
+      }
+
+      try(Cursor cursor = db.rawQuery(
+              "SELECT "
+                      + TaskTable.TABLE_NAME + ".* , " + TaskReminderTable.COLUMN_NAME_REMINDER_ID
+                      + " FROM " + TaskTable.TABLE_NAME
+                      + " JOIN " + TaskReminderTable.TABLE_NAME
+                      + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID + " = "
+                      + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
+                      + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_REMINDER_ID
+                      + " IN (" + reminderIdArg + ")",null
+      )){
+        if(cursor.moveToFirst()){
+          int taskTitleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
+          int taskIdIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
+          int taskLoopsIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+          int taskLoopDoneIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
+          int reminderIdIndex = cursor.getColumnIndex(TaskReminderTable.COLUMN_NAME_REMINDER_ID);
+
+          do{
+            String title = cursor.getString(taskTitleIndex);
+            int loops = cursor.getInt(taskLoopsIndex);
+            int loopsDone = cursor.getInt(taskLoopDoneIndex);
+            int taskId = cursor.getInt(taskIdIndex);
+            int reminderId = cursor.getInt(reminderIdIndex);
+
+            ReminderData reminder = reminderDataIdMap.get(reminderId).get(0);
+            TaskData task = new TaskData(title,loops,loopsDone,taskId,false);
+            task.reminderData = reminder;
+            taskDataList.add(task);
+          }while (cursor.moveToNext());
+        }
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+    return taskDataList;
+  }
+
+  private List<TaskData> getNotRemindAllTask() {
     ArrayList<TaskData> list = new ArrayList<TaskData>();
     try (
             SQLiteDatabase db = getReadableDatabase();
@@ -482,6 +470,31 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
     return list;
   }
+
+  public Map<ReminderData,List<TaskData>> getReminderTaskMapByReminder(int year,int month,int date){
+    List<TaskData> notRemindTask = getNotRemindAllTask();
+    List<TaskData> remindTask = getAllReminderTaskInDate(year,month,date);
+
+    LinkedList<TaskData> fullTaskList = Stream.concat(notRemindTask.stream(), remindTask.stream())
+            .collect(Collectors.toCollection(LinkedList::new));
+
+    return fullTaskList.stream().collect(Collectors.groupingBy(t->t.reminderData));
+  }
+
+  public long addTask(String name, int loops, int loopsCompleted, boolean isDone) {
+    try (SQLiteDatabase db = getWritableDatabase()) {
+      ContentValues cv = new ContentValues();
+      cv.put(TaskTable.COLUMN_NAME_TITLE, name);
+      cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
+      cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
+      cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE, loopsCompleted);
+
+      return db.insert(TaskTable.TABLE_NAME, null, cv);
+    } catch (Exception ignore) {
+    }
+    return -1;
+  }
+
 
   public boolean editTask(TaskData newData) {
     try (SQLiteDatabase db = getWritableDatabase()) {

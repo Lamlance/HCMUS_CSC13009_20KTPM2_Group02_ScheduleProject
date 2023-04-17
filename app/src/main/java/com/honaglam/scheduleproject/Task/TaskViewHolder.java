@@ -45,13 +45,14 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
 
     this.txtTaskName = itemView.findViewById(R.id.txtTaskName);
     this.txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
-    this.checkBoxCompleteTask = itemView.findViewById(R.id.checkBoxCompleteTask);
-    this.imgBtnDeleteTask = itemView.findViewById(R.id.imgBtnDeleteTask);
-    this.imgBtnEditTask = itemView.findViewById(R.id.imgBtnEditTask);
-    this.imgBtnMoveToHistory = itemView.findViewById(R.id.imgBtnMoveToHistory);
-    this.deleteTaskCallback = deleteTaskCallback;
-    this.checkTaskCallback = checkTaskCallback;
-    this.moveToHistoryCallback = moveToHistoryCallback;
+
+    //this.checkBoxCompleteTask = itemView.findViewById(R.id.checkBoxCompleteTask);
+    //this.imgBtnDeleteTask = itemView.findViewById(R.id.imgBtnDeleteTask);
+    //this.imgBtnEditTask = itemView.findViewById(R.id.imgBtnEditTask);
+    //this.imgBtnMoveToHistory = itemView.findViewById(R.id.imgBtnMoveToHistory);
+    //this.deleteTaskCallback = deleteTaskCallback;
+    //this.checkTaskCallback = checkTaskCallback;
+    //this.moveToHistoryCallback = moveToHistoryCallback;
 
     imgBtnEditTask.setOnClickListener(new View.OnClickListener() {
       @Override

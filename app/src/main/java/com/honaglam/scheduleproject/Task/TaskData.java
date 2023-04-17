@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject.Task;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.honaglam.scheduleproject.Reminder.ReminderData;
@@ -12,7 +13,9 @@ public class TaskData {
     public int numberPomodoros;
     public boolean isCompleted;
 
-    public @Nullable  ReminderData reminderData = null;
+    public static final ReminderData DEFAULT_TASK_DATA_HOLDER = new ReminderData("NONE",-1,-1);
+
+    public @NonNull ReminderData reminderData = DEFAULT_TASK_DATA_HOLDER;
 
     public TaskData(String taskName, int numberPomodoros,int id) {
         this.taskName = taskName;

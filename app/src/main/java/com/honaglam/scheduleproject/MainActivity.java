@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -71,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
   //Reminder
   public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
-  private static final String REMINDER_FILE_NAME = "ScheduleReminder";
-  File reminderFile = null;
   ReminderTaskDB taskDb;
   //========
 
@@ -99,9 +98,8 @@ public class MainActivity extends AppCompatActivity {
   static final String PREF_KEY_THEME = "theme";
 
   // Task
-  ArrayList<TaskData> tasks = new ArrayList<>();
-  Map<ReminderData,List<TaskData>> reminderTaskByReminderId = new HashMap<>();
   List<TaskData> historyTasks = new ArrayList<>();
+  HashMap<ReminderData,LinkedList<TaskData>> taskMapByReminder = new HashMap<>();
   // User setting
   //  private UserSettings userSettings;
   static final int IS_CALENDAR_FRAGMENT = 1;
@@ -127,22 +125,19 @@ public class MainActivity extends AppCompatActivity {
     taskDb.getTodayStats();
     historyTasks.addAll(listHistoryTasks());
     Calendar calendar = Calendar.getInstance();
-    reminderTaskByReminderId = taskDb
-            .getAllReminderTaskInDate(
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DATE)-2);
-    final Collection<List<TaskData>> reminderTasks = reminderTaskByReminderId.values();
-    for(List<TaskData> taskDataList : reminderTasks){
-      tasks.addAll(taskDataList);
-    }
+    Map<ReminderData,List<TaskData>> map = taskDb.getReminderTaskMapByReminder(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DATE)-2
+    );
+    map.forEach((k,v)->{
+      taskMapByReminder.put(k,new LinkedList<>(v));
+    });
 
-    Log.i("MAIN","Get all task size " + tasks.size());
     if (ReminderTaskDB.IS_DEV) {
       //taskDb.createSampleData();
     }
 
-    tasks.addAll(taskDb.getAllTask());
     setSupportActionBar(findViewById(R.id.toolbar));
 
     drawerLayout = findViewById(R.id.drawerLayout);
@@ -338,18 +333,18 @@ public class MainActivity extends AppCompatActivity {
     );
   }
 
-  public int addTask(String name, int loops, int loopsCompleted, boolean isDone) {
+  @Nullable
+  public TaskData addTask(String name, int loops, int loopsCompleted, boolean isDone) {
     try {
       int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone));
-      tasks.add(new TaskData(name, loops, id));
-      return tasks.size() - 1;
+      return new TaskData(name,loops,loopsCompleted,false);
     } catch (Exception ignore) {
     }
-    return -1;
+    return null;
   }
 
-  public int editTask(TaskData data) {
-    return taskDb.editTask(data) ? tasks.size() - 1 : -1;
+  public void editTask(TaskData data) {
+    taskDb.editTask(data);
   }
 
   public boolean makeTaskHistory(int id) {

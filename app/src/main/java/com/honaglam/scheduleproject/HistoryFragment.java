@@ -81,7 +81,7 @@ public class HistoryFragment extends Fragment {
 //        TODO: Complete function moveTaskToToDoTask->makeTaskToToDo
         activity.moveTaskToToDoTask(activity.historyTasks.get(position).id);
         //LAM FIX
-        activity.tasks.add(activity.historyTasks.get(position));
+        //activity.tasks.add(activity.historyTasks.get(position));
         activity.historyTasks.remove(position);
         //==
         Log.i("REMOVE","REMOVE HISTORY POS"+position);
