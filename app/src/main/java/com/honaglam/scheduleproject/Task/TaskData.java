@@ -1,5 +1,9 @@
 package com.honaglam.scheduleproject.Task;
 
+import androidx.annotation.Nullable;
+
+import com.honaglam.scheduleproject.Reminder.ReminderData;
+
 public class TaskData {
 
     public String taskName;
@@ -8,7 +12,7 @@ public class TaskData {
     public int numberPomodoros;
     public boolean isCompleted;
 
-    public int reminderId = -1;
+    public @Nullable  ReminderData reminderData = null;
 
     public TaskData(String taskName, int numberPomodoros,int id) {
         this.taskName = taskName;
@@ -33,4 +37,16 @@ public class TaskData {
         this.id = id;
     }
 
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if(!(obj instanceof  TaskData)){
+            return false;
+        }
+        return ((TaskData) obj).id == this.id;
+    }
 }

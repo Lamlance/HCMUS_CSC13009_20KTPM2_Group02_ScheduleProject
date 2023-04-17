@@ -112,12 +112,8 @@ public class TimerFragment extends Fragment {
 
     recyclerTask = view.findViewById(R.id.recyclerTask);
     recyclerTask.setLayoutManager(new LinearLayoutManager(context));
-    taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(context, new TaskRecyclerViewAdapter.GetListCallback() {
-      @Override
-      public List<TaskData> getList() {
-        return activity.tasks;
-      }
-    },
+    taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(context,
+            () -> activity.tasks,
             new DeleteTaskCallback(), new CheckTaskCallback(), new EditTaskCallback(), new MoveToHistoryCallback());
     recyclerTask.setAdapter(taskRecyclerViewAdapter);
 

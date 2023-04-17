@@ -180,8 +180,10 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     return -1;
   }
 
-  public Map<Integer,List<TaskData>> getAllReminderTaskInDate(int year,int month,int date){
+  public Map<ReminderData,List<TaskData>> getAllReminderTaskInDate(int year,int month,int date){
     List<TaskData> taskDataList = new ArrayList<TaskData>();
+
+
     List<ReminderData> reminderData = getReminderAt(date,month,year);
     Map<Integer,List<ReminderData>> reminderDataIdMap = reminderData.stream()
             .collect(Collectors.groupingBy(t->t.id));
@@ -224,8 +226,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             int reminderId = cursor.getInt(reminderIdIndex);
 
             ReminderData reminder = reminderDataIdMap.get(reminderId).get(0);
-            TaskData task = new TaskData(reminder.Name + "-" + title,loops,loopsDone,taskId,false);
-            task.reminderId = reminderId;
+            TaskData task = new TaskData(title,loops,loopsDone,taskId,false);
+            task.reminderData = reminder;
             taskDataList.add(task);
           }while (cursor.moveToNext());
         }
@@ -236,7 +238,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     } catch (Exception e){
       e.printStackTrace();
     }
-    return taskDataList.stream().collect(Collectors.groupingBy(t->t.reminderId));
+    return taskDataList.stream().collect(Collectors.groupingBy(t->t.reminderData));
   }
 
   public long addChildReminder(String name, long time, int fatherId) {

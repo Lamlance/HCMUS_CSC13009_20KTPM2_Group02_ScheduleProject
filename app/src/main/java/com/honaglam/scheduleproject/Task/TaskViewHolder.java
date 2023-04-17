@@ -42,6 +42,7 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
                         OnClickPositionCallBack editTaskCallback,
                         OnClickPositionCallBack moveToHistoryCallback) {
     super(itemView);
+
     this.txtTaskName = itemView.findViewById(R.id.txtTaskName);
     this.txtCountPomodoro = itemView.findViewById(R.id.txtCountPomodoro);
     this.checkBoxCompleteTask = itemView.findViewById(R.id.checkBoxCompleteTask);

@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
   // Task
   ArrayList<TaskData> tasks = new ArrayList<>();
-  Map<Integer,List<TaskData>> reminderTaskByReminderId = new HashMap<>();
+  Map<ReminderData,List<TaskData>> reminderTaskByReminderId = new HashMap<>();
   List<TaskData> historyTasks = new ArrayList<>();
   // User setting
   //  private UserSettings userSettings;
@@ -128,7 +128,10 @@ public class MainActivity extends AppCompatActivity {
     historyTasks.addAll(listHistoryTasks());
     Calendar calendar = Calendar.getInstance();
     reminderTaskByReminderId = taskDb
-            .getAllReminderTaskInDate(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DATE)-1);
+            .getAllReminderTaskInDate(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DATE)-2);
     final Collection<List<TaskData>> reminderTasks = reminderTaskByReminderId.values();
     for(List<TaskData> taskDataList : reminderTasks){
       tasks.addAll(taskDataList);
@@ -581,7 +584,7 @@ public class MainActivity extends AppCompatActivity {
     maxCalendar.set(maxYear,maxMonth,maxDate,0,0,0);
     calendar.set(minYear,minMonth,minDate,0,0,0);
 
-    while (calendar.before(maxCalendar)){
+    while (calendar.before(maxCalendar) || calendar.equals(maxCalendar)){
       int month = calendar.get(Calendar.MONTH);
       if(!monthsSet.contains(month)){
         monthsSet.add(calendar.get(Calendar.MONTH));
@@ -631,11 +634,12 @@ public class MainActivity extends AppCompatActivity {
         calendar.set(Calendar.DATE,s.date);
         calendar.set(Calendar.MONTH,s.month);
         calendar.set(Calendar.YEAR,s.year);
-        return calendar.getTimeInMillis();
+        return -calendar.getTimeInMillis();
       }
     ));
 
     list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
+    Log.i("STATS_30","SIZE AFTER "+ list.size());
 
     return list.subList(Math.max(list.size() - 30, 0), list.size());
   }

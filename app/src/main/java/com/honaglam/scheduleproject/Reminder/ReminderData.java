@@ -39,6 +39,11 @@ public class ReminderData implements Serializable {
   }
 
   @Override
+  public int hashCode() {
+    return id;
+  }
+
+  @Override
   public boolean equals(@Nullable Object obj) {
     if(!(obj instanceof ReminderData)){
       return false;

@@ -13,7 +13,9 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
+import com.honaglam.scheduleproject.Reminder.ReminderData;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -33,15 +35,12 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
   TaskViewHolder.OnClickPositionCallBack editTaskCallback;
   TaskViewHolder.OnClickPositionCallBack moveToHistoryCallback;
 
+  HashSet<ReminderData> reminderDataHashSet = new HashSet<>();
 
   public interface GetListCallback {
     public List<TaskData> getList();
   }
-  public interface GetReminderTaskC{
-    Map<Integer,List<TaskData>> getReminderMap ();
-  }
 
-  @Nullable GetReminderTaskC mapGet = null;
   GetListCallback dataGet;
   public TaskRecyclerViewAdapter(
           Context context,
@@ -59,23 +58,6 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     this.moveToHistoryCallback = moveToHistoryCallback;
   }
 
-  public TaskRecyclerViewAdapter(
-          Context context,
-          GetListCallback callback,
-          @Nullable GetReminderTaskC mapGetCallBack,
-          TaskViewHolder.OnClickPositionCallBack deleteTaskCallback,
-          TaskViewHolder.OnClickPositionCallBack checkTaskCallback,
-          TaskViewHolder.OnClickPositionCallBack editTaskCallback,
-          TaskViewHolder.OnClickPositionCallBack moveToHistoryCallback
-  ) {
-    this.context = context;
-    dataGet = callback;
-    this.deleteTaskCallback = deleteTaskCallback;
-    this.checkTaskCallback = checkTaskCallback;
-    this.editTaskCallback = editTaskCallback;
-    this.moveToHistoryCallback = moveToHistoryCallback;
-    this.mapGet = mapGetCallBack;
-  }
 
 
 
@@ -101,16 +83,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     holder.txtCountPomodoro.setText(
             taskData.numberCompletedPomodoros + "/ " + taskData.numberPomodoros);
     holder.checkBoxCompleteTask.setChecked(taskData.isCompleted);
-    if(taskData.isCompleted){
-      holder.txtTaskName.setPaintFlags(
-              holder.txtTaskName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
-      );
-    }else{
-      if((holder.txtTaskName.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) == Paint.STRIKE_THRU_TEXT_FLAG){
-        holder.txtTaskName.setPaintFlags(
-                holder.txtTaskName.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG
-        );
-      }
+
+    if(taskData.reminderData != null){
+      reminderDataHashSet.add(taskData.reminderData);
+      holder.checkBoxCompleteTask.setVisibility(View.GONE);
     }
 
     holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -120,7 +96,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
           selectedPosition = holder.getAdapterPosition();
           holder.itemView.requestFocus();
           Log.d("Show itemView request focus: ", holder.itemView.toString());
-          notifyDataSetChanged();
+          notifyItemChanged(selectedPosition);
         } catch (Exception e) {
           e.printStackTrace();
         }
