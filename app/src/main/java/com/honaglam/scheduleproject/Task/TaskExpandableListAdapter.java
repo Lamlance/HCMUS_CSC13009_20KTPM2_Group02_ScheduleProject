@@ -50,6 +50,8 @@ public class TaskExpandableListAdapter extends BaseExpandableListAdapter {
   OnChildAction deleteClickCallBack;
   @Nullable
   OnChildAction archiveClickCallBack;
+  @Nullable
+  OnChildAction childUpdatedCallBack;
 
   View prevClickView = null;
   int selectedGroup = -1;
@@ -72,6 +74,7 @@ public class TaskExpandableListAdapter extends BaseExpandableListAdapter {
     ReminderData reminder = groupGetter.getGroup().get(selectedGroup);
     try {
       mapGetter.getMap().get(reminder).get(selectedChild).numberCompletedPomodoros += 1;
+      callChildAction(childUpdatedCallBack,selectedGroup,selectedChild);
       TaskExpandableListAdapter.this.notifyDataSetInvalidated();
     }catch (Exception e){
       e.printStackTrace();
@@ -215,5 +218,12 @@ public class TaskExpandableListAdapter extends BaseExpandableListAdapter {
   }
   public void setArchiveClickCallBack(@NonNull OnChildAction action){
     this.archiveClickCallBack = action;
+  }
+  public void setChildUpdateCallBack(@NonNull OnChildAction action){
+    this.childUpdatedCallBack = action;
+  }
+
+  public HashSet<TaskData> getCheckedTask(){
+    return checkedTask;
   }
 }

@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import kotlin.NotImplementedError;
@@ -92,7 +93,6 @@ public class TimerFragment extends Fragment {
     return fragment;
   }
 
-  HashSet<Integer> checkedIdSet = new HashSet<Integer>();
 
   List<ReminderData> reminderList;
 
@@ -186,7 +186,7 @@ public class TimerFragment extends Fragment {
     btnTimerSetReminder.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (checkedIdSet.size() > 0) {
+        if (expandableListAdapter.getCheckedTask().size() > 0) {
           new ReminderAddDialog(activity, new SetTimerReminderCallBack()).show();
         }
       }
@@ -195,6 +195,11 @@ public class TimerFragment extends Fragment {
     UpdateTimerBackground(currentPomodoroState);
     setThemeId(activity.loadTimerSettingPref().prefTheme);
     Log.i("DRAW_POMODORO_STATE", "FRAGMENT VIEW CREATED");
+
+    expandableListAdapter.setChildUpdateCallBack(new ChildUpdatedCallBack());
+    expandableListAdapter.setArchiveClickCallBack(new ArchiveChildTaskCallBack());
+    expandableListAdapter.setDeleteClickCallBack(new DeleteChildTaskCallBack());
+    expandableListAdapter.setEditClickCallBack(new EditChildTaskCallBack());
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -253,12 +258,44 @@ public class TimerFragment extends Fragment {
 
     @Override
     public void onSubmit(String name, Calendar setDate) {
-      activity.makeTaskReminders(name, setDate.getTimeInMillis(), new ArrayList<Integer>(checkedIdSet));
+      LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
+
+
+      ReminderData newReminder = activity.makeTaskReminders(
+              name,
+              setDate.getTimeInMillis(),
+              reminderTaskDataList.stream().map(t->t.id).collect(Collectors.toList())
+      );
+      Set<TaskData> noneReminderData = reminderTaskDataList.stream()
+              .filter(t->t.reminderData.equals(TaskData.DEFAULT_TASK_DATA_HOLDER))
+              .collect(Collectors.toSet());
+
+      if(activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)){
+        List<TaskData> oldList = activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER);
+        LinkedList<TaskData> newList = new LinkedList<>(
+                oldList.stream().filter(t->!noneReminderData.contains(t)).collect(Collectors.toList())
+        );
+        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER,newList);
+        reminderList.add(newReminder);
+        activity.taskMapByReminder.put(newReminder,reminderTaskDataList);
+        expandableListAdapter.notifyDataSetChanged();
+      }
+
     }
 
     @Override
     public void onSubmitWeekly(String name, Calendar setDate, HashSet<Integer> dailyReminder) {
-      activity.addReminderWeekly(name, setDate.getTimeInMillis(), dailyReminder);
+      ReminderData newReminder = activity.makeWeeklyReminder(
+              name,
+              setDate.getTimeInMillis(),
+              dailyReminder,
+              expandableListAdapter.getCheckedTask().stream().map(t->t.id).collect(Collectors.toList())
+      );
+      reminderList.add(newReminder);
+      activity.taskMapByReminder.put(
+              newReminder,
+              new LinkedList<>(expandableListAdapter.getCheckedTask())
+      );
     }
 
     @Override
@@ -400,6 +437,19 @@ public class TimerFragment extends Fragment {
     }
   }
 
+  class ChildUpdatedCallBack implements TaskExpandableListAdapter.OnChildAction{
+    @Override
+    public void onCheck(int childPos, int groupPos) {
+      ReminderData reminder = reminderList.get(groupPos);
+      List<TaskData> list = activity.taskMapByReminder.get(reminder);
+      TaskData data = (list == null) ? null : list.get(childPos);
+      if(data == null){
+        return;
+      }
+
+      activity.editTask(data);
+    }
+  }
 
   class TimerSettingFragmentClick implements View.OnClickListener {
     @Override
