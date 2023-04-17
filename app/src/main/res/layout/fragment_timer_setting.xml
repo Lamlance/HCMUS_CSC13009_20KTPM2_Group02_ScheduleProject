@@ -8,7 +8,7 @@
     android:layout_marginRight="5dp"
     android:layout_marginBottom="10dp"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="10dp">
 
   <ScrollView
       android:layout_width="match_parent"
@@ -34,7 +34,7 @@
       <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:layout_marginBottom="20dp"
+          android:layout_marginBottom="5dp"
           android:gravity="center"
           android:orientation="horizontal">
 
@@ -50,7 +50,7 @@
               android:layout_height="wrap_content"
               android:gravity="center"
               android:text="@string/pomodoro"
-              android:textColor="?attr/colorSecondary"
+              android:textColor="?attr/colorOnSurfaceVariant"
               android:textAlignment="center"
               android:textSize="15sp" />
 
@@ -72,7 +72,7 @@
               android:layout_height="wrap_content"
               android:layout_gravity="center"
               android:text="@string/short_break"
-              android:textColor="?attr/colorSecondary"
+              android:textColor="?attr/colorOnSurfaceVariant"
               android:textAlignment="center"
               android:textSize="15sp" />
 
@@ -94,7 +94,7 @@
               android:layout_height="wrap_content"
               android:gravity="center"
               android:text="@string/long_break"
-              android:textColor="?attr/colorSecondary"
+              android:textColor="?attr/colorOnSurfaceVariant"
               android:textAlignment="center"
               android:textSize="15sp" />
 
@@ -122,7 +122,7 @@
               android:layout_height="wrap_content"
               android:layout_gravity="center"
               android:text="Auto Start Breaks"
-              android:textColor="?attr/colorSecondary"
+              android:textColor="?attr/colorOnSurfaceVariant"
               android:textSize="20sp"></TextView>
 
           <com.google.android.material.switchmaterial.SwitchMaterial
@@ -143,7 +143,7 @@
               android:layout_height="wrap_content"
               android:layout_gravity="center"
               android:text="Auto Start Pomodoro"
-              android:textColor="?attr/colorSecondary"
+              android:textColor="?attr/colorOnSurfaceVariant"
               android:textSize="20sp"></TextView>
 
           <com.google.android.material.switchmaterial.SwitchMaterial
@@ -166,7 +166,7 @@
               android:layout_height="wrap_content"
               android:layout_gravity="center"
               android:text="Long Break Interval"
-              android:textColor="?attr/colorSecondary"
+              android:textColor="?attr/colorOnSurfaceVariant"
               android:textSize="20sp" />
 
           <com.google.android.material.slider.Slider
@@ -209,7 +209,7 @@
             android:gravity=""
             android:onClick="pickASound"
             android:text="Alarm Sound"
-            android:textColor="?attr/colorSecondary"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="20sp" />
 
         <TextView
@@ -218,12 +218,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:layout_marginLeft="85dp"
-            android:clickable="true"
+            android:clickable="false"
             android:focusable="true"
             android:gravity="center"
             android:onClick="pickASound"
             android:text="Default Sound"
-            android:textColor="?attr/colorSecondary"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="20sp" />
       </LinearLayout>
 
