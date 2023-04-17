@@ -320,10 +320,10 @@ public class MainActivity extends AppCompatActivity {
     );
   }
 
-  public int addTask(String name, int loops, int loopsCompleted, boolean isDone) {
+  public int addTask(String name, int loops, int loopsCompleted, boolean isDone, int date, int month, int year) {
     try {
-      int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone));
-      tasks.add(new TaskData(name, loops, id));
+      int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone, date, month, year));
+      tasks.add(new TaskData(name, loops, id, date, month, year));
       return tasks.size() - 1;
     } catch (Exception ignore) {
     }

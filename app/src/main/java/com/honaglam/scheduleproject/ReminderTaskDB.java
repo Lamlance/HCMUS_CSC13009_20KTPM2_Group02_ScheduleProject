@@ -18,8 +18,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+//import kotlinx.coroutines.scheduling.Task;
+
 public class ReminderTaskDB extends SQLiteOpenHelper {
-    private static final int DB_VERSION = 24;
+    private static final int DB_VERSION = 25;
     public static final boolean IS_DEV = true;
     private static final String DB_NAME = "ScheduleProject.db";
     private static final String SQL_DROP_REMINDER_TABLE = "DROP TABLE IF EXISTS " + ReminderTable.TABLE_NAME;
@@ -52,6 +54,9 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         public static final String COLUMN_NAME_HISTORY = "history";
         public static final String COLUMN_NAME_IS_DONE = "done";
         public static final String COLUMN_NAME_LOOPS_DONE = "loops_done";
+        public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_MONTH = "month";
+        public static final String COLUMN_NAME_YEAR = "year";
     }
 
     private static class StatsTable implements BaseColumns {
@@ -95,7 +100,11 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                         + TaskTable.COLUMN_NAME_HISTORY + " INTEGER ,"
                         + TaskTable.COLUMN_NAME_IS_DONE + " INTEGER ,"
                         + TaskTable.COLUMN_NAME_LOOPS + " INTEGER ,"
-                        + TaskTable.COLUMN_NAME_LOOPS_DONE + " INTEGER DEFAULT 0);";
+                        + TaskTable.COLUMN_NAME_LOOPS_DONE + " INTEGER DEFAULT 0,"
+                        + TaskTable.COLUMN_NAME_DATE + " INTEGER NOT NULL,"
+                        + TaskTable.COLUMN_NAME_MONTH + " INTEGER NOT NULL,"
+                        + TaskTable.COLUMN_NAME_YEAR + " INTEGER NOT NULL);";
+
         String createStatsTable =
                 "CREATE TABLE " + StatsTable.TABLE_NAME + " ( "
                         + StatsTable.COLUMN_NAME_WORK_DURATION + " INTEGER DEFAULT 0 ,"
@@ -327,13 +336,16 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     //===
 
     //Task
-    public long addTask(String name, int loops, int loopsCompleted, boolean isDone) {
+    public long addTask(String name, int loops, int loopsCompleted, boolean isDone, int date, int month, int year) {
         try (SQLiteDatabase db = getWritableDatabase()) {
             ContentValues cv = new ContentValues();
             cv.put(TaskTable.COLUMN_NAME_TITLE, name);
             cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
             cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
             cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE, loopsCompleted);
+            cv.put(TaskTable.COLUMN_NAME_DATE, date);
+            cv.put(TaskTable.COLUMN_NAME_MONTH, month);
+            cv.put(TaskTable.COLUMN_NAME_YEAR, year);
 
             return db.insert(TaskTable.TABLE_NAME, null, cv);
         } catch (Exception ignore) {
@@ -345,15 +357,35 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
         ArrayList<TaskData> list = new ArrayList<TaskData>();
         try (
                 SQLiteDatabase db = getReadableDatabase();
+                // COLUMN_NAME_DATE
                 Cursor cursor = db.query(
                         TaskTable.TABLE_NAME,
                         null,
-                        TaskTable.COLUMN_NAME_HISTORY + " = ? ",
+                        TaskTable.COLUMN_NAME_HISTORY + " = ? OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL",
                         new String[]{"0"},
                         null,
                         null,
                         null
                 );
+//                Cursor cursor = db.query(
+//                        TaskTable.TABLE_NAME,
+//                        new String[] {
+//                                TaskTable.COLUMN_NAME_ID,
+//                                TaskTable.COLUMN_NAME_TITLE,
+//                                TaskTable.COLUMN_NAME_HISTORY,
+//                                TaskTable.COLUMN_NAME_IS_DONE,
+//                                TaskTable.COLUMN_NAME_LOOPS,
+//                                TaskTable.COLUMN_NAME_LOOPS_DONE,
+//                                TaskTable.COLUMN_NAME_DATE,
+//                                TaskTable.COLUMN_NAME_MONTH,
+//                                TaskTable.COLUMN_NAME_YEAR
+//                        },
+//                        TaskTable.COLUMN_NAME_HISTORY + " = ? ",
+//                        new String[]{"0"},
+//                        null,
+//                        null,
+//                        null
+//                );
         ) {
             if (!cursor.moveToFirst()) {
                 return list;
@@ -363,13 +395,21 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
             int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
             int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
+            int dateIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_DATE);
+            int monthIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_MONTH);
+            int yearIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_YEAR);
             do {
                 String name = cursor.getString(titleIndex);
                 int loops = cursor.getInt(loopIndex);
                 int loopsCompleted = cursor.getInt(loopCompletedIndex);
                 int id = cursor.getInt(idIndex);
                 boolean isComplete = cursor.getInt(completeIndex) > 0;
-                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete));
+                int date = cursor.getInt(dateIndex);
+                int month = cursor.getInt(monthIndex);
+                int year = cursor.getInt(yearIndex);
+                Log.i("LOGGING QUERY", "ID: " + id + ", Name: " + name + ", Loops: " + loops + ", Loops Completed: " + loopsCompleted +
+                        ", Is Complete: " + isComplete + ", Date: " + date + ", Month: " + month + ", Year: " + year);
+                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete, date, month, year));
             } while (cursor.moveToNext());
         } catch (Exception ignore) {
         }
@@ -451,12 +491,31 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                 Cursor cursor = db.query(
                         TaskTable.TABLE_NAME,
                         null,
-                        TaskTable.COLUMN_NAME_HISTORY + " > ? ",
+                        TaskTable.COLUMN_NAME_HISTORY + " > ?  OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NOT NULL",
                         new String[]{"0"},
                         null,
                         null,
                         null
                 );
+//                Cursor cursor = db.query(
+//                        TaskTable.TABLE_NAME,
+//                        new String[] {
+//                                TaskTable.COLUMN_NAME_ID,
+//                                TaskTable.COLUMN_NAME_TITLE,
+//                                TaskTable.COLUMN_NAME_HISTORY,
+//                                TaskTable.COLUMN_NAME_IS_DONE,
+//                                TaskTable.COLUMN_NAME_LOOPS,
+//                                TaskTable.COLUMN_NAME_LOOPS_DONE,
+//                                TaskTable.COLUMN_NAME_DATE,
+//                                TaskTable.COLUMN_NAME_MONTH,
+//                                TaskTable.COLUMN_NAME_YEAR
+//                        },
+//                        TaskTable.COLUMN_NAME_HISTORY + " > ? ",
+//                        new String[]{"0"},
+//                        null,
+//                        null,
+//                        null
+//                );
         ) {
             if (!cursor.moveToFirst()) {
                 return list;
@@ -466,13 +525,21 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
             int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
             int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
+            int dateIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_DATE);
+            int monthIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_MONTH);
+            int yearIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_YEAR);
             do {
                 String name = cursor.getString(titleIndex);
                 int loops = cursor.getInt(loopIndex);
                 int loopsCompleted = cursor.getInt(loopCompletedIndex);
                 int id = cursor.getInt(idIndex);
                 boolean isComplete = cursor.getInt(completeIndex) > 0;
-                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete));
+                int date = cursor.getInt(dateIndex);
+                int month = cursor.getInt(monthIndex);
+                int year = cursor.getInt(yearIndex);
+                Log.i("LOGGING QUERY", "ID: " + id + ", Name: " + name + ", Loops: " + loops + ", Loops Completed: " + loopsCompleted +
+                        ", Is Complete: " + isComplete + ", Date: " + date + ", Month: " + month + ", Year: " + year);
+                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete, date, month, year));
             } while (cursor.moveToNext());
             Log.i("HISTORY","Find " + cursor.getCount());
         } catch (Exception ignore) {
