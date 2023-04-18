@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import kotlin.NotImplementedError;
@@ -79,6 +81,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   @NonNull
   Map<Integer, List<ReminderData>> reminderByDates = new HashMap<>();
 
+  Map<Integer,List<ReminderData>> weeklyReminder;
+
   public CalendarRecyclerViewAdapter(Context context, GetReminderInMonth getReminderInMonth) {
     this.context = context;
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
@@ -89,6 +93,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     getSetAllReminderInMonth();
   }
 
+
+
   private void getSetAllReminderInMonth() {
     try {
       List<ReminderData> reminders = getReminderInMonth.getReminderInMonth(
@@ -98,10 +104,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
               Collectors.groupingBy(ReminderData::getMyDate)
       );
 
-      List<ReminderData> weekly = reminders.stream().filter(r->r.weekDate >= 0).collect(Collectors.toList());
-      for (ReminderData weeklyData: weekly) {
-        Log.i("CALENDAR", "Weekly reminders " + weeklyData.Name);
-      }
+      weeklyReminder = reminders.stream().filter(r->r.weekDate >= 0).collect(Collectors.groupingBy(r->r.weekDate));
 
     } catch (Exception ignore) {
     }
@@ -166,13 +169,16 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       notifyItemChanged(clickedPos);
       if (selectDateCallBack != null) {
         try {
+          HashSet<ReminderData> selectedWeekDate = new HashSet<>(reminderByDates.get(date));
+          selectedWeekDate.addAll(weeklyReminder.get(calendar.get(Calendar.DAY_OF_WEEK)));
           selectDateCallBack.clickDate(
                   date,
                   calendar.get(Calendar.MONTH),
                   calendar.get(Calendar.YEAR),
                   calendar.get(Calendar.DAY_OF_WEEK),
-                  reminderByDates.get(date));
+                  new LinkedList<>(selectedWeekDate));
         } catch (Exception e) {
+          e.printStackTrace();
         }
       }
     }
@@ -195,6 +201,9 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
+    }
+    if(weeklyReminder.get(weekDate) != null && date > 0){
       holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
     }
   }
