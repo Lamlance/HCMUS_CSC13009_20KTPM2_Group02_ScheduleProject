@@ -324,6 +324,10 @@ public class TimerFragment extends Fragment {
               taskData.taskName,
               taskData.numberPomodoros,
               taskData.numberCompletedPomodoros,
+              taskData.isCompleted,
+              taskData.date,
+              taskData.month,
+              taskData.year);
               taskData.isCompleted);
       if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)) {
         activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER).add(newData);

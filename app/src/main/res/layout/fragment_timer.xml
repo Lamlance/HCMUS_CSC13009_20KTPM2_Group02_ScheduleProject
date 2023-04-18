@@ -31,6 +31,7 @@
       app:layout_constraintTop_toTopOf="parent">
 
     <TextView
+        android:textColor="?attr/colorOnPrimary"
         android:id="@+id/txtPomodoro"
         style="@style/TEXT"
         android:layout_width="wrap_content"
@@ -45,8 +46,8 @@
         tools:ignore="HardcodedText" />
 
     <TextView
+        android:textColor="?attr/colorOnPrimary"
         android:id="@+id/txtShortBreak"
-        style="@style/TEXT"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_gravity="center_horizontal"
@@ -59,8 +60,8 @@
         tools:ignore="HardcodedText" />
 
     <TextView
+        android:textColor="?attr/colorOnPrimary"
         android:id="@+id/txtLongBreak"
-        style="@style/TEXT"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_gravity="center_horizontal"
@@ -196,12 +197,8 @@
       android:id="@+id/btnAddTask"
       style="@style/BUTTON"
       android:layout_width="0dp"
-
       android:layout_marginTop="20dp"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:layout_marginBottom="30dp"
-      android:layout_weight="0.1"
+
       android:backgroundTint="#4DFFFFFF"
       android:gravity="center"
       android:text="Add task"
@@ -212,6 +209,13 @@
       app:layout_constraintRight_toRightOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/layoutTimerControl"
       app:layout_constraintWidth_percent="0.8" />
+
+      android:backgroundTint="#f4dddc"
+      android:layout_gravity="center_horizontal"
+      android:textSize="18sp"
+      app:cornerRadius="5dp"
+      android:text="Add task"
+      android:textColor="#524342"/>
   <!-- TODO: Update blank fragment layout -->
 
 

@@ -334,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @Nullable
-  public TaskData addTask(String name, int loops, int loopsCompleted, boolean isDone) {
+  public TaskData addTask(String name, int loops, int loopsCompleted, boolean isDone, int date, int month, int year) {
     try {
       int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone));
       return new TaskData(name,loops,loopsCompleted,id,false);

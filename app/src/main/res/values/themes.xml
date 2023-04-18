@@ -2,15 +2,36 @@
   <!-- Base application theme. -->
   <style name="Theme.ScheduleProject" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
     <!-- Primary brand color. -->
-    <item name="colorPrimary">#006d3b</item>
-    <item name="colorPrimaryVariant">#006d3b</item>
+    <item name="colorPrimary">#9f3e41</item>
     <item name="colorOnPrimary">#ffffff</item>
+    <item name="colorPrimaryContainer">#ffdad8</item>
+    <item name="colorOnPrimaryContainer">#410007</item>
     <!-- Secondary brand color. -->
-    <item name="colorSecondary">#4f6353</item>
-    <item name="colorSecondaryVariant">#4f6353</item>
+    <item name="colorSecondary">#775655</item>
     <item name="colorOnSecondary">#ffffff</item>
+    <item name="colorSecondaryContainer">#ffdad8</item>
+    <item name="colorOnSecondaryContainer">#2c1515</item>
+    <!--    Tertiary brand color -->
+    <item name="colorTertiary">#745a2f</item>
+    <item name="colorOnTertiary">#ffffff</item>
+    <item name="colorTertiaryContainer">#ffdeac</item>
+    <item name="colorOnTertiaryContainer">#281900</item>
+    <!--    Error brand color -->
+    <item name="colorError">#ba1a1a</item>
+    <item name="colorOnError">#ffffff</item>
+    <item name="colorErrorContainer">#ffdad6</item>
+    <item name="colorOnErrorContainer">#410002</item>
+    <!--    Background brand color -->
+    <item name="backgroundColor">#fffbff</item>
+    <item name="colorOnBackground">#201a1a</item>
+    <item name="colorSurface">#fffbff</item>
+    <item name="colorOnSurface">#201a1a</item>
+    <!--    Outline brand color -->
+    <item name="colorOutline">#857372</item>
+    <item name="colorSurfaceVariant">#f4dddc</item>
+    <item name="colorOnSurfaceVariant">#524342</item>
     <!-- Status bar color. -->
-    <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    <item name="android:statusBarColor">@color/black</item>
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
     <!-- Customize your theme here. -->
@@ -23,32 +44,32 @@
   </style>
 
   <style name="REPORT_SCREEN">
-    <item name="android:background">#FFFFFF</item>
+    <item name="android:background">?attr/backgroundColor</item>
   </style>
 
   <style name="CALENDAR_SCREEN">
-    <item name="android:background">#FFFFFF</item>
+    <item name="android:background">?attr/backgroundColor</item>
   </style>
 
   <!-- Text background if light mode is on-->
   <style name="TEXT">
-    <item name="android:textColor">#2E2E2E</item>
+    <item name="android:textColor">?attr/colorOnBackground</item>
   </style>
 
   <!-- Image button background if dark mode is on-->
   <style name="IMAGE_BUTTON">
-    <item name="android:backgroundTint">#E6E6E6</item>
     <item name="backgroundColor">#2E2E2E</item>
-    <item name="android:tint">#AAAAAA</item>
+    <item name="android:backgroundTint">?attr/colorOnBackground</item>
+    <item name="android:tint">#2E2E2E</item>
   </style>
 
   <!-- Button background if light mode is on-->
   <style name="BUTTON">
-    <item name="android:textColor">#FFF</item>
+    <item name="android:textColor">?attr/colorOnBackground</item>
   </style>
 
   <style name="NAV_BUTTON">
-    <item name="android:background">#AA4646</item>
-    <item name="backgroundTint">#AA4646</item>
+    <item name="android:background">?attr/colorPrimary</item>
+    <item name="backgroundTint">?attr/colorPrimary</item>
   </style>
 </resources>

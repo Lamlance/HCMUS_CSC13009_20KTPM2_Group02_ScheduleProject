@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.Task.TaskData;
 
+import java.time.LocalDate;
+
 public class AddTaskDialog extends Dialog {
 
   public interface AddTaskDialogListener {
@@ -25,7 +27,7 @@ public class AddTaskDialog extends Dialog {
   Button btnDown;
   Button btnSave;
   Button btnCancel;
-  TaskData tempData = new TaskData("",0,-1);
+  TaskData tempData = new TaskData("",0,-1, 0,0,0);
   AddTaskDialogListener listener;
 
   public AddTaskDialog(@NonNull Context context, AddTaskDialogListener listener) {
@@ -78,6 +80,10 @@ public class AddTaskDialog extends Dialog {
 
         tempData.taskName = taskName;
         tempData.numberPomodoros = countPomodoro;
+        LocalDate currentDate = LocalDate.now();
+        tempData.date= currentDate.getDayOfMonth();
+        tempData.month= currentDate.getMonthValue();
+        tempData.year = currentDate.getYear();
 
         listener.onDataPassed(tempData);
         dismiss();

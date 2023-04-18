@@ -1,8 +1,10 @@
 package com.honaglam.scheduleproject.Calendar;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -186,8 +188,31 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
 
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
-    holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : Color.BLACK);
-    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.WHITE);
+
+    // set text primary color
+    TypedValue textTypedValue = new TypedValue();
+    Resources.Theme textTheme = holder.itemView.getContext().getTheme();
+    textTheme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, textTypedValue, true);
+    int txtColorPrimary = textTypedValue.data;
+    holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : txtColorPrimary);
+
+    // set tertiary color
+    TypedValue tertTypedValue = new TypedValue();
+    Resources.Theme tertTextTheme = holder.itemView.getContext().getTheme();
+    tertTextTheme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, tertTypedValue, true);
+    int tertColor = tertTypedValue.data;
+
+    //set highlighted color
+    TypedValue highlightedTypedValue = new TypedValue();
+    Resources.Theme highlightedTextTheme = holder.itemView.getContext().getTheme();
+    highlightedTextTheme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, highlightedTypedValue, true);
+    int highlightedColor = tertTypedValue.data;
+    // set bg primary color
+    TypedValue bgTypedValue = new TypedValue();
+    Resources.Theme bgTheme = holder.itemView.getContext().getTheme();
+    bgTheme.resolveAttribute(com.google.android.material.R.attr.backgroundColor, bgTypedValue, true);
+    int bgColorPrimary = bgTypedValue.data;
+    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(159, 62, 65) : bgColorPrimary);
 
     if (position < 7) {
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
@@ -201,7 +226,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
-      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? tertColor : highlightedColor);
     }
     if(weeklyReminder.get(weekDate) != null && date > 0){
       holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);

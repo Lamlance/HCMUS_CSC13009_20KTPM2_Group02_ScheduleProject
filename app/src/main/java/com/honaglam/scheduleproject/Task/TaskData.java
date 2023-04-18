@@ -12,33 +12,14 @@ public class TaskData {
     public int numberCompletedPomodoros;
     public int numberPomodoros;
     public boolean isCompleted;
+    public int date;
+    public int month;
+    public int year;
 
     public static final ReminderData DEFAULT_TASK_DATA_HOLDER = new ReminderData("NONE",-1,-1);
 
     public @NonNull ReminderData reminderData = DEFAULT_TASK_DATA_HOLDER;
 
-    public TaskData(String taskName, int numberPomodoros,int id) {
-        this.taskName = taskName;
-        this.numberCompletedPomodoros = 0;
-        this.numberPomodoros = numberPomodoros;
-        this.isCompleted = false;
-        this.id = id;
-    }
-    public TaskData(String taskName, int numberPomodoros,int id,boolean isCompleted) {
-        this.taskName = taskName;
-        this.numberCompletedPomodoros = 0;
-        this.numberPomodoros = numberPomodoros;
-        this.isCompleted = isCompleted;
-        this.id = id;
-    }
-
-    public TaskData(String taskName, int numberPomodoros, int numberPomodorosCompleted ,int id,boolean isCompleted) {
-        this.taskName = taskName;
-        this.numberCompletedPomodoros = numberPomodorosCompleted;
-        this.numberPomodoros = numberPomodoros;
-        this.isCompleted = isCompleted;
-        this.id = id;
-    }
 
     @Override
     public int hashCode() {
@@ -52,4 +33,16 @@ public class TaskData {
         }
         return ((TaskData) obj).id == this.id;
     }
+
+    public TaskData(String taskName, int numberPomodoros, int numberPomodorosCompleted ,int id,boolean isCompleted, int date, int month, int year) {
+        this.taskName = taskName;
+        this.numberCompletedPomodoros = numberPomodorosCompleted;
+        this.numberPomodoros = numberPomodoros;
+        this.isCompleted = isCompleted;
+        this.id = id;
+        this.date = date;
+        this.month = month;
+        this.year = year;
+    }
+
 }

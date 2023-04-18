@@ -50,20 +50,29 @@
     </LinearLayout>
 
     <!--
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="horizontal">
 
-      <CheckBox
+      <Button
+          android:id="@+id/btnCancelReminderDialog"
+          style="@style/BUTTON"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:gravity="center"
-          android:text="Remind me 1 day before"
-          android:textSize="15sp" />
+          android:layout_marginRight="10dp"
+          android:backgroundTint="?attr/colorOutline"
+          android:textColor="?attr/colorOnSurfaceVariant"
+          android:text="Cancel"/>
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+      <Button
+          android:id="@+id/btnAddReminderDialog"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="10dp"
+          android:text="Add" />
+    </LinearLayout>
     -->
 
     <!--  TODO: re-design this  -->
@@ -82,11 +91,12 @@
         android:layout_marginBottom="10dp">
 
       <androidx.appcompat.widget.AppCompatToggleButton
-          style="@style/BUTTON"
+
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="SU"
@@ -99,6 +109,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="MO"
@@ -111,6 +122,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="TU"
@@ -123,6 +135,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="WE"
@@ -135,6 +148,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="TH"
@@ -147,6 +161,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="FR"
@@ -159,6 +174,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@drawable/selector_date_daily_btn"
+          android:text="?attr/colorOnSecondaryContainer"
           android:minWidth="0dp"
           android:textAlignment="center"
           android:textOff="SA"

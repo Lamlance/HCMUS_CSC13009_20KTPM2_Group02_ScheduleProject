@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//import kotlinx.coroutines.scheduling.Task;
+
 public class ReminderTaskDB extends SQLiteOpenHelper {
   private static final int DB_VERSION = 27;
   public static final boolean IS_DEV = true;
@@ -48,16 +50,18 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_FATHER = "father";
     public static final String COLUMN_NAME_WEEKDAY = "weekday";
   }
-
-  private static class TaskTable implements BaseColumns {
-    public static final String TABLE_NAME = "POMODORO_TASK";
-    public static final String COLUMN_NAME_ID = "id";
-    public static final String COLUMN_NAME_TITLE = "title";
-    public static final String COLUMN_NAME_LOOPS = "loops";
-    public static final String COLUMN_NAME_HISTORY = "history";
-    public static final String COLUMN_NAME_IS_DONE = "done";
-    public static final String COLUMN_NAME_LOOPS_DONE = "loops_done";
-  }
+private static class TaskTable implements BaseColumns {
+        public static final String TABLE_NAME = "POMODORO_TASK";
+        public static final String COLUMN_NAME_ID = "id";
+        public static final String COLUMN_NAME_TITLE = "title";
+        public static final String COLUMN_NAME_LOOPS = "loops";
+        public static final String COLUMN_NAME_HISTORY = "history";
+        public static final String COLUMN_NAME_IS_DONE = "done";
+        public static final String COLUMN_NAME_LOOPS_DONE = "loops_done";
+        public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_MONTH = "month";
+        public static final String COLUMN_NAME_YEAR = "year";
+    }
 
   private static class StatsTable implements BaseColumns {
     private static final String TABLE_NAME = "TimerStats";
@@ -100,14 +104,17 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                     + ReminderTable.COLUMN_NAME_WEEKDAY + " INTEGER ,"
                     + " FOREIGN KEY (" + ReminderTable.COLUMN_NAME_FATHER + ") REFERENCES "
                     + ReminderTable.TABLE_NAME + "( " + ReminderTable.COLUMN_NAME_ID + "));";
-    String createTaskTable =
-            "CREATE TABLE " + TaskTable.TABLE_NAME + " ( "
-                    + TaskTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
-                    + TaskTable.COLUMN_NAME_TITLE + " TEXT ,"
-                    + TaskTable.COLUMN_NAME_HISTORY + " INTEGER ,"
-                    + TaskTable.COLUMN_NAME_IS_DONE + " INTEGER ,"
-                    + TaskTable.COLUMN_NAME_LOOPS + " INTEGER ,"
-                    + TaskTable.COLUMN_NAME_LOOPS_DONE + " INTEGER DEFAULT 0);";
+ String createTaskTable =
+                "CREATE TABLE " + TaskTable.TABLE_NAME + " ( "
+                        + TaskTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
+                        + TaskTable.COLUMN_NAME_TITLE + " TEXT ,"
+                        + TaskTable.COLUMN_NAME_HISTORY + " INTEGER ,"
+                        + TaskTable.COLUMN_NAME_IS_DONE + " INTEGER ,"
+                        + TaskTable.COLUMN_NAME_LOOPS + " INTEGER ,"
+                        + TaskTable.COLUMN_NAME_LOOPS_DONE + " INTEGER DEFAULT 0,"
+                        + TaskTable.COLUMN_NAME_DATE + " INTEGER NOT NULL,"
+                        + TaskTable.COLUMN_NAME_MONTH + " INTEGER NOT NULL,"
+                        + TaskTable.COLUMN_NAME_YEAR + " INTEGER NOT NULL);";
     String createStatsTable =
             "CREATE TABLE " + StatsTable.TABLE_NAME + " ( "
                     + StatsTable.COLUMN_NAME_WORK_DURATION + " INTEGER DEFAULT 0 ,"
@@ -149,6 +156,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
   }
 
+
   public long addReminder(String name, long time, int weekDate) {
     try (SQLiteDatabase db = this.getWritableDatabase()) {
       ContentValues cv = new ContentValues();
@@ -163,19 +171,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
   }
 
-  public long addChildReminder(String name, long time, int fatherId) {
-    try (SQLiteDatabase db = this.getWritableDatabase()) {
-      ContentValues cv = new ContentValues();
-      cv.put(ReminderTable.COLUMN_NAME_TITLE, name);
-      cv.put(ReminderTable.COLUMN_NAME_TIME, time);
-      cv.put(ReminderTable.COLUMN_NAME_FATHER, fatherId);
-
-      return db.insert(ReminderTable.TABLE_NAME, null, cv);
-    } catch (Exception ignore) {
-    }
-    ;
-    return -1;
-  }
 
   public List<ReminderData> getReminderAt(int date, int month, int year) {
     Calendar calendar = Calendar.getInstance();
@@ -219,7 +214,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
     return null;
   }
-
   public long removeReminder(long id) {
     try (SQLiteDatabase db = this.getWritableDatabase()) {
       return db.delete(
@@ -230,7 +224,35 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     } catch (Exception ignore) {
       return -1;
     }
-  }
+
+    //Reminder
+    public long addReminder(String name, long time) {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
+
+            cv.put(ReminderTable.COLUMN_NAME_TITLE, name);
+            cv.put(ReminderTable.COLUMN_NAME_TIME, time);
+
+            return db.insert(ReminderTable.TABLE_NAME, null, cv);
+        } catch (Exception ignore) {
+            return -1;
+        }
+    }
+
+    public long addReminder(String name, long time, int weekDate) {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
+
+            cv.put(ReminderTable.COLUMN_NAME_TITLE, name);
+            cv.put(ReminderTable.COLUMN_NAME_TIME, time);
+            cv.put(ReminderTable.COLUMN_NAME_WEEKDAY, weekDate);
+
+            return db.insert(ReminderTable.TABLE_NAME, null, cv);
+        } catch (Exception ignore) {
+            return -1;
+        }
+    }
+
 
   public @NonNull List<ReminderData> findReminders(String nameSearch, long startDate, long endDate) {
     if (startDate < 0 || endDate < 0) {
@@ -479,23 +501,72 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
 
     LinkedList<TaskData> fullTaskList = Stream.concat(notRemindTask.stream(), remindTask.stream())
             .collect(Collectors.toCollection(LinkedList::new));
-
     return fullTaskList.stream().collect(Collectors.groupingBy(t->t.reminderData));
   }
 
-  public long addTask(String name, int loops, int loopsCompleted, boolean isDone) {
-    try (SQLiteDatabase db = getWritableDatabase()) {
-      ContentValues cv = new ContentValues();
-      cv.put(TaskTable.COLUMN_NAME_TITLE, name);
-      cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
-      cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
-      cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE, loopsCompleted);
+    //Task
+    public long addTask(String name, int loops, int loopsCompleted, boolean isDone, int date, int month, int year) {
+        try (SQLiteDatabase db = getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
+            cv.put(TaskTable.COLUMN_NAME_TITLE, name);
+            cv.put(TaskTable.COLUMN_NAME_LOOPS, loops);
+            cv.put(TaskTable.COLUMN_NAME_IS_DONE, isDone ? 1 : 0);
+            cv.put(TaskTable.COLUMN_NAME_LOOPS_DONE, loopsCompleted);
+            cv.put(TaskTable.COLUMN_NAME_DATE, date);
+            cv.put(TaskTable.COLUMN_NAME_MONTH, month);
+            cv.put(TaskTable.COLUMN_NAME_YEAR, year);
 
-      return db.insert(TaskTable.TABLE_NAME, null, cv);
-    } catch (Exception ignore) {
+            return db.insert(TaskTable.TABLE_NAME, null, cv);
+        } catch (Exception ignore) {
+        }
+        return -1;
     }
-    return -1;
-  }
+
+    public List<TaskData> getAllTask() {
+        ArrayList<TaskData> list = new ArrayList<TaskData>();
+        try (
+                SQLiteDatabase db = getReadableDatabase();
+                // COLUMN_NAME_DATE
+                Cursor cursor = db.query(
+                        TaskTable.TABLE_NAME,
+                        null,
+                        TaskTable.COLUMN_NAME_HISTORY + " = ? OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL",
+                        new String[]{"0"},
+                        null,
+                        null,
+                        null
+                );
+        ) {
+            if (!cursor.moveToFirst()) {
+                return list;
+            }
+            int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
+            int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
+            int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+            int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
+            int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
+            int dateIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_DATE);
+            int monthIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_MONTH);
+            int yearIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_YEAR);
+            do {
+                String name = cursor.getString(titleIndex);
+                int loops = cursor.getInt(loopIndex);
+                int loopsCompleted = cursor.getInt(loopCompletedIndex);
+                int id = cursor.getInt(idIndex);
+                boolean isComplete = cursor.getInt(completeIndex) > 0;
+                int date = cursor.getInt(dateIndex);
+                int month = cursor.getInt(monthIndex);
+                int year = cursor.getInt(yearIndex);
+                Log.i("LOGGING QUERY", "ID: " + id + ", Name: " + name + ", Loops: " + loops + ", Loops Completed: " + loopsCompleted +
+                        ", Is Complete: " + isComplete + ", Date: " + date + ", Month: " + month + ", Year: " + year);
+                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete, date, month, year));
+            } while (cursor.moveToNext());
+        } catch (Exception ignore) {
+        }
+        return list;
+    }
+
+
 
 
   public boolean editTask(TaskData newData)   {
@@ -566,41 +637,48 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     return false;
   }
 
-  public List<TaskData> getHistoryTask() {
-    ArrayList<TaskData> list = new ArrayList<TaskData>();
-    try (
-            SQLiteDatabase db = getReadableDatabase();
-            Cursor cursor = db.query(
-                    TaskTable.TABLE_NAME,
-                    null,
-                    TaskTable.COLUMN_NAME_HISTORY + " > ? ",
-                    new String[]{"0"},
-                    null,
-                    null,
-                    null
-            );
-    ) {
-      if (!cursor.moveToFirst()) {
+    public List<TaskData> getHistoryTask() {
+        ArrayList<TaskData> list = new ArrayList<TaskData>();
+        try (
+                SQLiteDatabase db = getReadableDatabase();
+                Cursor cursor = db.query(
+                        TaskTable.TABLE_NAME,
+                        null,
+                        TaskTable.COLUMN_NAME_HISTORY + " > ?  OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NOT NULL",
+                        new String[]{"0"},
+                        null,
+                        null,
+                        null);
+        ) {
+            if (!cursor.moveToFirst()) {
+                return list;
+            }
+            int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
+            int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
+            int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+            int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
+            int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
+            int dateIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_DATE);
+            int monthIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_MONTH);
+            int yearIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_YEAR);
+            do {
+                String name = cursor.getString(titleIndex);
+                int loops = cursor.getInt(loopIndex);
+                int loopsCompleted = cursor.getInt(loopCompletedIndex);
+                int id = cursor.getInt(idIndex);
+                boolean isComplete = cursor.getInt(completeIndex) > 0;
+                int date = cursor.getInt(dateIndex);
+                int month = cursor.getInt(monthIndex);
+                int year = cursor.getInt(yearIndex);
+                Log.i("LOGGING QUERY", "ID: " + id + ", Name: " + name + ", Loops: " + loops + ", Loops Completed: " + loopsCompleted +
+                        ", Is Complete: " + isComplete + ", Date: " + date + ", Month: " + month + ", Year: " + year);
+                list.add(new TaskData(name, loops, loopsCompleted, id, isComplete, date, month, year));
+            } while (cursor.moveToNext());
+            Log.i("HISTORY","Find " + cursor.getCount());
+        } catch (Exception ignore) {
+        }
         return list;
       }
-      int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
-      int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
-      int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
-      int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
-      int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
-      do {
-        String name = cursor.getString(titleIndex);
-        int loops = cursor.getInt(loopIndex);
-        int loopsCompleted = cursor.getInt(loopCompletedIndex);
-        int id = cursor.getInt(idIndex);
-        boolean isComplete = cursor.getInt(completeIndex) > 0;
-        list.add(new TaskData(name, loops, loopsCompleted, id, isComplete));
-      } while (cursor.moveToNext());
-      Log.i("HISTORY", "Find " + cursor.getCount());
-    } catch (Exception ignore) {
-    }
-    return list;
-  }
   //===
 
   //Stats

@@ -104,7 +104,8 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     });
 //    TODO: Change color red_700 to another color
     if (position == selectedPosition) {
-      holder.itemView.setBackgroundResource(R.color.red_700);
+
+      holder.itemView.setBackgroundResource(R.color.selected_white);
     } else {
       holder.itemView.setBackgroundColor(Color.TRANSPARENT);
     }

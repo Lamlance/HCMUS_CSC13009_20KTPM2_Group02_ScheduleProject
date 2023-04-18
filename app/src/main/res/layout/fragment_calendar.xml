@@ -17,6 +17,8 @@
 
       android:id="@+id/btnSetReminder"
       android:src="@drawable/baseline_add_24"
+      android:backgroundTint="?attr/colorPrimary"
+      app:backgroundTint="?attr/colorPrimary"
       android:layout_alignParentBottom="true"
       android:layout_gravity="end|bottom"
       android:layout_alignParentEnd="true"
@@ -86,7 +88,6 @@
               style="@style/IMAGE_BUTTON"
               android:layout_weight="1"
               android:src="@drawable/baseline_arrow_left_24_black"
-              app:iconTint="@color/black"
               android:scaleType="fitXY"
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
@@ -102,14 +103,12 @@
               android:layout_height="wrap_content"/>
           <ImageButton
               android:id="@+id/btnIncreaseMonth"
-              style="@style/IMAGE_BUTTON"
               android:layout_weight="1"
               android:src="@drawable/baseline_arrow_right_24_black"
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
               android:scaleType="fitXY"
-              android:background="@android:color/transparent"
-              android:textColor="@color/purple_700"/>
+              android:background="@android:color/transparent" />
         </LinearLayout>
         <!-- Calender View -->
         <LinearLayout
@@ -149,14 +148,14 @@
             android:layout_height="match_parent"/>
         <ImageButton
             android:id="@+id/btnSearchReminder"
-            style="@style/IMAGE_BUTTON"
             android:src="@drawable/baseline_search_24_black"
+            android:backgroundTint="?attr/colorPrimary"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
         <ImageButton
             android:id="@+id/btnFilterReminder"
-            style="@style/IMAGE_BUTTON"
             android:src="@drawable/baseline_filter_alt_24_black"
+            android:backgroundTint="?attr/colorPrimary"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
         <androidx.appcompat.widget.AppCompatToggleButton
