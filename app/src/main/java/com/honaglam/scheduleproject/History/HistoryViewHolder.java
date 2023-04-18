@@ -11,9 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.Task.TaskViewHolder;
 
+import org.w3c.dom.Text;
+
 import kotlin.NotImplementedError;
 
 public class HistoryViewHolder extends RecyclerView.ViewHolder{
+  TextView txtTaskDateHistory;
   TextView txtTaskNameHistory;
   TextView txtCountPomodoroHistory;
   ImageButton imgBtnMoveToTodoTask;
@@ -27,6 +30,7 @@ public class HistoryViewHolder extends RecyclerView.ViewHolder{
   public HistoryViewHolder(@NonNull View itemView,
                            HistoryViewHolder.OnClickPositionCallBack moveToTodoTaskCallback) {
     super(itemView);
+    this.txtTaskDateHistory = itemView.findViewById(R.id.txtTaskDateHistory);
     this.txtTaskNameHistory = itemView.findViewById(R.id.txtTaskNameHistory);
     this.txtCountPomodoroHistory = itemView.findViewById(R.id.txtCountPomodoroHistory);
     this.imgBtnMoveToTodoTask = itemView.findViewById(R.id.imgBtnMoveToTodoTask);

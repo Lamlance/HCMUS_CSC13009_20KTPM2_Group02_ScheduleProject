@@ -228,7 +228,10 @@ public class TimerFragment extends Fragment {
               taskData.taskName,
               taskData.numberPomodoros,
               taskData.numberCompletedPomodoros,
-              taskData.isCompleted);
+              taskData.isCompleted,
+              taskData.date,
+              taskData.month,
+              taskData.year);
       taskRecyclerViewAdapter.notifyItemInserted(newPos);
     }
   }

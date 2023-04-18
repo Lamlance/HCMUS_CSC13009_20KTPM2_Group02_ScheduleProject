@@ -58,6 +58,8 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryView
     TaskData taskData = dataGet.getList().get(position);
 
     Log.i("HISTORY_NAME","Task name " + taskData.taskName);
+    String formattedDate = String.format("%04d-%02d-%02d", taskData.year, taskData.month, taskData.date);
+    holder.txtTaskDateHistory.setText(formattedDate);
     holder.txtTaskNameHistory.setText(taskData.taskName);
     holder.txtCountPomodoroHistory.setText(taskData.numberCompletedPomodoros + "/ " + taskData.numberPomodoros);
   }
