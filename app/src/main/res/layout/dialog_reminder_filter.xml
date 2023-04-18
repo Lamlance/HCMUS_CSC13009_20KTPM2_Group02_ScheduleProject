@@ -94,24 +94,21 @@
     android:layout_height="wrap_content">
 
     <Button
-      style="@style/BUTTON"
       android:id="@+id/btnFilterClear"
       android:text="Cancel"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:backgroundTint="#DFDFDF"
-      android:textColor="#000000"
+        android:backgroundTint="?attr/colorOutline"
+        android:textColor="?attr/colorOnSurfaceVariant"
       android:layout_marginRight="10dp"
       />
     <Button
-      style="@style/BUTTON"
       android:id="@+id/btnFilterAccept"
       android:text="Accept"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      />
+      android:layout_marginRight="10dp" />
   </LinearLayout>
 
 </LinearLayout>

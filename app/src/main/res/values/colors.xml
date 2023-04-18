@@ -7,7 +7,8 @@
   <color name="teal_700">#FF018786</color>
   <color name="black">#FF000000</color>
   <color name="white">#FFFFFFFF</color>
-
+  <color name="main_theme">#9f3e41</color>
+  <color name="main_neutral">#775655</color>
   <color name="dark_mode_color">#0F0F0F</color>
 
   <color name="text_work_state_background_color">#a44e4e</color>
@@ -38,55 +39,54 @@
   <color name="image_btn_timer_fragment_lightmode_background">#BACDDB</color>
   <color name="image_btn_timer_fragment_lightmode_icon">#CE5959</color>
 
-
   <color name="selected_white">#80D2D2D2</color>
   <!--
   <color name="work_color">#FF5722</color>
   <color name="short_break_color">#4CAF50</color>
   <color name="long_break_color">#2196F3</color>
   -->
-  <color name="red_700">#B03602</color>
+  <color name="red_700">#ffdad8</color>
   <color name="red_500">#F44336</color>
 
-  <color name="work_color_theme0">#CE5959</color>
-  <color name="short_break_color_theme0">#38858A</color>
-  <color name="long_break_color_theme0">#397097</color>
+  <color name="work_color_theme0">#57371E</color>
+  <color name="short_break_color_theme0">#3F4E4F</color>
+  <color name="long_break_color_theme0">#242C2E</color>
   <color name="image_btn_background_theme0">#E6E6E6</color>
 
-  <color name="work_color_theme1">#A4BC92</color>
-  <color name="short_break_color_theme1">#92A4BC</color>
-  <color name="long_break_color_theme1">#BC92A4</color>
-  <color name="image_btn_background_theme1">#675D50</color>
+  <color name="work_color_theme1">#7A2A1F</color>
+  <color name="short_break_color_theme1">#704F4F</color>
+  <color name="long_break_color_theme1">#3C2828</color>
+  <color name="image_btn_background_theme1">#E6E6E6</color>
 
-  <color name="work_color_theme2">#AECABF</color>
-  <color name="short_break_color_theme2">#BFAECA</color>
-  <color name="long_break_color_theme2">#CABFAE</color>
-  <color name="image_btn_background_theme2">#4C6C8F</color>
+  <color name="work_color_theme2">#392811</color>
+  <color name="short_break_color_theme2">#4F4557</color>
+  <color name="long_break_color_theme2">#24222C</color>
+  <color name="image_btn_background_theme2">#E6E6E6</color>
+s
+  <color name="work_color_theme3">#4E382A</color>
+  <color name="short_break_color_theme3">#9D5353</color>
+  <color name="long_break_color_theme3">#632626</color>
+  <color name="image_btn_background_theme3">#E6E6E6</color>
 
-  <color name="work_color_theme3">#FFAAC4</color>
-  <color name="short_break_color_theme3">#C4FFAA</color>
-  <color name="long_break_color_theme3">#AAC4FF</color>
-  <color name="image_btn_background_theme3">#5C2E7E</color>
+  <color name="work_color_theme4">#36427E</color>
+  <color name="short_break_color_theme4">#2E4D85</color>
+  <color name="long_break_color_theme4">#133E7C</color>
+  <color name="image_btn_background_theme4">#E6E6E6</color>
 
-  <color name="work_color_theme4">#4E31AA</color>
-  <color name="short_break_color_theme4">#2F58CD</color>
-  <color name="long_break_color_theme4">#3795BD</color>
-  <color name="image_btn_background_theme4">#2E2E2E</color>
-
-  <color name="work_color_theme5">#6D5D6E</color>
-  <color name="short_break_color_theme5">#6E6D5D</color>
-  <color name="long_break_color_theme5">#5D6E6D</color>
-  <color name="image_btn_background_theme5">#F4EEE0</color>
+  <color name="work_color_theme5">#1A5F7A</color>
+  <color name="short_break_color_theme5">#106C6A</color>
+  <color name="long_break_color_theme5">#084543</color>
+  <color name="image_btn_background_theme5">#E6E6E6</color>
 
   <color name="work_color_theme6">#3C2A21</color>
-  <color name="short_break_color_theme6">#213C2A</color>
-  <color name="long_break_color_theme6">#2A213C</color>
-  <color name="image_btn_background_theme6">#D5CEA3</color>
+  <color name="short_break_color_theme6">#2A5037</color>
+  <color name="long_break_color_theme6">#122719</color>
+  <color name="image_btn_background_theme6">#E6E6E6</color>
 
   <color name="work_color_theme7">#1B2430</color>
   <color name="short_break_color_theme7">#301B24</color>
   <color name="long_break_color_theme7">#24301B</color>
-  <color name="image_btn_background_theme7">#816797</color>
+  <color name="image_btn_background_theme7">#E6E6E6</color>
   
   <color name="transparent">#00FFFFFF</color>
 </resources>

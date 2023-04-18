@@ -1,8 +1,10 @@
 package com.honaglam.scheduleproject;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -102,6 +105,7 @@ public class StatisticFragment extends Fragment {
         preparePieChartData(pieData);
 
         txtTotalTime.setText("You have focused " + String.format("%.2f", workHours) + " hours in 30 days recently.");
+        txtTotalTime.setTextColor(Color.parseColor("#777777"));
         return linearLayout;
     }
 
@@ -122,9 +126,9 @@ public class StatisticFragment extends Fragment {
             values2.add(new BarEntry(i, this.data.get(i).shortDur + this.data.get(i).longDur));
         }
 
+
         BarDataSet set1 = new BarDataSet(values1, GROUP_1_LABEL);
         BarDataSet set2 = new BarDataSet(values2, GROUP_2_LABEL);
-
         set1.setColor(ColorTemplate.MATERIAL_COLORS[0]);
         set2.setColor(ColorTemplate.MATERIAL_COLORS[1]);
 
@@ -154,16 +158,18 @@ public class StatisticFragment extends Fragment {
         xAxis.setGranularity(1f);
         xAxis.setCenterAxisLabels(false);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-
+        xAxis.setTextColor(Color.parseColor("#777777"));
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setDrawGridLines(true);
         leftAxis.setSpaceTop(35f);
         leftAxis.setAxisMinimum(0f);
+        leftAxis.setTextColor(Color.parseColor("#777777"));
 
         barChart.getAxisRight().setEnabled(false);
         barChart.getXAxis().setAxisMinimum(0);
         barChart.getXAxis().setAxisMaximum(MAX_X_VALUE);
         barChart.setVisibleXRangeMaximum(MAX_X_SHOW);
+
 
 
     }
