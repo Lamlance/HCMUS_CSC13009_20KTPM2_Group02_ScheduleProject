@@ -1,21 +1,15 @@
 package com.honaglam.scheduleproject.History;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.honaglam.scheduleproject.Calendar.CalendarViewHolder;
 import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.Task.TaskData;
-import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
-import com.honaglam.scheduleproject.Task.TaskViewHolder;
 
 import java.util.List;
 

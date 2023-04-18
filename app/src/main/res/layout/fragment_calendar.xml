@@ -165,6 +165,8 @@
             android:textOn=""
             android:textOff=""
             android:drawableStart="@drawable/reminder_search_toggleview"
+            android:backgroundTint="?attr/colorPrimary"
+            android:drawableTint="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="match_parent" />
       </LinearLayout>

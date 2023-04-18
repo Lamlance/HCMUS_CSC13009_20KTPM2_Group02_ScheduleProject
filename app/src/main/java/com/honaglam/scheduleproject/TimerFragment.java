@@ -2,14 +2,11 @@ package com.honaglam.scheduleproject;
 
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 //import android.os.Handler;
@@ -21,26 +18,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentResultListener;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskExpandableListAdapter;
-import com.honaglam.scheduleproject.Task.TaskRecyclerViewAdapter;
-import com.honaglam.scheduleproject.Task.TaskViewHolder;
 import com.honaglam.scheduleproject.TimerViews.TimerFloatingButton;
 import com.honaglam.scheduleproject.TimerViews.TimerViewGroupConstraint;
-import com.honaglam.scheduleproject.TimerViews.TimerViewGroupLinear;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -328,7 +318,6 @@ public class TimerFragment extends Fragment {
               taskData.date,
               taskData.month,
               taskData.year);
-              taskData.isCompleted);
       if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)) {
         activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER).add(newData);
       } else {

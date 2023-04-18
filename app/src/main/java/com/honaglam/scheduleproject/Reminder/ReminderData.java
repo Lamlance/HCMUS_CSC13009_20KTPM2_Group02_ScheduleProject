@@ -31,7 +31,7 @@ public class ReminderData implements Serializable {
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(time);
     this.myDate = calendar.get(Calendar.DATE);
-    this.weekDate = calendar.get(Calendar.DAY_OF_WEEK);
+    this.weekDate = weekDate;
   }
 
   public int getMyDate(){

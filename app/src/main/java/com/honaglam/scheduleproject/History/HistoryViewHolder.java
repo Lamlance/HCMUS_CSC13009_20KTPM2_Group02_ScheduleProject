@@ -1,7 +1,6 @@
 package com.honaglam.scheduleproject.History;
 
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -9,9 +8,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
-import com.honaglam.scheduleproject.Task.TaskViewHolder;
-
-import org.w3c.dom.Text;
 
 import kotlin.NotImplementedError;
 

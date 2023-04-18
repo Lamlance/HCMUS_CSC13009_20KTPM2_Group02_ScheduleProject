@@ -34,17 +34,14 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
 
     txtDate = itemView.findViewById(R.id.txtCalendarDateItem);
     layoutItemAll = itemView.findViewById(R.id.layoutCalendarItemAll);
-    this.itemView.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        try {
-          int position = getAdapterPosition();
-          if (position >= 0) {
-            clickPositionCallBack.clickAtPosition(position);
-          }
-        } catch (Exception e) {
-          e.printStackTrace();
+    this.itemView.setOnClickListener(view -> {
+      try {
+        int position = getAdapterPosition();
+        if (position >= 0) {
+          clickPositionCallBack.clickAtPosition(position);
         }
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     });
   }

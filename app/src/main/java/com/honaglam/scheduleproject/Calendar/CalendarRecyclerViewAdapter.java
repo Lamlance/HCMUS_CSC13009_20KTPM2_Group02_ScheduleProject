@@ -6,9 +6,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import kotlin.NotImplementedError;
@@ -105,8 +102,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       reminderByDates = reminders.stream().collect(
               Collectors.groupingBy(ReminderData::getMyDate)
       );
-
-      weeklyReminder = reminders.stream().filter(r->r.weekDate >= 0).collect(Collectors.groupingBy(r->r.weekDate));
+      weeklyReminder = reminders.stream().filter(r->r.weekDate > 0).collect(Collectors.groupingBy(r->r.weekDate));
 
     } catch (Exception ignore) {
     }
@@ -171,14 +167,21 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       notifyItemChanged(clickedPos);
       if (selectDateCallBack != null) {
         try {
-          HashSet<ReminderData> selectedWeekDate = new HashSet<>(reminderByDates.get(date));
-          selectedWeekDate.addAll(weeklyReminder.get(calendar.get(Calendar.DAY_OF_WEEK)));
+          List<ReminderData> normalReminder = reminderByDates.get(date);
+          List<ReminderData> selectedWeeklyReminder = weeklyReminder.get(calendar.get(Calendar.DAY_OF_WEEK));
+          HashSet<ReminderData> selectedWeekDateReminder = new HashSet<>();
+          if(normalReminder != null){
+            selectedWeekDateReminder.addAll(normalReminder);
+          }
+          if(selectedWeeklyReminder != null){
+            selectedWeekDateReminder.addAll(selectedWeeklyReminder);
+          }
           selectDateCallBack.clickDate(
                   date,
                   calendar.get(Calendar.MONTH),
                   calendar.get(Calendar.YEAR),
                   calendar.get(Calendar.DAY_OF_WEEK),
-                  new LinkedList<>(selectedWeekDate));
+                  new LinkedList<>(selectedWeekDateReminder));
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -186,33 +189,50 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     }
   }
 
+  Integer txtPrimaryColor = null;
+  Integer highlightColor = null;
+  Integer bgPrimaryColor = null;
+  Integer tertiaryColor = null;
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
 
     // set text primary color
-    TypedValue textTypedValue = new TypedValue();
-    Resources.Theme textTheme = holder.itemView.getContext().getTheme();
-    textTheme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, textTypedValue, true);
-    int txtColorPrimary = textTypedValue.data;
-    holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : txtColorPrimary);
+    if(txtPrimaryColor == null){
+      TypedValue textTypedValue = new TypedValue();
+      Resources.Theme textTheme = holder.itemView.getContext().getTheme();
+      textTheme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, textTypedValue, true);
+      txtPrimaryColor = textTypedValue.data;
+    }
+    holder.txtDate.setTextColor((clickedPos == position) ? Color.WHITE : txtPrimaryColor);
+
 
     // set tertiary color
-    TypedValue tertTypedValue = new TypedValue();
-    Resources.Theme tertTextTheme = holder.itemView.getContext().getTheme();
-    tertTextTheme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, tertTypedValue, true);
-    int tertColor = tertTypedValue.data;
+    if(tertiaryColor == null){
+      TypedValue tertTypedValue = new TypedValue();
+      Resources.Theme tertTextTheme = holder.itemView.getContext().getTheme();
+      tertTextTheme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, tertTypedValue, true);
+      tertiaryColor = tertTypedValue.data;
+    }
+
 
     //set highlighted color
-    TypedValue highlightedTypedValue = new TypedValue();
-    Resources.Theme highlightedTextTheme = holder.itemView.getContext().getTheme();
-    highlightedTextTheme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, highlightedTypedValue, true);
-    int highlightedColor = tertTypedValue.data;
+    if(highlightColor == null){
+      TypedValue highlightedTypedValue = new TypedValue();
+      Resources.Theme highlightedTextTheme = holder.itemView.getContext().getTheme();
+      highlightedTextTheme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, highlightedTypedValue, true);
+      highlightColor = highlightedTypedValue.data;
+    }
+
+
     // set bg primary color
-    TypedValue bgTypedValue = new TypedValue();
-    Resources.Theme bgTheme = holder.itemView.getContext().getTheme();
-    bgTheme.resolveAttribute(com.google.android.material.R.attr.backgroundColor, bgTypedValue, true);
-    int bgColorPrimary = bgTypedValue.data;
-    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(159, 62, 65) : bgColorPrimary);
+    if(bgPrimaryColor == null){
+      TypedValue bgTypedValue = new TypedValue();
+      Resources.Theme bgTheme = holder.itemView.getContext().getTheme();
+      bgTheme.resolveAttribute(com.google.android.material.R.attr.backgroundColor, bgTypedValue, true);
+      bgPrimaryColor = bgTypedValue.data;
+    }
+
+    holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(159, 62, 65) : bgPrimaryColor);
 
     if (position < 7) {
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
@@ -226,10 +246,10 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
-      holder.txtDate.setBackgroundColor((clickedPos == position) ? tertColor : highlightedColor);
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? tertiaryColor : highlightColor);
     }
     if(weeklyReminder.get(weekDate) != null && date > 0){
-      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : highlightColor);
     }
   }
 

@@ -27,7 +27,9 @@ public class AddTaskDialog extends Dialog {
   Button btnDown;
   Button btnSave;
   Button btnCancel;
-  TaskData tempData = new TaskData("",0,-1, 0,0,0);
+  TaskData tempData = new TaskData(
+          "",0,0,
+          -1,false,0,0,0);
   AddTaskDialogListener listener;
 
   public AddTaskDialog(@NonNull Context context, AddTaskDialogListener listener) {
@@ -106,7 +108,10 @@ public class AddTaskDialog extends Dialog {
     this.listener = listener;
     setContentView(R.layout.add_task_dialog);
 
-    TaskData tempData = new TaskData(oldData.taskName, oldData.numberPomodoros,oldData.id);
+    TaskData tempData = new TaskData(
+            oldData.taskName,
+            oldData.numberPomodoros,oldData.numberCompletedPomodoros,
+            oldData.id,oldData.isCompleted,oldData.date,oldData.month,oldData.year);
 
     // Set width for dialog
     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
