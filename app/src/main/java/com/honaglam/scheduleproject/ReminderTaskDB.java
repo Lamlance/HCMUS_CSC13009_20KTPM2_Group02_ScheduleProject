@@ -163,7 +163,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
   }
 
-
   public long addChildReminder(String name, long time, int fatherId) {
     try (SQLiteDatabase db = this.getWritableDatabase()) {
       ContentValues cv = new ContentValues();
@@ -248,8 +247,9 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             Cursor cursor = db.query(
                     ReminderTable.TABLE_NAME,
                     null,
-                    "( " + ReminderTable.COLUMN_NAME_TIME + " BETWEEN ? AND ? ) AND ("
-                            + ReminderTable.COLUMN_NAME_TITLE + " LIKE ? )",
+                    "((" + ReminderTable.COLUMN_NAME_TIME + " BETWEEN ? AND ? ) AND ("
+                            + ReminderTable.COLUMN_NAME_TITLE + " LIKE ? )) OR "
+                            + ReminderTable.COLUMN_NAME_WEEKDAY + " IS NOT NULL",
                     new String[]{String.valueOf(startDate), String.valueOf(endDate), "%" + nameSearch + "%"},
                     null,
                     null,
@@ -288,7 +288,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             Cursor cursor = db.query(
                     ReminderTable.TABLE_NAME,
                     null,
-                    ReminderTable.COLUMN_NAME_TIME + " BETWEEN ? AND ?",
+                    "(" + ReminderTable.COLUMN_NAME_TIME + " BETWEEN ? AND ? ) OR "
+                            + ReminderTable.COLUMN_NAME_WEEKDAY +" IS NOT NULL",
                     new String[]{String.valueOf(startDate), String.valueOf(endDate)},
                     null,
                     null,
@@ -325,7 +326,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
             Cursor cursor = db.query(
                     ReminderTable.TABLE_NAME,
                     null,
-                    ReminderTable.COLUMN_NAME_TITLE + " LIKE ?",
+                    "( " + ReminderTable.COLUMN_NAME_TITLE + " LIKE ? OR "
+                            +ReminderTable.COLUMN_NAME_WEEKDAY + " IS NOT NULL",
                     new String[]{"%" + searchName + "%"},
                     null,
                     null,
@@ -496,7 +498,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   }
 
 
-  public boolean editTask(TaskData newData) {
+  public boolean editTask(TaskData newData)   {
     try (SQLiteDatabase db = getWritableDatabase()) {
       ContentValues cv = new ContentValues();
       cv.put(TaskTable.COLUMN_NAME_LOOPS, newData.numberPomodoros);

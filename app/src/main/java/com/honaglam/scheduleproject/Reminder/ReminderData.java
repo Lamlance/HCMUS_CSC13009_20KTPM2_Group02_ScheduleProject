@@ -12,7 +12,7 @@ public class ReminderData implements Serializable {
   public int id = -1;
   boolean isWeekly = false;
   int myDate;
-  int weekDate = -1;
+  public int weekDate = -1;
   public ReminderData(String name, long time,int id){
     this.Name = name;
     this.RemindTime = time;

@@ -97,6 +97,12 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       reminderByDates = reminders.stream().collect(
               Collectors.groupingBy(ReminderData::getMyDate)
       );
+
+      List<ReminderData> weekly = reminders.stream().filter(r->r.weekDate >= 0).collect(Collectors.toList());
+      for (ReminderData weeklyData: weekly) {
+        Log.i("CALENDAR", "Weekly reminders " + weeklyData.Name);
+      }
+
     } catch (Exception ignore) {
     }
   }

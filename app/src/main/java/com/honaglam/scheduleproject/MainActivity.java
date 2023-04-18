@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
   public TaskData addTask(String name, int loops, int loopsCompleted, boolean isDone) {
     try {
       int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone));
-      return new TaskData(name,loops,loopsCompleted,false);
+      return new TaskData(name,loops,loopsCompleted,id,false);
     } catch (Exception ignore) {
     }
     return null;

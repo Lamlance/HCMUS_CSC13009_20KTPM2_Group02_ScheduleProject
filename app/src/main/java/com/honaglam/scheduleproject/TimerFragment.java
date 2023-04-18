@@ -208,10 +208,6 @@ public class TimerFragment extends Fragment {
     txtTimer.setText(String.format("%d:%02d", minutes, seconds));
   }
 
-  public void updateBackground(int color) {
-    getView().setBackgroundColor(color);
-  }
-
   private void UpdateTimerBackground(int work_state) {
     //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     Log.i("DRAW_POMODORO_STATE", "SETTING STATE " + work_state);
@@ -260,42 +256,59 @@ public class TimerFragment extends Fragment {
     public void onSubmit(String name, Calendar setDate) {
       LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
 
-
       ReminderData newReminder = activity.makeTaskReminders(
               name,
               setDate.getTimeInMillis(),
-              reminderTaskDataList.stream().map(t->t.id).collect(Collectors.toList())
+              reminderTaskDataList.stream().map(t -> t.id).collect(Collectors.toList())
       );
+
+      reminderList.add(newReminder);
+      activity.taskMapByReminder.put(newReminder, reminderTaskDataList);
+
       Set<TaskData> noneReminderData = reminderTaskDataList.stream()
-              .filter(t->t.reminderData.equals(TaskData.DEFAULT_TASK_DATA_HOLDER))
+              .filter(t -> t.reminderData.equals(TaskData.DEFAULT_TASK_DATA_HOLDER))
               .collect(Collectors.toSet());
 
-      if(activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)){
+      if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER) && noneReminderData.size() > 0) {
         List<TaskData> oldList = activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER);
-        LinkedList<TaskData> newList = new LinkedList<>(
-                oldList.stream().filter(t->!noneReminderData.contains(t)).collect(Collectors.toList())
-        );
-        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER,newList);
-        reminderList.add(newReminder);
-        activity.taskMapByReminder.put(newReminder,reminderTaskDataList);
-        expandableListAdapter.notifyDataSetChanged();
+        LinkedList<TaskData> newList = oldList.stream()
+                .filter(t -> !noneReminderData.contains(t))
+                .collect(Collectors.toCollection(LinkedList::new));
+        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, newList);
       }
+
+      expandableListAdapter.notifyDataSetChanged();
 
     }
 
     @Override
     public void onSubmitWeekly(String name, Calendar setDate, HashSet<Integer> dailyReminder) {
+      LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
+
       ReminderData newReminder = activity.makeWeeklyReminder(
               name,
               setDate.getTimeInMillis(),
               dailyReminder,
-              expandableListAdapter.getCheckedTask().stream().map(t->t.id).collect(Collectors.toList())
+              reminderTaskDataList.stream().map(t -> t.id).collect(Collectors.toList())
       );
+
+      Set<TaskData> noneReminderData = reminderTaskDataList.stream()
+              .filter(t -> t.reminderData.equals(TaskData.DEFAULT_TASK_DATA_HOLDER))
+              .collect(Collectors.toSet());
+
       reminderList.add(newReminder);
-      activity.taskMapByReminder.put(
-              newReminder,
-              new LinkedList<>(expandableListAdapter.getCheckedTask())
-      );
+      activity.taskMapByReminder.put(newReminder, reminderTaskDataList);
+
+      if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER) && noneReminderData.size() > 0) {
+        List<TaskData> oldList = activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER);
+        LinkedList<TaskData> newList = oldList.stream()
+                .filter(t -> !noneReminderData.contains(t))
+                .collect(Collectors.toCollection(LinkedList::new));
+        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, newList);
+
+      }
+
+      expandableListAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -312,12 +325,13 @@ public class TimerFragment extends Fragment {
               taskData.numberPomodoros,
               taskData.numberCompletedPomodoros,
               taskData.isCompleted);
-      if(activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)){
+      if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)) {
         activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER).add(newData);
-      }else{
+      } else {
         LinkedList<TaskData> linkedList = new LinkedList<>();
         linkedList.add(newData);
-        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER,linkedList);
+        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, linkedList);
+        reminderList.add(TaskData.DEFAULT_TASK_DATA_HOLDER);
       }
       expandableListAdapter.notifyDataSetInvalidated();
     }
@@ -364,7 +378,6 @@ public class TimerFragment extends Fragment {
     }
   }
 
-
   class DeleteChildTaskCallBack implements TaskExpandableListAdapter.OnChildAction {
     @Override
     public void onCheck(int childPos, int groupPos) {
@@ -372,13 +385,16 @@ public class TimerFragment extends Fragment {
       List<TaskData> list = activity.taskMapByReminder.get(reminder);
       TaskData data = (list == null) ? null : list.get(childPos);
 
-      if (data == null) {return;}
+      if (data == null) {
+        return;
+      }
 
       activity.deleteTask(data.id);
       try {
         activity.taskMapByReminder.get(reminder).remove(childPos);
-        if(activity.taskMapByReminder.get(reminder).size() <= 0){
+        if (activity.taskMapByReminder.get(reminder).size() <= 0) {
           reminderList.remove(groupPos);
+          activity.taskMapByReminder.remove(reminder);
         }
         expandableListAdapter.notifyDataSetChanged();
       } catch (Exception e) {
@@ -395,55 +411,57 @@ public class TimerFragment extends Fragment {
       List<TaskData> list = activity.taskMapByReminder.get(reminder);
       TaskData data = (list == null) ? null : list.get(childPos);
 
-      if (data == null) {return;}
+      if (data == null) {
+        return;
+      }
 
       activity.moveTaskToHistory(data.id);
       activity.historyTasks.add(data);
       try {
         activity.taskMapByReminder.get(reminder).remove(childPos);
-        if(activity.taskMapByReminder.get(reminder).size() <= 0){
+        if (activity.taskMapByReminder.get(reminder).size() <= 0) {
           reminderList.remove(groupPos);
         }
         expandableListAdapter.notifyDataSetChanged();
-      }catch (Exception e){
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
   }
 
-  class EditChildTaskCallBack implements TaskExpandableListAdapter.OnChildAction{
+  class EditChildTaskCallBack implements TaskExpandableListAdapter.OnChildAction {
     @Override
     public void onCheck(int childPos, int groupPos) {
       ReminderData reminder = reminderList.get(groupPos);
       List<TaskData> list = activity.taskMapByReminder.get(reminder);
       TaskData data = (list == null) ? null : list.get(childPos);
-      if(data == null){
+      if (data == null) {
         return;
       }
 
       AddTaskDialog.AddTaskDialogListener listener = (taskData -> {
         activity.editTask(taskData);
         try {
-          activity.taskMapByReminder.get(reminder).set(childPos,taskData);
+          activity.taskMapByReminder.get(reminder).set(childPos, taskData);
           expandableListAdapter.notifyDataSetChanged();
-        }catch (Exception e){
+        } catch (Exception e) {
           e.printStackTrace();
         }
       });
 
-      new AddTaskDialog(context,listener,data).show();
+      new AddTaskDialog(context, listener, data).show();
 
 
     }
   }
 
-  class ChildUpdatedCallBack implements TaskExpandableListAdapter.OnChildAction{
+  class ChildUpdatedCallBack implements TaskExpandableListAdapter.OnChildAction {
     @Override
     public void onCheck(int childPos, int groupPos) {
       ReminderData reminder = reminderList.get(groupPos);
       List<TaskData> list = activity.taskMapByReminder.get(reminder);
       TaskData data = (list == null) ? null : list.get(childPos);
-      if(data == null){
+      if (data == null) {
         return;
       }
 

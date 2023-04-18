@@ -186,17 +186,18 @@ public class TaskExpandableListAdapter extends BaseExpandableListAdapter {
         checkedTask.remove(data);
       }
     });
+    checkBox.setChecked(false);
 
     editBtn.setOnClickListener((clickedView)->{
       callChildAction(editClickCallBack,groupPos,childPos);
     });
 
     deleteBtn.setOnClickListener((clickedView)->{
-      callChildAction(deleteClickCallBack,childPos,groupPos);
+      callChildAction(deleteClickCallBack,groupPos,childPos);
     });
 
     archiveBtn.setOnClickListener((clickedView)->{
-      callChildAction(archiveClickCallBack,childPos,groupPos);
+      callChildAction(archiveClickCallBack,groupPos,childPos);
     });
 
     return view;
