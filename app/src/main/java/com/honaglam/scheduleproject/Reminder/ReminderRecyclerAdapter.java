@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.icu.text.DateFormat;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -24,14 +25,22 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     List<ReminderData> get() throws NotImplementedError;
   }
 
+  public interface DeleteListCallBack{
+    void deletePos(int pos) throws NotImplementedError;
+  }
+
   Context context;
   ReminderListGetter reminderListGetter = null;
-
+  DeleteListCallBack deleteListCallBack = null;
   public int selectedItemPos = -1;
   public int swipePos = -1;
-  public ReminderRecyclerAdapter(Context context, ReminderListGetter getter){
+  public ReminderRecyclerAdapter(
+          Context context,
+          ReminderListGetter getter,
+          DeleteListCallBack deleteListCallBack){
     this.context = context;
     this.reminderListGetter = getter;
+    this.deleteListCallBack = deleteListCallBack;
   }
 
   @NonNull
@@ -53,19 +62,17 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     holder.itemView.setBackgroundColor(position == selectedItemPos ?
             ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
             Color.TRANSPARENT);
+    holder.btnDeleteReminder.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        try{
+          deleteListCallBack.deletePos(selectedItemPos);
+        }catch (Exception ignore){}
+      }
+    });
     holder.openMenu(selectedItemPos == position);
   }
 
-  public void swipeItem(int pos){
-    int oldSwipe = swipePos;
-    swipePos = pos;
-    if(oldSwipe >= 0 && oldSwipe < reminderListGetter.get().size()){
-      notifyItemChanged(oldSwipe);
-    }
-    if(swipePos >= 0){
-      notifyItemChanged(swipePos);
-    }
-  }
 
   @Override
   public int getItemCount() {
@@ -76,7 +83,15 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
     public void onClickPos(int pos) throws NotImplementedError {
       int oldPos = selectedItemPos;
       selectedItemPos = pos;
-      notifyDataSetChanged();
+      int listSize = reminderListGetter.get().size();
+
+      if(oldPos >= 0 && oldPos < listSize){
+        notifyItemChanged(oldPos);
+      }
+      if(selectedItemPos >= 0 && selectedItemPos < listSize){
+        notifyItemChanged(selectedItemPos);
+      }
+
 
     }
   }

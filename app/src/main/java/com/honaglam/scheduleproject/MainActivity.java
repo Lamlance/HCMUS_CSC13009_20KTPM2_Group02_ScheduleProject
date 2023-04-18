@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -37,11 +38,18 @@ import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
   //Reminder
   public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
-  private static final String REMINDER_FILE_NAME = "ScheduleReminder";
-  File reminderFile = null;
   ReminderTaskDB taskDb;
   //========
 
@@ -92,8 +98,8 @@ public class MainActivity extends AppCompatActivity {
   static final String PREF_KEY_THEME = "theme";
 
   // Task
-  ArrayList<TaskData> tasks = new ArrayList<>();
   List<TaskData> historyTasks = new ArrayList<>();
+  HashMap<ReminderData,LinkedList<TaskData>> taskMapByReminder = new HashMap<>();
   // User setting
   //  private UserSettings userSettings;
   static final int IS_CALENDAR_FRAGMENT = 1;
@@ -118,12 +124,20 @@ public class MainActivity extends AppCompatActivity {
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
     historyTasks.addAll(listHistoryTasks());
+    Calendar calendar = Calendar.getInstance();
+    Map<ReminderData,List<TaskData>> map = taskDb.getReminderTaskMapByReminder(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DATE)
+    );
+    map.forEach((k,v)->{
+      taskMapByReminder.put(k,new LinkedList<>(v));
+    });
 
-    if (taskDb.IS_DEV) {
+    if (ReminderTaskDB.IS_DEV) {
       //taskDb.createSampleData();
     }
 
-    tasks.addAll(taskDb.getAllTask());
     setSupportActionBar(findViewById(R.id.toolbar));
 
     drawerLayout = findViewById(R.id.drawerLayout);
@@ -260,7 +274,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  //TODO Timer On Finished
   public boolean setTimerOnFinishCallback(TimerService.TimerOnFinishCallback onFinishCallback) {
     if (timerFragment != null) {
       timerService.setOnFinishCallback(onFinishCallback);
@@ -320,18 +333,18 @@ public class MainActivity extends AppCompatActivity {
     );
   }
 
-  public int addTask(String name, int loops, int loopsCompleted, boolean isDone, int date, int month, int year) {
+  @Nullable
+  public TaskData addTask(String name, int loops, int loopsCompleted, boolean isDone, int date, int month, int year) {
     try {
-      int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone, date, month, year));
-      tasks.add(new TaskData(name, loops, id, date, month, year));
-      return tasks.size() - 1;
+      int id = Math.toIntExact(taskDb.addTask(name, loops, loopsCompleted, isDone));
+      return new TaskData(name,loops,loopsCompleted,id,false);
     } catch (Exception ignore) {
     }
-    return -1;
+    return null;
   }
 
-  public int editTask(TaskData data) {
-    return taskDb.editTask(data) ? tasks.size() - 1 : -1;
+  public void editTask(TaskData data) {
+    taskDb.editTask(data);
   }
 
   public boolean makeTaskHistory(int id) {
@@ -353,6 +366,27 @@ public class MainActivity extends AppCompatActivity {
   public List<TaskData> listHistoryTasks() {
     return taskDb.getHistoryTask();
   }
+
+  public ReminderData makeTaskReminders(String name, long time,List<Integer> tasksIds){
+    try{
+      int reminderId = addReminderReturnId(name,time);
+      int result = taskDb.bindTaskToReminder(reminderId,tasksIds);
+
+      return new ReminderData(name,time,result);
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public ReminderData makeWeeklyReminder(String name, long time, HashSet<Integer> weekDates,List<Integer> tasksIds){
+    List <ReminderData> weeklyReminderDataList = addReminderWeeklyGetReminders(name, time, weekDates);
+    for (ReminderData reminder: weeklyReminderDataList) {
+      taskDb.bindTaskToReminder(reminder.id, tasksIds);
+    }
+    return weeklyReminderDataList.get(0);
+  }
+
   //===
 
   @Override
@@ -403,6 +437,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     return reminderDataList.size();
+  }
+
+  public int addReminderReturnId(String name, long time){
+    long result = taskDb.addReminder(name, time);
+
+    try {
+      int id = Math.toIntExact(result);
+
+      ReminderData reminderData = new ReminderData(name, time, id);
+      reminderDataList.add(reminderData);
+      //Toast.makeText(this, "Success = " + result, Toast.LENGTH_SHORT).show();
+
+      notificationBuilder.setContentText(name);
+      Notification notification = notificationBuilder.build();
+
+
+      AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+      intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
+      intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
+      intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+      intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY, id);
+
+      PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent,
+              PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+      alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
+
+      return id;
+    } catch (Exception ignore) {
+    }
+
+    return -1;
   }
 
   public int addReminderWeekly(String name, long time, HashSet<Integer> weekDates) {
@@ -469,6 +535,67 @@ public class MainActivity extends AppCompatActivity {
     return reminderDataList.size();
   }
 
+  public List<ReminderData> addReminderWeeklyGetReminders(String name, long time, HashSet<Integer> weekDates){
+    List<ReminderData> reminders = new ArrayList<ReminderData>();
+    try {
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTimeInMillis(time);
+      long result = taskDb.addReminder(name, time, calendar.get(Calendar.DAY_OF_WEEK));
+      reminders.add(new ReminderData(
+              name,
+              calendar.getTimeInMillis(),
+              Math.toIntExact(result)
+      ));
+
+      int curWeekDate = calendar.get(Calendar.DAY_OF_WEEK);
+
+      for (Integer wDate : weekDates) {
+        int weekDateDif = Math.min(
+                Math.abs(curWeekDate - wDate),
+                Math.abs(7 - (curWeekDate - wDate))
+        );
+
+
+        calendar.add(Calendar.DAY_OF_WEEK, weekDateDif);
+        Log.d("WEEKDAY_DATE", String.valueOf(calendar.get(Calendar.DATE)));
+
+        long idResult = taskDb.addReminder(name, calendar.getTimeInMillis());
+        reminders.add(new ReminderData(
+                name,
+                calendar.getTimeInMillis(),
+                Math.toIntExact(idResult)
+        ));
+
+        calendar.add(Calendar.DAY_OF_WEEK, -weekDateDif);
+      }
+
+      AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+      notificationBuilder.setContentText(name);
+      Notification notification = notificationBuilder.build();
+
+      for (ReminderData reminderData : reminders) {
+        Intent intent = new Intent(this, ReminderBroadcastReceiver.class);
+        intent.putExtra(ReminderBroadcastReceiver.NAME_TAG, name);
+        intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_KEY, notification);
+        intent.putExtra(ReminderBroadcastReceiver.NOTIFICATION_ID_KEY, 1);
+        intent.putExtra(ReminderBroadcastReceiver.REMINDER_ID_KEY, reminderData.id);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, reminderData.id, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+
+        alarmManager.setInexactRepeating(
+                AlarmManager.RTC,
+                reminderData.RemindTime,
+                AlarmManager.INTERVAL_DAY * 7,
+                pendingIntent
+        );
+
+      }
+    } catch (Exception ignore) {
+    }
+    return reminders;
+  }
+
   public void removeReminder(int pos) {
     try {
       ReminderData data = reminderDataList.get(pos);
@@ -485,20 +612,6 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  /*
-  public int getReminderAt(int date, int month, int year) {
-    List<ReminderData> data = taskDb.getReminderAt(date, month, year);
-    Log.d("DataLength", String.valueOf(data.size()));
-
-    int oldSize = reminderDataList.size();
-    reminderDataList.clear();
-    reminderDataList.addAll(data);
-    int newSize = reminderDataList.size();
-
-    return Math.max(oldSize, newSize);
-  }
-  */
-
   public int searchReminder(String name, long startDate, long endDate) {
     List<ReminderData> newList = taskDb.findReminders(name, startDate, endDate);
     reminderDataList.clear();
@@ -507,6 +620,93 @@ public class MainActivity extends AppCompatActivity {
     Toast.makeText(this, "Search size " + reminderDataList.size(), Toast.LENGTH_SHORT).show();
 
     return reminderDataList.size();
+  }
+
+  List<ReminderTaskDB.TimerStatsData> get30StatsBeforeToday(){
+    List<ReminderTaskDB.TimerStatsData> list = taskDb.get30StatsBeforeToday();
+
+    Log.i("STATS_30","BEFORE ADD 30");
+    list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
+
+    Map<Integer,List<ReminderTaskDB.TimerStatsData>> statsByMonth = list.stream().collect(Collectors.groupingBy(s->s.month));
+    HashSet<Integer> monthsSet = new HashSet<Integer>(statsByMonth.keySet());
+
+
+    Calendar calendar = Calendar.getInstance();
+    int maxDate = calendar.get(Calendar.DATE);
+    int maxMonth = calendar.get(Calendar.MONTH);
+    int maxYear = calendar.get(Calendar.YEAR);
+
+    calendar.add(Calendar.DATE,-29);
+    int minDate = calendar.get(Calendar.DATE);
+    int minMonth = calendar.get(Calendar.MONTH);
+    int minYear = calendar.get(Calendar.YEAR);
+
+    Log.i("STATS_30","Min date " + minDate + " Min month " + minMonth);
+    Log.i("STATS_30","Max date " + maxDate + " Min month " + maxMonth);
+
+    Calendar maxCalendar = Calendar.getInstance();
+    maxCalendar.set(maxYear,maxMonth,maxDate,0,0,0);
+    calendar.set(minYear,minMonth,minDate,0,0,0);
+
+    while (calendar.before(maxCalendar) || calendar.equals(maxCalendar)){
+      int month = calendar.get(Calendar.MONTH);
+      if(!monthsSet.contains(month)){
+        monthsSet.add(calendar.get(Calendar.MONTH));
+      }
+      calendar.add(Calendar.MONTH,1);
+    }
+
+    for (int month:monthsSet) {
+      List<ReminderTaskDB.TimerStatsData> monthStatsList = statsByMonth.get(month);
+
+      HashSet<Integer> dateSet = (monthStatsList != null) ?
+              monthStatsList.stream().map(s -> s.date).collect(Collectors.toCollection(HashSet::new))
+              : null;
+
+      if(month == maxMonth){
+        int year = dateSet == null ? maxYear : monthStatsList.get(0).year;
+        for(int date = 1; date <= maxDate;date++){
+          if(dateSet == null || !dateSet.contains(date)){
+            list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
+          }
+        }
+      } else if (month == minMonth) {
+        int year = dateSet == null ? minYear : monthStatsList.get(0).year;
+        calendar.set(Calendar.YEAR,year);
+        calendar.set(Calendar.MONTH,month);
+        int maxDateInMonth = calendar.getActualMaximum(Calendar.DATE);
+        for(int date = minDate; date <= maxDateInMonth;date++){
+          if(dateSet == null || !dateSet.contains(date)){
+            list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
+          }
+        }
+      }else{
+        int year = (month > maxMonth) ? maxYear - 1 : maxYear;
+
+        calendar.set(Calendar.MONTH,month);
+        int maxDateInMonth = calendar.getActualMaximum(Calendar.DATE);
+        for(int date = 1; date <= maxDateInMonth;date++){
+          if(dateSet == null || !dateSet.contains(date)){
+            list.add(new ReminderTaskDB.TimerStatsData(date,month,year,0,0,0));
+          }
+        }
+      }
+    }
+
+    Log.i("STATS_30","AFTER ADD 30");
+    list.sort(Comparator.comparing(s->{
+        calendar.set(Calendar.DATE,s.date);
+        calendar.set(Calendar.MONTH,s.month);
+        calendar.set(Calendar.YEAR,s.year);
+        return -calendar.getTimeInMillis();
+      }
+    ));
+
+    list.forEach(s->Log.i("STATS_30",s.date + "/" + s.month + "/" + s.year));
+    Log.i("STATS_30","SIZE AFTER "+ list.size());
+
+    return list.subList(Math.max(list.size() - 30, 0), list.size());
   }
 
   public List<ReminderData> getSearchReminder(String name, long startDate, long endDate) {

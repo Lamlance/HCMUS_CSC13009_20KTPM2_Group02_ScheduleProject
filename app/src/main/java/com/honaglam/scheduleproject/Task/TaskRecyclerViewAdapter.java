@@ -9,11 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.R;
+import com.honaglam.scheduleproject.Reminder.ReminderData;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import kotlin.NotImplementedError;
 
@@ -31,13 +35,13 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
   TaskViewHolder.OnClickPositionCallBack editTaskCallback;
   TaskViewHolder.OnClickPositionCallBack moveToHistoryCallback;
 
+  HashSet<ReminderData> reminderDataHashSet = new HashSet<>();
 
   public interface GetListCallback {
     public List<TaskData> getList();
   }
 
   GetListCallback dataGet;
-
   public TaskRecyclerViewAdapter(
           Context context,
           GetListCallback callback,
@@ -53,6 +57,9 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     this.editTaskCallback = editTaskCallback;
     this.moveToHistoryCallback = moveToHistoryCallback;
   }
+
+
+
 
   @NonNull
   @Override
@@ -76,16 +83,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
     holder.txtCountPomodoro.setText(
             taskData.numberCompletedPomodoros + "/ " + taskData.numberPomodoros);
     holder.checkBoxCompleteTask.setChecked(taskData.isCompleted);
-    if(taskData.isCompleted){
-      holder.txtTaskName.setPaintFlags(
-              holder.txtTaskName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
-      );
-    }else{
-      if((holder.txtTaskName.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) == Paint.STRIKE_THRU_TEXT_FLAG){
-        holder.txtTaskName.setPaintFlags(
-                holder.txtTaskName.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG
-        );
-      }
+
+    if(taskData.reminderData != null){
+      reminderDataHashSet.add(taskData.reminderData);
+      holder.checkBoxCompleteTask.setVisibility(View.GONE);
     }
 
     holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +96,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskViewHolder
           selectedPosition = holder.getAdapterPosition();
           holder.itemView.requestFocus();
           Log.d("Show itemView request focus: ", holder.itemView.toString());
-          notifyDataSetChanged();
+          notifyItemChanged(selectedPosition);
         } catch (Exception e) {
           e.printStackTrace();
         }

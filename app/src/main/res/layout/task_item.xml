@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:orientation="horizontal"
-  android:gravity="center_vertical"
-  android:weightSum="10">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:weightSum="10">
 
   <CheckBox
-    android:id="@+id/checkBoxCompleteTask"
-    android:layout_height="wrap_content"
-    android:layout_width="0dp"
-    android:buttonTint="?attr/colorPrimary"
-    android:layout_weight="1"/>
-
+      android:id="@+id/checkBoxCompleteTask"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1" />
   <TextView
     android:id="@+id/txtTaskName"
     android:text="Task name"
@@ -24,7 +22,6 @@
     android:padding="8dp"
     android:textStyle="normal"
     android:layout_weight="5"/>
-
   <TextView
     android:id="@+id/txtCountPomodoro"
     style="@style/TEXT"
@@ -36,7 +33,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_weight="1"/>
-
   <ImageButton
     android:id="@+id/imgBtnEditTask"
     android:src="@drawable/baseline_edit_24"
@@ -45,7 +41,7 @@
     android:layout_height="wrap_content"
     android:layout_width="0dp"
     android:layout_weight="1" />
-
+    
   <ImageButton
     android:id="@+id/imgBtnDeleteTask"
     android:src="@drawable/baseline_delete_24"

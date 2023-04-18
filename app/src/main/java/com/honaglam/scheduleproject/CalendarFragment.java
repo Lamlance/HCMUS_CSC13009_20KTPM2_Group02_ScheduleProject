@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatToggleButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -75,12 +77,8 @@ public class CalendarFragment extends Fragment {
   ImageButton filterBtn;
   EditText txtSearchReminder;
 
-  LinearLayout layoutBigDateView;
-  LinearLayout layoutRemindersView;
-  LinearLayout layoutCalendarGrid;
   ConstraintLayout layoutCalendarAll;
 
-  public static final int FULL_CALENDAR_VIEW = 1;
 
   public static CalendarFragment newInstance() {
     CalendarFragment fragment = new CalendarFragment();
@@ -107,9 +105,7 @@ public class CalendarFragment extends Fragment {
     context = getContext();
     mainActivity = (MainActivity) getActivity();
 
-    layoutBigDateView = view.findViewById(R.id.layoutBigDateView);
-    layoutRemindersView = view.findViewById(R.id.layoutRemindersView);
-    layoutCalendarGrid = view.findViewById(R.id.layoutCalendarGrid);
+
     layoutCalendarAll = view.findViewById(R.id.layoutCalendarAll);
 
     //switchFragmentView(FULL_CALENDAR_VIEW);
@@ -147,11 +143,11 @@ public class CalendarFragment extends Fragment {
       public List<ReminderData> get() throws NotImplementedError {
         return mainActivity.reminderDataList;
       }
-    });
+    }, new DeleteReminderPos());
     reminderRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
     reminderRecycler.setAdapter(reminderRecyclerAdapter);
-    ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
-    helper.attachToRecyclerView(reminderRecycler);
+    //ItemTouchHelper helper = new ItemTouchHelper(recyclerReminderSwipeHelper);
+    //helper.attachToRecyclerView(reminderRecycler);
 
     view.findViewById(R.id.btnSetReminder).setOnClickListener(new View.OnClickListener() {
       @Override
@@ -180,6 +176,12 @@ public class CalendarFragment extends Fragment {
     //updateDateUI();
     calendarRecyclerViewAdapter.setSelectDateCallBack(new DateSelectCallBack());
 
+    ((AppCompatToggleButton) view.findViewById(R.id.btnToggleCalendar)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override
+      public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
+        layoutCalendarAll.setVisibility(isOn ? View.GONE : View.VISIBLE);
+      }
+    });
   }
 
   private void AddReminder(String name) {
@@ -258,7 +260,7 @@ public class CalendarFragment extends Fragment {
 
   class DateSelectCallBack implements CalendarRecyclerViewAdapter.SelectDateCallBackInterface {
     @Override
-    public void clickDate(int date, int month, int year, int weekDay,List<ReminderData> reminders) throws NotImplementedError {
+    public void clickDate(int date, int month, int year, int weekDay,List<ReminderData> reminders) {
       /*
       if ((date != selectedDate || month != selectedMonth || year != selectedYear)
               && (date * month * year * weekDay) > 0) {
@@ -309,29 +311,11 @@ public class CalendarFragment extends Fragment {
     }
   }
 
-  ItemTouchHelper.SimpleCallback recyclerReminderSwipeHelper = new ItemTouchHelper.SimpleCallback(
-          0,
-          ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+  class DeleteReminderPos implements ReminderRecyclerAdapter.DeleteListCallBack{
     @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-      return false;
+    public void deletePos(int pos) throws NotImplementedError {
+      mainActivity.removeReminder(pos);
+      reminderRecyclerAdapter.notifyItemRemoved(pos);
     }
-    @Override
-    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-      if(direction == ItemTouchHelper.LEFT){
-        reminderRecyclerAdapter.swipeItem(reminderRecyclerAdapter.selectedItemPos);
-      }
-      //int pos = reminderRecyclerAdapter.selectedItemPos;
-      //mainActivity.removeReminder(pos);
-      //reminderRecyclerAdapter.notifyItemRemoved(pos);
-      //Toast.makeText(context, String.format(Locale.getDefault(), "Delete %d ", pos), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-      super.onChildDraw(c, recyclerView, viewHolder, 0, 0, actionState, isCurrentlyActive);
-    }
-  };
-
-
+  }
 }

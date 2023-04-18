@@ -41,8 +41,8 @@ public class StatisticFragment extends Fragment {
 
     private static final int MAX_X_SHOW = 7;
     private static final int MAX_X_VALUE = 30;
-    private static final int MAX_Y_VALUE = 50;
-    private static final int MIN_Y_VALUE = 5;
+
+    private static final int MILIS_TO_MINS = 60 * 1000;
     private static final int GROUPS = 2;
     private static final String GROUP_1_LABEL = "Work time";
     private static final String GROUP_2_LABEL = "Break time";
@@ -81,9 +81,10 @@ public class StatisticFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.activity = (MainActivity) getActivity();
         float workHours = 0;
+
         if (this.activity != null) {
-            this.data = this.activity.taskDb.get30StatsBeforeToday();
-            Collections.reverse(this.data);
+            this.data = this.activity.get30StatsBeforeToday();
+            // Collections.reverse(this.data);
             workHours = this.data.stream().mapToLong(e -> e.workDur).sum();
             workHours = workHours / (1000 * 60 * 60);
         }
@@ -122,8 +123,8 @@ public class StatisticFragment extends Fragment {
         ArrayList<BarEntry> values2 = new ArrayList<>();
 
         for (int i = 0; i < this.data.size(); i++) {
-            values1.add(new BarEntry(i, this.data.get(i).workDur));
-            values2.add(new BarEntry(i, this.data.get(i).shortDur + this.data.get(i).longDur));
+            values1.add(new BarEntry(i, this.data.get(i).workDur / MILIS_TO_MINS));
+            values2.add(new BarEntry(i, (this.data.get(i).shortDur + this.data.get(i).longDur) / MILIS_TO_MINS));
         }
 
 
@@ -131,6 +132,9 @@ public class StatisticFragment extends Fragment {
         BarDataSet set2 = new BarDataSet(values2, GROUP_2_LABEL);
         set1.setColor(ColorTemplate.MATERIAL_COLORS[0]);
         set2.setColor(ColorTemplate.MATERIAL_COLORS[1]);
+
+        set1.setDrawValues(false);
+        set2.setDrawValues(false);
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         dataSets.add(set1);
@@ -142,7 +146,7 @@ public class StatisticFragment extends Fragment {
         barChart.setPinchZoom(false);
         barChart.setDrawBarShadow(false);
         barChart.setDrawGridBackground(true);
-        barChart.setDrawValueAboveBar(true);
+        barChart.setDrawValueAboveBar(false);
 
         barChart.getDescription().setEnabled(false);
 
@@ -151,16 +155,19 @@ public class StatisticFragment extends Fragment {
         for (int i = 0; i < this.data.size(); i++) {
             int date = this.data.get(i).date;
             int month = this.data.get(i).month;
-            labels.add(String.format("%d/%d", date, month));
+            labels.add(String.format("%d/%d", date, month + 1));
         }
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(true);
+        xAxis.setDrawAxisLine(false);
         xAxis.setCenterAxisLabels(false);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setTextColor(Color.parseColor("#777777"));
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setDrawGridLines(true);
+        leftAxis.setDrawAxisLine(true);
         leftAxis.setSpaceTop(35f);
         leftAxis.setAxisMinimum(0f);
         leftAxis.setTextColor(Color.parseColor("#777777"));

@@ -14,6 +14,7 @@ import android.view.animation.CycleInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -45,6 +46,15 @@ public class ReminderAddDialog extends Dialog {
     void onSubmit(String name, int hour24h, int minute);
 
     void onSubmitWeekly(String name, int hour24h, int minute, HashSet<Integer> dailyReminder);
+
+    default void onSubmit(String name, Calendar setDate) {
+      ReminderDataCallBack.this
+              .onSubmit(name, setDate.get(Calendar.HOUR_OF_DAY), setDate.get(Calendar.MINUTE));
+    }
+    default void onSubmitWeekly(String name, Calendar setDate,HashSet<Integer> dailyReminder) {
+      ReminderDataCallBack.this
+              .onSubmitWeekly(name, setDate.get(Calendar.HOUR_OF_DAY), setDate.get(Calendar.MINUTE),dailyReminder);
+    }
   }
 
   private static final HashMap<String, Integer> DATE_TO_CALENDAR_INT = new HashMap<String, Integer>() {{
@@ -64,6 +74,7 @@ public class ReminderAddDialog extends Dialog {
   LinearLayout linearLayoutDailyBtn = null;
   EditText editTextName;
   TimePicker timePicker;
+  DatePicker datePicker;
   HashSet<Integer> dailyReminder = new HashSet<Integer>();
   SwitchCompat switchDaily;
 
@@ -78,6 +89,20 @@ public class ReminderAddDialog extends Dialog {
     this.currCalendar = current;
   }
 
+  boolean displayCalendar = false;
+
+  public ReminderAddDialog(
+          @NonNull Context context,
+          ReminderDataCallBack dataCallBack) {
+    super(context);
+    this.dataCallBack = dataCallBack;
+    this.shakeAnim = AnimationUtils.loadAnimation(context, R.anim.shake);
+    this.shakeAnim.setInterpolator(new CycleInterpolator(7));
+    this.currCalendar = Calendar.getInstance();
+    displayCalendar = true;
+  }
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -87,6 +112,9 @@ public class ReminderAddDialog extends Dialog {
     timePicker = findViewById(R.id.timeReminderDialog);
     timePicker.setIs24HourView(true);
     editTextName = findViewById(R.id.txtEditNameReminder);
+    datePicker = findViewById(R.id.dateReminderDialog);
+    datePicker.setVisibility(displayCalendar ? View.VISIBLE : View.GONE);
+
     findViewById(R.id.btnAddReminderDialog).setOnClickListener(new AddReminderButton());
 
     findViewById(R.id.btnCancelReminderDialog).setOnClickListener(new View.OnClickListener() {
@@ -113,7 +141,7 @@ public class ReminderAddDialog extends Dialog {
 
 
   void setEnableDaily(boolean isEnable) {
-    linearLayoutDailyBtn.setVisibility(isEnable ? View.VISIBLE : View.INVISIBLE);
+    linearLayoutDailyBtn.setVisibility(isEnable ? View.VISIBLE : View.GONE);
   }
 
   class AddReminderButton implements View.OnClickListener {
@@ -133,10 +161,19 @@ public class ReminderAddDialog extends Dialog {
       }
 
       try {
+        currCalendar.set(Calendar.HOUR_OF_DAY,hour);
+        currCalendar.set(Calendar.MINUTE,minute);
+
+        if(displayCalendar){
+          currCalendar.set(Calendar.YEAR,datePicker.getYear());
+          currCalendar.set(Calendar.MONTH,datePicker.getMonth());
+          currCalendar.set(Calendar.DATE,datePicker.getDayOfMonth());
+        }
+
         if (switchDaily.isChecked()) {
-          dataCallBack.onSubmitWeekly(name, hour, minute, dailyReminder);
+          dataCallBack.onSubmitWeekly(name, currCalendar, dailyReminder);
         } else {
-          dataCallBack.onSubmit(name, hour, minute);
+          dataCallBack.onSubmit(name, currCalendar);
         }
       } catch (Exception ignore) {
       }

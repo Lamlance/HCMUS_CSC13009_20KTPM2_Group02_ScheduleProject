@@ -3,6 +3,7 @@ package com.honaglam.scheduleproject.Calendar;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import kotlin.NotImplementedError;
@@ -80,6 +83,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
   @NonNull
   Map<Integer, List<ReminderData>> reminderByDates = new HashMap<>();
 
+  Map<Integer,List<ReminderData>> weeklyReminder;
+
   public CalendarRecyclerViewAdapter(Context context, GetReminderInMonth getReminderInMonth) {
     this.context = context;
     clickedPos = dateToPos(calendar.get(Calendar.DATE));
@@ -90,6 +95,8 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     getSetAllReminderInMonth();
   }
 
+
+
   private void getSetAllReminderInMonth() {
     try {
       List<ReminderData> reminders = getReminderInMonth.getReminderInMonth(
@@ -98,6 +105,9 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       reminderByDates = reminders.stream().collect(
               Collectors.groupingBy(ReminderData::getMyDate)
       );
+
+      weeklyReminder = reminders.stream().filter(r->r.weekDate >= 0).collect(Collectors.groupingBy(r->r.weekDate));
+
     } catch (Exception ignore) {
     }
   }
@@ -161,13 +171,16 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       notifyItemChanged(clickedPos);
       if (selectDateCallBack != null) {
         try {
+          HashSet<ReminderData> selectedWeekDate = new HashSet<>(reminderByDates.get(date));
+          selectedWeekDate.addAll(weeklyReminder.get(calendar.get(Calendar.DAY_OF_WEEK)));
           selectDateCallBack.clickDate(
                   date,
                   calendar.get(Calendar.MONTH),
                   calendar.get(Calendar.YEAR),
                   calendar.get(Calendar.DAY_OF_WEEK),
-                  reminderByDates.get(date));
+                  new LinkedList<>(selectedWeekDate));
         } catch (Exception e) {
+          e.printStackTrace();
         }
       }
     }
@@ -205,14 +218,19 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
       return;
     }
-
+    int weekDate = position % 7;
     int date = posToDate(position);
+
+    Log.i("WEEK_DATE", "Date " + date + " is " + WEEKDAY_NAMES[weekDate] );
+
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
       holder.txtDate.setBackgroundColor((clickedPos == position) ? tertColor : highlightedColor);
     }
-
+    if(weeklyReminder.get(weekDate) != null && date > 0){
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : Color.RED);
+    }
   }
 
   private int dateToPos(int date) {

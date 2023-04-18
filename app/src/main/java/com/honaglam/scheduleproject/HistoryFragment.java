@@ -72,9 +72,6 @@ public class HistoryFragment extends Fragment {
     activity = (MainActivity) getActivity();
 
     // TODO: List task history
-//    List<TaskData> test;
-//    test = activity.listHistoryTasks();
-//    Log.i("Tasks History: ", test.toString());
   }
 
   class MoveToToDoTaskCallback implements HistoryViewHolder.OnClickPositionCallBack {
@@ -82,10 +79,15 @@ public class HistoryFragment extends Fragment {
     public void clickAtPosition(int position) throws NotImplementedError {
       try {
 //        TODO: Complete function moveTaskToToDoTask->makeTaskToToDo
-        activity.moveTaskToToDoTask(activity.tasks.get(position).id);
-        activity.tasks.remove(position);
+        activity.moveTaskToToDoTask(activity.historyTasks.get(position).id);
+        //LAM FIX
+        //activity.tasks.add(activity.historyTasks.get(position));
+        activity.historyTasks.remove(position);
+        //==
+        Log.i("REMOVE","REMOVE HISTORY POS"+position);
         historyRecyclerViewAdapter.notifyItemRemoved(position);
-      } catch (Exception ignore) {
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
   }
