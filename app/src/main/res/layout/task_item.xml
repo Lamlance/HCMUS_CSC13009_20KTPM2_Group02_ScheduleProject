@@ -11,6 +11,7 @@
       android:id="@+id/checkBoxCompleteTask"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:buttonTint="?attr/colorTertiaryContainer"
       android:layout_weight="1" />
   <TextView
     android:id="@+id/txtTaskName"

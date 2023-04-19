@@ -247,9 +247,11 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
       holder.txtDate.setBackgroundColor((clickedPos == position) ? tertiaryColor : highlightColor);
+      holder.txtDate.setTextColor(Color.WHITE);
     }
     if(weeklyReminder.get(weekDate) != null && date > 0){
       holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : highlightColor);
+
     }
   }
 

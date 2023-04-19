@@ -163,7 +163,8 @@ public class TaskExpandableListAdapter extends BaseExpandableListAdapter {
       }
       selectedChild = childPos;
       selectedGroup = groupPos;
-      clickedView.setBackgroundColor(Color.RED);
+
+      clickedView.setBackgroundColor(Color.parseColor("#80D2D2D2"));
       prevClickView = clickedView;
       callChildAction(childClickCallBack,groupPos,childPos);
     });
