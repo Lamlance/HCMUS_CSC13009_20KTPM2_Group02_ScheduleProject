@@ -266,14 +266,6 @@ public class MainActivity extends AppCompatActivity {
     return false;
   }
 
-  public boolean resetTimer() {
-    if (timerService != null) {
-      timerService.resetTimer();
-      return true;
-    }
-    return false;
-  }
-
   public boolean setTimerOnFinishCallback(TimerService.TimerOnFinishCallback onFinishCallback) {
     if (timerFragment != null) {
       timerService.setOnFinishCallback(onFinishCallback);

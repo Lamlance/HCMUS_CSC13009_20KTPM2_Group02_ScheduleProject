@@ -246,12 +246,11 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     String dateStr = (date <= 0) ? "!" : String.format(Locale.getDefault(), "%d", date);
     holder.txtDate.setText(dateStr);
     if (reminderByDates.get(date) != null) {
-      holder.txtDate.setBackgroundColor((clickedPos == position) ? tertiaryColor : highlightColor);
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(159, 62, 65) : highlightColor);
       holder.txtDate.setTextColor(Color.WHITE);
     }
     if(weeklyReminder.get(weekDate) != null && date > 0){
-      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(0, 109, 59) : highlightColor);
-
+      holder.txtDate.setBackgroundColor((clickedPos == position) ? Color.rgb(159, 62, 65) : highlightColor);
     }
   }
 

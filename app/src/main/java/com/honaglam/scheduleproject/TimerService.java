@@ -18,8 +18,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
+
 import androidx.core.app.NotificationCompat;
 
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
@@ -73,10 +72,14 @@ public class TimerService extends Service {
 
   }
 
-  private static final long NOTIFICATION_FLAG_WELCOME = -1;
-  private static final long NOTIFICATION_FLAG_WORK_FINISHED = -2;
-  private static final long NOTIFICATION_FLAG_BREAK_FINISHED = -3;
+  private static final long NOTIFICATION_FLAG_IS_RUNNING = -2;
+  private static final long NOTIFICATION_FLAG_WORK_FINISHED = -3;
+  private static final long NOTIFICATION_FLAG_BREAK_FINISHED = -4;
 
+  private static final String TIMER_REQ_CODE_KEY = "timer-req-key";
+  private static final int START_TIMER_REQ_CODE = 0;
+  private static final int PAUSE_TIMER_REQ_CODE = 1;
+  private static final int SKIP_TIMER_REQ_CODE = 2;
   BroadcastReceiver receiver;
 
   @Override
@@ -124,37 +127,82 @@ public class TimerService extends Service {
 
   public Notification makeServiceNotification(long time) {
     notificationBuilder.setContentText(makeTimeString(time));
-    notificationBuilder.clearActions();
+    if(time == NOTIFICATION_FLAG_IS_RUNNING
+            || time == NOTIFICATION_FLAG_WORK_FINISHED
+            || time == NOTIFICATION_FLAG_BREAK_FINISHED
 
-    if(time == NOTIFICATION_FLAG_WORK_FINISHED || time == NOTIFICATION_FLAG_BREAK_FINISHED){
-      String action = (time == NOTIFICATION_FLAG_WORK_FINISHED) ? "Start break" : "Start focusing";
+    ){
+      notificationBuilder.clearActions();
 
-      Intent broadcastServiceControlIntent = new Intent("com.hoanglam.scheduleproject.controltimer");
-      PendingIntent pendingIntent = PendingIntent.getBroadcast(
-              this,
-              0,broadcastServiceControlIntent,
-              PendingIntent.FLAG_IMMUTABLE);
-      notificationBuilder.addAction(R.mipmap.ic_launcher_round,action,pendingIntent);
+      if(time == NOTIFICATION_FLAG_WORK_FINISHED || time == NOTIFICATION_FLAG_BREAK_FINISHED){
+        String action = (time == NOTIFICATION_FLAG_WORK_FINISHED) ? "Start break" : "Start focusing";
+
+        Intent startStateIntent = new Intent("com.hoanglam.scheduleproject.controltimer");
+        startStateIntent.putExtra(TIMER_REQ_CODE_KEY,START_TIMER_REQ_CODE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                0,
+                startStateIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        notificationBuilder.addAction(R.mipmap.ic_launcher_round,action,pendingIntent);
+
+      }else {
+        String startStop = isRunning ? "Pause timer" : "Start timer";
+        String skipTimer = "Skip timer";
+
+        Intent startStopIntent = new Intent("com.hoanglam.scheduleproject.controltimer");
+        startStopIntent.putExtra(TIMER_REQ_CODE_KEY,isRunning ? PAUSE_TIMER_REQ_CODE : START_TIMER_REQ_CODE);
+        PendingIntent startStopPending= PendingIntent.getBroadcast(
+                this,
+                1,
+                startStopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        Intent skipStateIntent = new Intent("com.hoanglam.scheduleproject.controltimer");
+        skipStateIntent.putExtra(TIMER_REQ_CODE_KEY,SKIP_TIMER_REQ_CODE);
+        PendingIntent skipStatePending = PendingIntent.getBroadcast(
+                this,
+                2,
+                skipStateIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        notificationBuilder.addAction(R.mipmap.ic_launcher_round,startStop,startStopPending);
+        notificationBuilder.addAction(R.mipmap.ic_launcher_round,skipTimer,skipStatePending);
+
+      }
+
+
     }
+
+
 
     return notificationBuilder.build();
   }
+
   private String makeTimeString(long time){
-    if(time == NOTIFICATION_FLAG_WELCOME){
-      return "Hello user";
-    }
+    Log.i("TIMER_SERVICE", "Make time string: " + time);
+
     if(time == NOTIFICATION_FLAG_WORK_FINISHED){
       return "Work time had finished. Start your break~~";
     }
     if(time == NOTIFICATION_FLAG_BREAK_FINISHED){
       return "Break time finished. Let's start working! ";
     }
+    if(time == NOTIFICATION_FLAG_IS_RUNNING){
+      int minute = ((int) Math.floor((double)millisRemain / 60000.0)) * (millisRemain > 0 ? 1 : 0);
+      int seconds = ((int)Math.floor((double)millisRemain / 1000.0) - (minute*60)) * (millisRemain > 0 ? 1 : 0);
+      return (("00" + minute).substring(String.valueOf(minute).length())+":"+("00" + seconds).substring(String.valueOf(seconds).length()));
+    }
 
 
-    int minute = (int) Math.floor((double)time / 60000.0);
-    int seconds = (int)Math.floor((double)time / 1000.0) - (minute*60);
-    return (minute+":"+seconds);
+
+    int minute = ((int) Math.floor((double)time / 60000.0)) * (time > 0 ? 1 : 0);
+    int seconds = ((int)Math.floor((double)time / 1000.0) - (minute*60)) * (time > 0 ? 1 : 0);
+    String timerString = (("00" + minute).substring(String.valueOf(minute).length())+":"+("00" + seconds).substring(String.valueOf(seconds).length()));
+    Log.i("TIMER_SERVICE",timerString);
+    return timerString;
   }
+
   public void updateServiceNotification(Notification notification) {
     NotificationManager notificationManager = getSystemService(NotificationManager.class);
     notificationManager.notify(NOTIFICATION_ID, notification);
@@ -165,6 +213,7 @@ public class TimerService extends Service {
       public PomodoroTimerCountDown(long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
         isRunning = true;
+        updateServiceNotification(makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));
       }
 
       @Override
@@ -290,16 +339,14 @@ public class TimerService extends Service {
     callTickCallBack(millisRemain);
   }
 
-  public boolean callTickCallBack(long millis) {
+  public void callTickCallBack(long millis) {
     if (tickCallBack == null) {
-      return false;
+      return;
     }
     try {
       tickCallBack.call(millis);
     } catch (Exception ignore) {
-      return false;
     }
-    return true;
   }
 
   public void setStateChangeCallBack(TimerStateChangeCallBack stateChangeCallBack) {
@@ -311,38 +358,35 @@ public class TimerService extends Service {
     this.onFinishCallback = onFinishCallback;
   }
 
-  public boolean callOnFinishCallback(boolean isAutoSwitchTask) {
+  public void callOnFinishCallback(boolean isAutoSwitchTask) {
     if (onFinishCallback == null) {
-      return false;
+      return;
     }
     try {
       onFinishCallback.onFinish(isAutoSwitchTask);
     } catch (Exception e) {
       e.printStackTrace();
-      return false;
     }
-    return true;
   }
 
 
-  public boolean callStateChangeCallBack(int newState,long timePrevSate,int oldState) {
+  public void callStateChangeCallBack(int newState, long timePrevSate, int oldState) {
     if (stateChangeCallBack == null) {
-      return false;
+      return;
     }
     try {
       stateChangeCallBack.onStateChange(newState,timePrevSate,oldState);
     } catch (Exception ignore) {
-      return false;
     }
-    return true;
   }
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    startForeground(NOTIFICATION_ID, makeServiceNotification(-1));
-    updateServiceNotification(makeServiceNotification(-1));
+    startForeground(NOTIFICATION_ID, makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));
+    updateServiceNotification(makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));
     return super.onStartCommand(intent, flags, startId);
   }
+
   public void startTimer() {
     if (!isRunning) {
       timerRunnable = new Timer();
@@ -359,6 +403,7 @@ public class TimerService extends Service {
       timerHandler.removeCallbacks(timerRunnable);
     }
     callTickCallBack(millisRemain);
+    updateServiceNotification(makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));
   }
   public void resetTimer() {
     millisRemain = workMillis;
@@ -369,6 +414,7 @@ public class TimerService extends Service {
     }
     callTickCallBack(millisRemain);
     callStateChangeCallBack(WORK_STATE,0,WORK_STATE);
+    updateServiceNotification(makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));
   }
 
   public void setStateTime(UserTimerSettings settings) {
@@ -468,6 +514,7 @@ public class TimerService extends Service {
     callTickCallBack(millisRemain);
     switchState();
     callTickCallBack(millisRemain);
+    updateServiceNotification(makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));
   }
 
   public class LocalBinder extends Binder {
@@ -479,7 +526,14 @@ public class TimerService extends Service {
   public class ServiceControlBroadCastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-      startTimer(); ;
+      int reqCode = intent.getIntExtra(TIMER_REQ_CODE_KEY,100);
+      if(reqCode == START_TIMER_REQ_CODE){
+        startTimer();
+      } else if (reqCode == PAUSE_TIMER_REQ_CODE) {
+        pauseTimer();
+      } else if (reqCode == SKIP_TIMER_REQ_CODE) {
+        skipTimer();
+      }
     }
   }
 
