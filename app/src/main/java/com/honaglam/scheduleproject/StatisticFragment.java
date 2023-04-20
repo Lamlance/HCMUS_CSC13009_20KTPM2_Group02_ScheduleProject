@@ -56,7 +56,7 @@ public class StatisticFragment extends Fragment {
     private TextView txtTotalTime;
 
     private MainActivity activity;
-
+    Integer txtPrimaryColor = null;
 
     private List<ReminderTaskDB.TimerStatsData> data;
 
@@ -89,6 +89,15 @@ public class StatisticFragment extends Fragment {
             workHours = workHours / (1000 * 60 * 60);
         }
 
+
+        // set text primary color
+        if(txtPrimaryColor == null){
+            TypedValue textTypedValue = new TypedValue();
+            Resources.Theme textTheme = container.getContext().getTheme();
+            textTheme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, textTypedValue, true);
+            txtPrimaryColor = textTypedValue.data;
+        }
+
         LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_statistic, container, false);
 
         BarChart barChart = linearLayout.findViewById(R.id.barChart);
@@ -106,7 +115,7 @@ public class StatisticFragment extends Fragment {
         preparePieChartData(pieData);
 
         txtTotalTime.setText("You have focused " + String.format("%.2f", workHours) + " hours in 30 days recently.");
-        txtTotalTime.setTextColor(Color.parseColor("#777777"));
+        txtTotalTime.setTextColor(txtPrimaryColor);
         return linearLayout;
     }
 
@@ -164,13 +173,13 @@ public class StatisticFragment extends Fragment {
         xAxis.setDrawAxisLine(false);
         xAxis.setCenterAxisLabels(false);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-        xAxis.setTextColor(Color.parseColor("#777777"));
+        xAxis.setTextColor(txtPrimaryColor);
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setDrawGridLines(true);
         leftAxis.setDrawAxisLine(true);
         leftAxis.setSpaceTop(35f);
         leftAxis.setAxisMinimum(0f);
-        leftAxis.setTextColor(Color.parseColor("#777777"));
+        leftAxis.setTextColor(txtPrimaryColor);
 
         barChart.getAxisRight().setEnabled(false);
         barChart.getXAxis().setAxisMinimum(0);
@@ -182,9 +191,9 @@ public class StatisticFragment extends Fragment {
     }
     private void prepareChartData(BarData data) {
         barChart.setData(data);
-
         barChart.getBarData().setBarWidth(BAR_WIDTH);
-
+        Legend k = barChart.getLegend();
+        k.setTextColor(txtPrimaryColor);
         float groupSpace = 1f - ((BAR_SPACE + BAR_WIDTH) * GROUPS);
         barChart.groupBars(0, groupSpace, BAR_SPACE);
 
@@ -221,6 +230,8 @@ public class StatisticFragment extends Fragment {
 
     private void preparePieChartData(PieData data) {
         pieChart.setData(data);
+        Legend l = pieChart.getLegend();
+        l.setTextColor(txtPrimaryColor);
         pieChart.invalidate();
     }
 }
