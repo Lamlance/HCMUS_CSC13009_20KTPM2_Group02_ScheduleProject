@@ -79,7 +79,9 @@ public class ReminderFilterDialog extends Dialog {
         if(selectFromToDate != null){
           try {
             selectFromToDate.onSelect(fromDate,toDate);
-          }catch (Exception ignore){}
+          }catch (Exception e){
+            e.printStackTrace();
+          }
         }
         ReminderFilterDialog.this.dismiss();
       }

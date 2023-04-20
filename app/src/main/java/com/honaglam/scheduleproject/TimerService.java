@@ -239,6 +239,7 @@ public class TimerService extends Service {
         updateServiceNotification(makeServiceNotification(
                 runningState == WORK_STATE ? NOTIFICATION_FLAG_WORK_FINISHED : NOTIFICATION_FLAG_BREAK_FINISHED
         ));
+
         if (tickingMediaPlayer != null) {
           // Stop the tickling sound and release media player
           tickingMediaPlayer.stop();
@@ -262,31 +263,12 @@ public class TimerService extends Service {
         
         isRunning = false;
 
-        new CountDownTimer(2000, 1000) {
-          public void onTick(long millisUntilFinished) {
-            // Do nothing
-          }
+        if(runningState != WORK_STATE && autoStartBreakSetting){
+          startTimer();
+        } else if (runningState == WORK_STATE && autoStartPomodoroSetting) {
+          startTimer();
+        }
 
-          public void onFinish() {
-            if (autoStartBreakSetting && autoStartPomodoroSetting) {
-              run();
-            } else if (autoStartPomodoroSetting && !autoStartBreakSetting) {
-              if (runningState != 1) {
-                runningState = 0;
-              } else {
-                run();
-              }
-            } else if (!autoStartPomodoroSetting && autoStartBreakSetting) {
-              if (runningState == 1) {
-                runningState = 0;
-              } else {
-                run();
-              }
-            } else {
-              runningState = 0;
-            }
-          }
-        }.start();
       }
     }
 
@@ -412,6 +394,9 @@ public class TimerService extends Service {
       timerHandler.removeCallbacks(timerRunnable);
       isRunning = false;
     }
+    runningState = WORK_STATE;
+    timerCount = 0;
+    cycleCount = 0;
     callTickCallBack(millisRemain);
     callStateChangeCallBack(WORK_STATE,0,WORK_STATE);
     updateServiceNotification(makeServiceNotification(NOTIFICATION_FLAG_IS_RUNNING));

@@ -664,6 +664,69 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     }
     return list;
   }
+
+  public List<TaskData> getHistoryAtRange(long from,long to){
+    List<TaskData> taskDataList = new ArrayList<>();
+    try(SQLiteDatabase db =getReadableDatabase()){
+      Calendar calendar = Calendar.getInstance();
+
+      calendar.setTimeInMillis(from);
+      int pastYear = calendar.get(Calendar.YEAR);
+      int pastMonth = calendar.get(Calendar.MONTH);
+      int pastDate = calendar.get(Calendar.DATE);
+
+      calendar.setTimeInMillis(to);
+      int fuYear = calendar.get(Calendar.YEAR);
+      int furMonth = calendar.get(Calendar.MONTH);
+      int furDate = calendar.get(Calendar.DATE);
+
+      String query = "SELECT * , date(substr('0000' || year,-4,4) || '-' || substr('00' || month,-2,2) || '-' || substr('00' || date,-2,2)) AS col_date FROM " + TaskTable.TABLE_NAME
+              + " WHERE col_date BETWEEN "
+              + " date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2)) AND date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2))"
+              + " ORDER BY col_date DESC ";
+
+      try(
+              Cursor cursor =  db.rawQuery(query,new String[]{
+                      String.valueOf(pastYear), String.valueOf(pastMonth+1), String.valueOf(pastDate),
+                      String.valueOf(fuYear), String.valueOf(furMonth+1), String.valueOf(furDate)
+              })
+      ) {
+        if (!cursor.moveToFirst()) {
+          return taskDataList;
+        }
+        int titleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
+        int idIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_ID);
+        int loopIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS);
+        int loopCompletedIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_LOOPS_DONE);
+        int completeIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_IS_DONE);
+        int dateIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_DATE);
+        int monthIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_MONTH);
+        int yearIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_YEAR);
+        do {
+          String name = cursor.getString(titleIndex);
+          int loops = cursor.getInt(loopIndex);
+          int loopsCompleted = cursor.getInt(loopCompletedIndex);
+          int id = cursor.getInt(idIndex);
+          boolean isComplete = cursor.getInt(completeIndex) > 0;
+          int date = cursor.getInt(dateIndex);
+          int month = cursor.getInt(monthIndex);
+          int year = cursor.getInt(yearIndex);
+          Log.i("LOGGING QUERY", "ID: " + id + ", Name: " + name + ", Loops: " + loops + ", Loops Completed: " + loopsCompleted +
+                  ", Is Complete: " + isComplete + ", Date: " + date + ", Month: " + month + ", Year: " + year);
+          taskDataList.add(new TaskData(name, loops, loopsCompleted, id, isComplete, date, month, year));
+        } while (cursor.moveToNext());
+
+
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    return taskDataList;
+  }
+
   //===
 
   //Stats

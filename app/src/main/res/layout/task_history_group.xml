@@ -11,7 +11,7 @@
       android:paddingLeft="50dp"
       android:focusable="false"
       tools:text="Reminder Group 1"
-      android:id="@+id/txtTaskGroupName"
+      android:id="@+id/txtHistoryGroupName"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" />
 </LinearLayout>

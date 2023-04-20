@@ -83,10 +83,7 @@
   </LinearLayout>
 
 <!-- TODO: fix the color of the text of the checkbox in dark mode -->
-  <CheckBox
-    android:text="Show weekly reminder"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
+
   <LinearLayout
     android:layout_marginBottom="10dp"
     android:gravity="end"
