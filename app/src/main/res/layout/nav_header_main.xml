@@ -16,7 +16,7 @@
     <ImageView
       android:layout_width="100dp"
       android:layout_height="100dp"
-      android:src="@mipmap/ic_launcher_round" />
+      android:src="@drawable/clock_svgrepo_com" />
   </LinearLayout>
   <TextView
     style="@style/TEXT"
@@ -24,5 +24,5 @@
     android:textSize="20sp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Simple Schedule App"/>
+    android:text="Pomofocus"/>
 </LinearLayout>

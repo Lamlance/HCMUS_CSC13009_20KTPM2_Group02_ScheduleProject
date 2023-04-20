@@ -8,10 +8,11 @@
     android:paddingHorizontal="20dp"
     android:paddingVertical="10dp">
   <TextView
-      android:paddingLeft="50dp"
+      android:paddingLeft="17dp"
       android:focusable="false"
       tools:text="Reminder Group 1"
       android:id="@+id/txtTaskGroupName"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      android:textColor="#E6E6E6"/>
 </LinearLayout>

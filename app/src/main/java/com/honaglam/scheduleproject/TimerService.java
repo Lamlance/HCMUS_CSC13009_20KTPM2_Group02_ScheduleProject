@@ -1,12 +1,15 @@
 package com.honaglam.scheduleproject;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
@@ -18,6 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -445,6 +449,7 @@ public class TimerService extends Service {
       }
       case LONG_BREAK_STATE:{
         stateTime = longBreakMillis;
+
         break;
       }
     }
@@ -533,4 +538,6 @@ public class TimerService extends Service {
   public interface TimerOnFinishCallback {
     void onFinish(boolean isAutoSwitchTask) throws NotImplementedError;
   }
+
+
 }
