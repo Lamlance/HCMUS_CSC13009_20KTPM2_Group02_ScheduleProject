@@ -16,7 +16,7 @@ public class TaskData {
     public int month;
     public int year;
 
-    public static final ReminderData DEFAULT_TASK_DATA_HOLDER = new ReminderData("NONE",-1,-1);
+    public static final ReminderData DEFAULT_TASK_DATA_HOLDER = new ReminderData("Tasks",-1,-1);
 
     public @NonNull ReminderData reminderData = DEFAULT_TASK_DATA_HOLDER;
 
