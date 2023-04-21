@@ -192,6 +192,14 @@ public class TimerFragment extends Fragment {
     expandableListAdapter.setEditClickCallBack(new EditChildTaskCallBack());
   }
 
+  @Override
+  public void onResume() {
+    super.onResume();
+
+    activity.updateTodayTask();
+    expandableListAdapter.notifyDataSetChanged();
+  }
+
   public void UpdateTimeUI(long millisRemain) {
     int seconds = ((int) millisRemain / 1000) % 60;
     int minutes = (int) millisRemain / (60 * 1000);
@@ -326,7 +334,7 @@ public class TimerFragment extends Fragment {
         activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, linkedList);
         reminderList.add(TaskData.DEFAULT_TASK_DATA_HOLDER);
       }
-      expandableListAdapter.notifyDataSetInvalidated();
+      expandableListAdapter.notifyDataSetChanged();
     }
   }
 

@@ -47,7 +47,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_TIME = "time";
-    public static final String COLUMN_NAME_FATHER = "father";
+    //public static final String COLUMN_NAME_FATHER = "father";
     public static final String COLUMN_NAME_WEEKDAY = "weekday";
   }
 
@@ -101,10 +101,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                     + ReminderTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
                     + ReminderTable.COLUMN_NAME_TITLE + " TEXT ,"
                     + ReminderTable.COLUMN_NAME_TIME + " INTEGER ,"
-                    + ReminderTable.COLUMN_NAME_FATHER + " INTEGER ,"
-                    + ReminderTable.COLUMN_NAME_WEEKDAY + " INTEGER ,"
-                    + " FOREIGN KEY (" + ReminderTable.COLUMN_NAME_FATHER + ") REFERENCES "
-                    + ReminderTable.TABLE_NAME + "( " + ReminderTable.COLUMN_NAME_ID + "));";
+                    + ReminderTable.COLUMN_NAME_WEEKDAY + " INTEGER )";
     String createTaskTable =
             "CREATE TABLE " + TaskTable.TABLE_NAME + " ( "
                     + TaskTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
@@ -179,6 +176,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     long startDay = calendar.getTimeInMillis();
     calendar.set(year, month, date, 23, 59, 59);
     long endDay = calendar.getTimeInMillis();
+    List<ReminderData> list = new ArrayList<ReminderData>();
 
     try (
             SQLiteDatabase db = this.getReadableDatabase();
@@ -192,7 +190,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     ) {
 
 
-      List<ReminderData> list = new ArrayList<ReminderData>();
 
       if (!query1.moveToFirst()) {
         return list;
@@ -211,9 +208,10 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       } while (query1.moveToNext());
 
       return list;
-    } catch (Exception ignore) {
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    return null;
+    return list;
   }
 
   public long removeReminder(long id) {
@@ -402,7 +400,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                       + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID + " = "
                       + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
                       + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_REMINDER_ID
-                      + " IN (" + reminderIdArg + ")", null
+                      + " IN (" + reminderIdArg + ") "
+                      + " AND (" + TaskTable.COLUMN_NAME_HISTORY + " = 0 OR + " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL )" , null
       )) {
         if (cursor.moveToFirst()) {
           int taskTitleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
@@ -450,6 +449,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                             + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID
                             + " = " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
                             + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID + " IS NULL"
+                            + " AND ( " + TaskTable.COLUMN_NAME_HISTORY + " = 0 OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL)"
                     , null
             );
     ) {
@@ -596,11 +596,12 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       long update = db.update(
               TaskTable.TABLE_NAME,
               cv,
-              TaskTable.COLUMN_NAME_ID + "=?",
+              TaskTable.COLUMN_NAME_ID + "= ?",
               new String[]{String.valueOf(id)}
       );
       return update > 0;
-    } catch (Exception ignore) {
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return false;
   }
@@ -608,8 +609,12 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   // TODO: implement makeTaskToToDo
   public boolean makeTaskToToDo(int id) {
     try (SQLiteDatabase db = this.getWritableDatabase()) {
+      Calendar myCalendar = Calendar.getInstance();
       ContentValues cv = new ContentValues();
       cv.put(TaskTable.COLUMN_NAME_HISTORY, 0);
+      cv.put(TaskTable.COLUMN_NAME_DATE,myCalendar.get(Calendar.DATE));
+      cv.put(TaskTable.COLUMN_NAME_MONTH,myCalendar.get(Calendar.MONTH) + 1);
+      cv.put(TaskTable.COLUMN_NAME_YEAR,myCalendar.get(Calendar.YEAR));
       long update = db.update(
               TaskTable.TABLE_NAME,
               cv,
@@ -681,7 +686,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       int furDate = calendar.get(Calendar.DATE);
 
       String query = "SELECT * , date(substr('0000' || year,-4,4) || '-' || substr('00' || month,-2,2) || '-' || substr('00' || date,-2,2)) AS col_date FROM " + TaskTable.TABLE_NAME
-              + " WHERE col_date BETWEEN "
+              + " WHERE (" + TaskTable.COLUMN_NAME_HISTORY +  " < 0 OR " + TaskTable.COLUMN_NAME_HISTORY +" IS NOT NULL ) AND col_date BETWEEN "
               + " date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2)) AND date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2))"
               + " ORDER BY col_date DESC ";
 

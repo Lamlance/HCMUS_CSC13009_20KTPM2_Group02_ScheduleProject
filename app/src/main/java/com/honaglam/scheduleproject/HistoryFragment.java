@@ -2,7 +2,6 @@ package com.honaglam.scheduleproject;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,23 +11,18 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.History.HistoryExpandableListAdapter;
-import com.honaglam.scheduleproject.History.HistoryRecyclerViewAdapter;
-import com.honaglam.scheduleproject.History.HistoryViewHolder;
 import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import kotlin.NotImplementedError;
 
 
 public class HistoryFragment extends Fragment {
@@ -79,6 +73,8 @@ public class HistoryFragment extends Fragment {
             getLayoutInflater(),
             () -> taskDataGroupByDate,
             () -> dateGroup);
+    historyExpandableListAdapter.setClickMakeTaskCallBack(new ChildItemUnarchiveCallBack());
+
 
     expandableListHistory = view.findViewById(R.id.recyclerHistory);
     expandableListHistory.setAdapter(historyExpandableListAdapter);
@@ -89,10 +85,15 @@ public class HistoryFragment extends Fragment {
     // TODO: List task history
   }
 
+  long fromDate;
+  long toDate;
 
   class TaskDataDateFilterCallBack implements ReminderFilterDialog.OnSelectFromToDate{
     @Override
     public void onSelect(long fromDate, long toDate) {
+      HistoryFragment.this.fromDate = fromDate;
+      HistoryFragment.this.toDate = toDate;
+
       Calendar calendar = Calendar.getInstance();
       taskDataList = activity.taskDb.getHistoryAtRange(fromDate,toDate);
 
@@ -103,7 +104,10 @@ public class HistoryFragment extends Fragment {
       }));
 
       dateGroup.clear();
-      dateGroup.addAll(taskDataGroupByDate.keySet());
+      dateGroup.addAll(
+              taskDataGroupByDate.keySet()
+                      .stream().sorted().collect(Collectors.toList())
+      );
 
       try {
         historyExpandableListAdapter.notifyDataSetChanged();
@@ -113,21 +117,37 @@ public class HistoryFragment extends Fragment {
     }
   }
 
-  class MoveToToDoTaskCallback implements HistoryViewHolder.OnClickPositionCallBack {
+  class ChildItemUnarchiveCallBack implements HistoryExpandableListAdapter.ChildItemClickCallBack{
     @Override
-    public void clickAtPosition(int position) throws NotImplementedError {
+    public void onClick(int groupPos, int childPos) {
       try {
-//        TODO: Complete function moveTaskToToDoTask->makeTaskToToDo
-        activity.moveTaskToToDoTask(activity.historyTasks.get(position).id);
-        //LAM FIX
-        //activity.tasks.add(activity.historyTasks.get(position));
-        activity.historyTasks.remove(position);
-        //==
-        Log.i("REMOVE","REMOVE HISTORY POS"+position);
-      } catch (Exception e) {
+        Long date = dateGroup.get(groupPos);
+        activity.moveTaskToToDoTask(taskDataGroupByDate.get(date).get(childPos).id);
+        taskDataGroupByDate.get(date).remove(childPos);
+        if(taskDataGroupByDate.get(date).size() == 0){
+          taskDataGroupByDate.remove(date);
+          dateGroup.remove(groupPos);
+        }
+        historyExpandableListAdapter.notifyDataSetChanged();
+      }catch (Exception e){
         e.printStackTrace();
       }
+
     }
   }
 
+  @Override
+  public void onResume() {
+    if(fromDate > 0 && toDate > 0 ){
+      new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
+    }else{
+      Calendar calendar = Calendar.getInstance();
+      toDate = calendar.getTimeInMillis();
+      calendar.add(Calendar.DATE,-14);
+      fromDate = calendar.getTimeInMillis();
+      new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
+    }
+
+    super.onResume();
+  }
 }
