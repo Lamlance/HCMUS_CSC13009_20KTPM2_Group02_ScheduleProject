@@ -179,6 +179,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     long startDay = calendar.getTimeInMillis();
     calendar.set(year, month, date, 23, 59, 59);
     long endDay = calendar.getTimeInMillis();
+    List<ReminderData> list = new ArrayList<ReminderData>();
 
     try (
             SQLiteDatabase db = this.getReadableDatabase();
@@ -192,7 +193,6 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     ) {
 
 
-      List<ReminderData> list = new ArrayList<ReminderData>();
 
       if (!query1.moveToFirst()) {
         return list;
@@ -211,9 +211,10 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       } while (query1.moveToNext());
 
       return list;
-    } catch (Exception ignore) {
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    return null;
+    return list;
   }
 
   public long removeReminder(long id) {

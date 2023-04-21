@@ -92,9 +92,7 @@ public class CalendarRecyclerViewAdapter extends RecyclerView.Adapter<CalendarVi
     getSetAllReminderInMonth();
   }
 
-
-
-  private void getSetAllReminderInMonth() {
+  public void getSetAllReminderInMonth() {
     try {
       List<ReminderData> reminders = getReminderInMonth.getReminderInMonth(
               calendar.get(Calendar.YEAR),

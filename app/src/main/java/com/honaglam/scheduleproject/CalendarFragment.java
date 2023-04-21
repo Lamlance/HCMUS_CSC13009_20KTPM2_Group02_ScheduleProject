@@ -315,7 +315,9 @@ public class CalendarFragment extends Fragment {
     @Override
     public void deletePos(int pos) throws NotImplementedError {
       mainActivity.removeReminder(pos);
+      calendarRecyclerViewAdapter.getSetAllReminderInMonth();
       reminderRecyclerAdapter.notifyItemRemoved(pos);
+      calendarRecyclerViewAdapter.notifyDataSetChanged();
     }
   }
 }
