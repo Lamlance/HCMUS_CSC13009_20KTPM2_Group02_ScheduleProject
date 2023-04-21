@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     taskDb = new ReminderTaskDB(this);
     taskDb.getTodayStats();
     historyTasks.addAll(listHistoryTasks());
-
+    updateTodayTask();
 
     if (ReminderTaskDB.IS_DEV) {
       //taskDb.createSampleData();
@@ -339,6 +339,8 @@ public class MainActivity extends AppCompatActivity {
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DATE)
     );
+
+
     map.forEach((k, v) -> {
       taskMapByReminder.put(k, new LinkedList<>(v));
     });

@@ -11,18 +11,20 @@
   android:paddingTop="40dp"
   android:paddingBottom="20dp">
   <LinearLayout
+      android:layout_marginLeft="15dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <ImageView
       android:layout_width="100dp"
       android:layout_height="100dp"
-      android:src="@mipmap/ic_launcher_round" />
+      android:src="@drawable/clock_svgrepo_com" />
   </LinearLayout>
   <TextView
+      android:layout_marginLeft="15dp"
     style="@style/TEXT"
     android:textColor="@color/white"
     android:textSize="20sp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Simple Schedule App"/>
+    android:text="Pomofocus"/>
 </LinearLayout>

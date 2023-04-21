@@ -8,6 +8,7 @@
     android:paddingHorizontal="20dp"
     android:paddingVertical="10dp">
   <TextView
+      android:textColor="@color/white"
       android:paddingLeft="50dp"
       android:focusable="false"
       tools:text="Reminder Group 1"

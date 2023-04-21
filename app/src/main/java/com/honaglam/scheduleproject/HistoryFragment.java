@@ -18,6 +18,7 @@ import com.honaglam.scheduleproject.Task.TaskData;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +104,10 @@ public class HistoryFragment extends Fragment {
       }));
 
       dateGroup.clear();
-      dateGroup.addAll(taskDataGroupByDate.keySet());
+      dateGroup.addAll(
+              taskDataGroupByDate.keySet()
+                      .stream().sorted().collect(Collectors.toList())
+      );
 
       try {
         historyExpandableListAdapter.notifyDataSetChanged();
@@ -135,6 +139,12 @@ public class HistoryFragment extends Fragment {
   @Override
   public void onResume() {
     if(fromDate > 0 && toDate > 0 ){
+      new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
+    }else{
+      Calendar calendar = Calendar.getInstance();
+      toDate = calendar.getTimeInMillis();
+      calendar.add(Calendar.DATE,-14);
+      fromDate = calendar.getTimeInMillis();
       new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
     }
 

@@ -194,8 +194,10 @@ public class TimerFragment extends Fragment {
 
   @Override
   public void onResume() {
-    activity.updateTodayTask();
     super.onResume();
+
+    activity.updateTodayTask();
+    expandableListAdapter.notifyDataSetChanged();
   }
 
   public void UpdateTimeUI(long millisRemain) {
@@ -332,7 +334,7 @@ public class TimerFragment extends Fragment {
         activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, linkedList);
         reminderList.add(TaskData.DEFAULT_TASK_DATA_HOLDER);
       }
-      expandableListAdapter.notifyDataSetInvalidated();
+      expandableListAdapter.notifyDataSetChanged();
     }
   }
 
