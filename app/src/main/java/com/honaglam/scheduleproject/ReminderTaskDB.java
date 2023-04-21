@@ -403,7 +403,8 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                       + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID + " = "
                       + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
                       + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_REMINDER_ID
-                      + " IN (" + reminderIdArg + ")", null
+                      + " IN (" + reminderIdArg + ") "
+                      + " AND (" + TaskTable.COLUMN_NAME_HISTORY + " = 0 OR + " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL )" , null
       )) {
         if (cursor.moveToFirst()) {
           int taskTitleIndex = cursor.getColumnIndex(TaskTable.COLUMN_NAME_TITLE);
@@ -451,6 +452,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                             + " ON " + TaskTable.TABLE_NAME + "." + TaskTable.COLUMN_NAME_ID
                             + " = " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID
                             + " WHERE " + TaskReminderTable.TABLE_NAME + "." + TaskReminderTable.COLUMN_NAME_TASK_ID + " IS NULL"
+                            + " AND ( " + TaskTable.COLUMN_NAME_HISTORY + " = 0 OR " + TaskTable.COLUMN_NAME_HISTORY + " IS NULL)"
                     , null
             );
     ) {
@@ -597,11 +599,12 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       long update = db.update(
               TaskTable.TABLE_NAME,
               cv,
-              TaskTable.COLUMN_NAME_ID + "=?",
+              TaskTable.COLUMN_NAME_ID + "= ?",
               new String[]{String.valueOf(id)}
       );
       return update > 0;
-    } catch (Exception ignore) {
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return false;
   }
@@ -682,7 +685,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
       int furDate = calendar.get(Calendar.DATE);
 
       String query = "SELECT * , date(substr('0000' || year,-4,4) || '-' || substr('00' || month,-2,2) || '-' || substr('00' || date,-2,2)) AS col_date FROM " + TaskTable.TABLE_NAME
-              + " WHERE col_date BETWEEN "
+              + " WHERE (" + TaskTable.COLUMN_NAME_HISTORY +  " < 0 OR " + TaskTable.COLUMN_NAME_HISTORY +" IS NOT NULL ) AND col_date BETWEEN "
               + " date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2)) AND date(substr('0000' || ?,-4,4) || '-' || substr('00' || ?,-2,2) || '-' || substr('00' || ?,-2,2))"
               + " ORDER BY col_date DESC ";
 

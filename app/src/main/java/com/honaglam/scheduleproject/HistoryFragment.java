@@ -82,10 +82,15 @@ public class HistoryFragment extends Fragment {
     // TODO: List task history
   }
 
+  long fromDate;
+  long toDate;
 
   class TaskDataDateFilterCallBack implements ReminderFilterDialog.OnSelectFromToDate{
     @Override
     public void onSelect(long fromDate, long toDate) {
+      HistoryFragment.this.fromDate = fromDate;
+      HistoryFragment.this.toDate = toDate;
+
       Calendar calendar = Calendar.getInstance();
       taskDataList = activity.taskDb.getHistoryAtRange(fromDate,toDate);
 
@@ -106,4 +111,12 @@ public class HistoryFragment extends Fragment {
     }
   }
 
+  @Override
+  public void onResume() {
+    if(fromDate > 0 && toDate > 0 ){
+      new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
+    }
+
+    super.onResume();
+  }
 }
