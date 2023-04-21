@@ -72,6 +72,8 @@ public class HistoryFragment extends Fragment {
             getLayoutInflater(),
             () -> taskDataGroupByDate,
             () -> dateGroup);
+    historyExpandableListAdapter.setClickMakeTaskCallBack(new ChildItemUnarchiveCallBack());
+
 
     expandableListHistory = view.findViewById(R.id.recyclerHistory);
     expandableListHistory.setAdapter(historyExpandableListAdapter);
@@ -108,6 +110,25 @@ public class HistoryFragment extends Fragment {
       }catch (Exception e){
         e.printStackTrace();
       }
+    }
+  }
+
+  class ChildItemUnarchiveCallBack implements HistoryExpandableListAdapter.ChildItemClickCallBack{
+    @Override
+    public void onClick(int groupPos, int childPos) {
+      try {
+        Long date = dateGroup.get(groupPos);
+        activity.moveTaskToToDoTask(taskDataGroupByDate.get(date).get(childPos).id);
+        taskDataGroupByDate.get(date).remove(childPos);
+        if(taskDataGroupByDate.get(date).size() == 0){
+          taskDataGroupByDate.remove(date);
+          dateGroup.remove(groupPos);
+        }
+        historyExpandableListAdapter.notifyDataSetChanged();
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+
     }
   }
 

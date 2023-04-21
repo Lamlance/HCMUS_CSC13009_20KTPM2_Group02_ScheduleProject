@@ -192,6 +192,12 @@ public class TimerFragment extends Fragment {
     expandableListAdapter.setEditClickCallBack(new EditChildTaskCallBack());
   }
 
+  @Override
+  public void onResume() {
+    activity.updateTodayTask();
+    super.onResume();
+  }
+
   public void UpdateTimeUI(long millisRemain) {
     int seconds = ((int) millisRemain / 1000) % 60;
     int minutes = (int) millisRemain / (60 * 1000);

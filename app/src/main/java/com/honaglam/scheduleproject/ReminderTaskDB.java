@@ -612,8 +612,12 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   // TODO: implement makeTaskToToDo
   public boolean makeTaskToToDo(int id) {
     try (SQLiteDatabase db = this.getWritableDatabase()) {
+      Calendar myCalendar = Calendar.getInstance();
       ContentValues cv = new ContentValues();
       cv.put(TaskTable.COLUMN_NAME_HISTORY, 0);
+      cv.put(TaskTable.COLUMN_NAME_DATE,myCalendar.get(Calendar.DATE));
+      cv.put(TaskTable.COLUMN_NAME_MONTH,myCalendar.get(Calendar.MONTH) + 1);
+      cv.put(TaskTable.COLUMN_NAME_YEAR,myCalendar.get(Calendar.YEAR));
       long update = db.update(
               TaskTable.TABLE_NAME,
               cv,
