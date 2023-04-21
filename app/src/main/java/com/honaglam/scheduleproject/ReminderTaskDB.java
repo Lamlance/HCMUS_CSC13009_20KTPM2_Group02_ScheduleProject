@@ -47,7 +47,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_TIME = "time";
-    public static final String COLUMN_NAME_FATHER = "father";
+    //public static final String COLUMN_NAME_FATHER = "father";
     public static final String COLUMN_NAME_WEEKDAY = "weekday";
   }
 
@@ -101,10 +101,7 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
                     + ReminderTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
                     + ReminderTable.COLUMN_NAME_TITLE + " TEXT ,"
                     + ReminderTable.COLUMN_NAME_TIME + " INTEGER ,"
-                    + ReminderTable.COLUMN_NAME_FATHER + " INTEGER ,"
-                    + ReminderTable.COLUMN_NAME_WEEKDAY + " INTEGER ,"
-                    + " FOREIGN KEY (" + ReminderTable.COLUMN_NAME_FATHER + ") REFERENCES "
-                    + ReminderTable.TABLE_NAME + "( " + ReminderTable.COLUMN_NAME_ID + "));";
+                    + ReminderTable.COLUMN_NAME_WEEKDAY + " INTEGER )";
     String createTaskTable =
             "CREATE TABLE " + TaskTable.TABLE_NAME + " ( "
                     + TaskTable.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
