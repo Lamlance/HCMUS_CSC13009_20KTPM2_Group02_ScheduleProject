@@ -15,5 +15,6 @@
   <string name="timer">TIMER</string>
   <string name="time_minutes">Time (minutes)</string>
   <string name="date_format">DD/MM/YYYY</string>
-    <string name="est_pomodoro">Est Pomodoros:</string>
+  <string name="est_pomodoro">Est Pomodoros:</string>
+  <string name="com_auth0_domain">dev-j07rhfbc.us.auth0.com</string>
 </resources>
