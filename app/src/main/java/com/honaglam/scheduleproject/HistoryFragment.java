@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.honaglam.scheduleproject.History.HistoryExpandableListAdapter;
 import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
@@ -46,6 +48,7 @@ public class HistoryFragment extends Fragment {
   List<TaskData> taskDataList;
   List<Long> dateGroup = new ArrayList<>();
   Map<Long,List<TaskData>> taskDataGroupByDate = new HashMap<>();
+
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
   }
