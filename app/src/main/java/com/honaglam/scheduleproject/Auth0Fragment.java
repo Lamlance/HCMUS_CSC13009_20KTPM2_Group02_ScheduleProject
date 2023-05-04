@@ -55,7 +55,7 @@ public class Auth0Fragment extends Fragment {
   @NonNull Auth0 auth0Account = new Auth0("6auXenOyXE3RcK51Syb5hoeu55DAbfDy","dev-j07rhfbc.us.auth0.com");
   @Nullable UserProfile userProfile;
   @Nullable Context context;
-  ReminderTaskFireBase fireBase;
+  //ReminderTaskFireBase fireBase;
 
   @Override public void onAttach(@NonNull Context context) {
     super.onAttach(context);
@@ -67,7 +67,7 @@ public class Auth0Fragment extends Fragment {
     if (getArguments() != null) {
       userAccessToken = getArguments().getString(USER_ACCESS_TOKEN_ARG,null);
     }
-    fireBase = new ReminderTaskFireBase("lamhoangdien113@gmail,com");
+    //fireBase = new ReminderTaskFireBase("lamhoangdien113@gmail,com");
   }
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -80,7 +80,7 @@ public class ReminderRecyclerAdapter extends RecyclerView.Adapter<ReminderViewHo
   }
   class ReminderItemClickCallBack implements ReminderViewHolder.SelectItemCallBack{
     @Override
-    public void onClickPos(int pos) throws NotImplementedError {
+    public void onClickPos(int pos) {
       int oldPos = selectedItemPos;
       selectedItemPos = pos;
       int listSize = reminderListGetter.get().size();

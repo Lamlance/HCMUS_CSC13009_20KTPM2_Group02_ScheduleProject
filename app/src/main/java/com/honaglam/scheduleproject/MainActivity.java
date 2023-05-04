@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
   // User setting
   //  private UserSettings userSettings;
 
+  ReminderTaskFireBase fireBase = new ReminderTaskFireBase("lamhoangdien113@gmail,com");;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

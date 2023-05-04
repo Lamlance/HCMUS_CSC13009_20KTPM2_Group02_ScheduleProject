@@ -2,6 +2,8 @@ package com.honaglam.scheduleproject.Reminder;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.icu.text.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -9,44 +11,57 @@ import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.honaglam.scheduleproject.CalendarFragment;
 import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.ReminderTaskFireBase;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderViewHolder>{
-  public interface TaskListGetter{
-    List<ReminderTaskFireBase.Task> getList();
-  }
-  public interface ItemAction{
+public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderViewHolder> {
+
+  public interface ItemAction {
     void onAction(int position);
   }
 
 
   int selectedPos = -1;
   Context context;
-  TaskListGetter taskListGetter;
   ItemAction itemClickAction;
   ItemAction deleteClickAction;
 
-  ReminderRecyclerAdapterFB(Context context,TaskListGetter getter){
+  CalendarFragment.ReminderInDateGetter reminderInDateGetter;
+
+
+  public ReminderRecyclerAdapterFB(Context context,CalendarFragment.ReminderInDateGetter getter) {
     this.context = context;
-    this.taskListGetter = getter;
+    reminderInDateGetter = getter;
   }
 
-  public void callItemAction(ItemAction action){
-    if(action != null){
-      try{
+
+  public void callItemAction(ItemAction action) {
+    if (action != null) {
+      try {
         action.onAction(selectedPos);
-      }catch (Exception e ){
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
   }
-  public void setItemClickAction(ItemAction action){
+
+  public void setItemClickAction(ItemAction action) {
     itemClickAction = action;
   }
-  public void setDeleteClickAction(ItemAction action) {deleteClickAction = action;}
+
+  public void setDeleteClickAction(ItemAction action) {
+    deleteClickAction = action;
+  }
+
+
+
 
   @NonNull
   @Override
@@ -63,16 +78,28 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
 
   @Override
   public void onBindViewHolder(@NonNull ReminderViewHolder holder, int position) {
+    Log.i("REMINDER_RECYCLER","Bind view holder " + position);
+
     holder.btnDeleteReminder.setOnClickListener((clickedView) -> {
       callItemAction(deleteClickAction);
     });
     holder.itemView.setBackgroundColor(position == selectedPos ?
             ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
             Color.TRANSPARENT);
+
+    ReminderTaskFireBase.Reminder data = reminderInDateGetter.getReminder().get(position);
+
+    if(data != null){
+      String dateFormat = DateFormat.getDateTimeInstance().format(new Date(data.reminderTime));
+      holder.txtId.setText(dateFormat);
+      holder.txtName.setText(data.title);
+    }
+
   }
 
   @Override
   public int getItemCount() {
-    return 0;
+    List<ReminderTaskFireBase.Reminder> reminders = reminderInDateGetter.getReminder();
+    return reminders.size();
   }
 }
