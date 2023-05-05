@@ -27,15 +27,18 @@ import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskExpandableListAdapter;
+import com.honaglam.scheduleproject.Task.TaskExpandableListAdapterFB;
 import com.honaglam.scheduleproject.TimerViews.TimerFloatingButton;
 import com.honaglam.scheduleproject.TimerViews.TimerViewGroupConstraint;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,9 +63,6 @@ public class TimerFragment extends Fragment {
   private TimerViewGroupConstraint layoutTimerFragment;
   private TimerFloatingButton btnTimerSetReminder;
 
-//  private Button btnTimer;
-//  private Button btnGiveUp;
-//  private Button btnSkip;
 
   private Button btnAddTask;
 
@@ -84,24 +84,52 @@ public class TimerFragment extends Fragment {
   }
 
 
-  List<ReminderData> reminderList;
+  Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> taskMapByReminder;
+  List<ReminderTaskFireBase.Reminder> reminderList;
+  TaskExpandableListAdapterFB expandableListAdapter;
 
-  TaskExpandableListAdapter expandableListAdapter;
 
   public TimerFragment() {
     // Required empty public constructor
   }
 
+  public class ReminderAndTaskListGetter{
+    public List<ReminderTaskFireBase.Reminder> getRemindList(){
+      return reminderList;
+    }
+    @NonNull
+    public List<ReminderTaskFireBase.Task> getTaskInReminder(ReminderTaskFireBase.Reminder reminder){
+      List<ReminderTaskFireBase.Task> tasks = taskMapByReminder.get(reminder);
+      if(tasks != null){
+        return tasks;
+      }
+      return new LinkedList<>();
+    }
+  }
+
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Calendar calendar = Calendar.getInstance();
+    List<ReminderTaskFireBase.Task> taskList = ReminderTaskFireBase.GetTasksInDate(
+            calendar.get(Calendar.DATE),calendar.get(Calendar.MONTH)
+    );
+    Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> map = taskList.stream()
+            .collect(Collectors.groupingBy(t -> t.reminder));
+
+    taskMapByReminder = new HashMap<>();
+    map.forEach((k,v)->{
+      taskMapByReminder.put(k,new LinkedList<>(v));
+    });
+    reminderList = new LinkedList<>(map.keySet());
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     activity = (MainActivity) getActivity();
     context = requireContext();
-    reminderList = new LinkedList<>(activity.taskMapByReminder.keySet());
+    //reminderList = new LinkedList<>(activity.taskMapByReminder.keySet());
 
     return inflater.inflate(R.layout.fragment_timer, container, false);
   }
@@ -112,10 +140,16 @@ public class TimerFragment extends Fragment {
 
 
     recyclerTask = view.findViewById(R.id.recyclerTask);
+    /*
     expandableListAdapter = new TaskExpandableListAdapter(
             getLayoutInflater(),
             () -> activity.taskMapByReminder,
             () -> reminderList
+    );
+     */
+    expandableListAdapter = new TaskExpandableListAdapterFB(
+            getLayoutInflater(),
+            new ReminderAndTaskListGetter()
     );
     recyclerTask.setAdapter(expandableListAdapter);
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
@@ -176,9 +210,11 @@ public class TimerFragment extends Fragment {
     btnTimerSetReminder.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
+        /*
         if (expandableListAdapter.getCheckedTask().size() > 0) {
           new ReminderAddDialog(activity, new SetTimerReminderCallBack()).show();
         }
+         */
       }
     });
 
@@ -186,10 +222,10 @@ public class TimerFragment extends Fragment {
     setThemeId(activity.loadTimerSettingPref().prefTheme);
     Log.i("DRAW_POMODORO_STATE", "FRAGMENT VIEW CREATED");
 
-    expandableListAdapter.setChildUpdateCallBack(new ChildUpdatedCallBack());
-    expandableListAdapter.setArchiveClickCallBack(new ArchiveChildTaskCallBack());
-    expandableListAdapter.setDeleteClickCallBack(new DeleteChildTaskCallBack());
-    expandableListAdapter.setEditClickCallBack(new EditChildTaskCallBack());
+    //expandableListAdapter.setChildUpdateCallBack(new ChildUpdatedCallBack());
+    //expandableListAdapter.setArchiveClickCallBack(new ArchiveChildTaskCallBack());
+    //expandableListAdapter.setDeleteClickCallBack(new DeleteChildTaskCallBack());
+    //expandableListAdapter.setEditClickCallBack(new EditChildTaskCallBack());
   }
 
   @Override
@@ -252,6 +288,7 @@ public class TimerFragment extends Fragment {
 
     @Override
     public void onSubmit(String name, Calendar setDate) {
+      /*
       LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
 
       ReminderData newReminder = activity.makeTaskReminders(
@@ -276,11 +313,12 @@ public class TimerFragment extends Fragment {
       }
 
       expandableListAdapter.notifyDataSetChanged();
-
+       */
     }
 
     @Override
     public void onSubmitWeekly(String name, Calendar setDate, HashSet<Integer> dailyReminder) {
+      /*
       LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
 
       ReminderData newReminder = activity.makeWeeklyReminder(
@@ -307,6 +345,7 @@ public class TimerFragment extends Fragment {
       }
 
       expandableListAdapter.notifyDataSetChanged();
+       */
     }
 
     @Override
@@ -318,6 +357,7 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
+      /*
       TaskData newData = activity.addTask(
               taskData.taskName,
               taskData.numberPomodoros,
@@ -335,6 +375,7 @@ public class TimerFragment extends Fragment {
         reminderList.add(TaskData.DEFAULT_TASK_DATA_HOLDER);
       }
       expandableListAdapter.notifyDataSetChanged();
+       */
     }
   }
 
@@ -372,103 +413,14 @@ public class TimerFragment extends Fragment {
     public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
       if (isAutoSwitchTask) return;
       try {
-        expandableListAdapter.addAndUpdateChildView();
+        //expandableListAdapter.addAndUpdateChildView();
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
   }
 
-  class DeleteChildTaskCallBack implements TaskExpandableListAdapter.OnChildAction {
-    @Override
-    public void onCheck(int childPos, int groupPos) {
-      ReminderData reminder = reminderList.get(groupPos);
-      List<TaskData> list = activity.taskMapByReminder.get(reminder);
-      TaskData data = (list == null) ? null : list.get(childPos);
 
-      if (data == null) {
-        return;
-      }
-
-      activity.deleteTask(data.id);
-      try {
-        activity.taskMapByReminder.get(reminder).remove(childPos);
-        if (activity.taskMapByReminder.get(reminder).size() <= 0) {
-          reminderList.remove(groupPos);
-          activity.taskMapByReminder.remove(reminder);
-        }
-        expandableListAdapter.notifyDataSetChanged();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
-    }
-  }
-
-  class ArchiveChildTaskCallBack implements TaskExpandableListAdapter.OnChildAction {
-    @Override
-    public void onCheck(int childPos, int groupPos) {
-      ReminderData reminder = reminderList.get(groupPos);
-      List<TaskData> list = activity.taskMapByReminder.get(reminder);
-      TaskData data = (list == null) ? null : list.get(childPos);
-
-      if (data == null) {
-        return;
-      }
-
-      activity.moveTaskToHistory(data.id);
-      activity.historyTasks.add(data);
-      try {
-        activity.taskMapByReminder.get(reminder).remove(childPos);
-        if (activity.taskMapByReminder.get(reminder).size() <= 0) {
-          reminderList.remove(groupPos);
-        }
-        expandableListAdapter.notifyDataSetChanged();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  class EditChildTaskCallBack implements TaskExpandableListAdapter.OnChildAction {
-    @Override
-    public void onCheck(int childPos, int groupPos) {
-      ReminderData reminder = reminderList.get(groupPos);
-      List<TaskData> list = activity.taskMapByReminder.get(reminder);
-      TaskData data = (list == null) ? null : list.get(childPos);
-      if (data == null) {
-        return;
-      }
-
-      AddTaskDialog.AddTaskDialogListener listener = (taskData -> {
-        activity.editTask(taskData);
-        try {
-          activity.taskMapByReminder.get(reminder).set(childPos, taskData);
-          expandableListAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      });
-
-      new AddTaskDialog(context, listener, data).show();
-
-
-    }
-  }
-
-  class ChildUpdatedCallBack implements TaskExpandableListAdapter.OnChildAction {
-    @Override
-    public void onCheck(int childPos, int groupPos) {
-      ReminderData reminder = reminderList.get(groupPos);
-      List<TaskData> list = activity.taskMapByReminder.get(reminder);
-      TaskData data = (list == null) ? null : list.get(childPos);
-      if (data == null) {
-        return;
-      }
-
-      activity.editTask(data);
-    }
-  }
 
   class TimerSettingFragmentClick implements View.OnClickListener {
     @Override

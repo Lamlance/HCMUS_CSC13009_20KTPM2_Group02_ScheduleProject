@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ReminderTaskFireBase {
   public static class TimerStats implements Serializable {
@@ -42,6 +44,24 @@ public class ReminderTaskFireBase {
     @Override
     public String toString() {
       return String.format(Locale.getDefault(), "%d w:%d - s:%d - l:%d", createDate, workDur, shortDur, longDur);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+      if(obj instanceof TimerStats){
+        return this.createDate == ((TimerStats)obj).createDate;
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      try{
+        return Math.toIntExact(createDate);
+      }catch (Exception e){
+        e.printStackTrace();
+        return super.hashCode();
+      }
     }
   }
 
@@ -67,18 +87,46 @@ public class ReminderTaskFireBase {
       this.title = title;
       this.reminderTime = reminderTime;
     }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+      if(obj instanceof Reminder){
+        return this.id.equals(((Reminder)obj).id);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return this.id.hashCode();
+    }
   }
 
   public static class Task implements Serializable {
     public static final Reminder DEFAULT_REMINDER = new Reminder("NONE", "NONE", -1);
     public static final String TABLE_NAME = "Task";
-    String id;
+    public static final String TASK_REMINDER_NAME = "reminder";
+
+    public String id;
     public String title;
     public int loops;
     public int loopsDone;
+    public boolean isArchive = false;
 
-    @NonNull
-    Reminder reminder = DEFAULT_REMINDER;
+    public Reminder reminder =  DEFAULT_REMINDER;
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+      if(obj instanceof Task){
+        return this.id.equals(((Task)obj).id);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return this.id.hashCode();
+    }
   }
 
   static DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -89,7 +137,8 @@ public class ReminderTaskFireBase {
 
   static private final HashMap<Integer, List<Reminder>> SINGLE_REMINDER_BY_MONTH = new HashMap<>();
   static private final HashMap<Integer, List<Reminder>> WEEKLY_REMINDER_BY_WEEKDAY = new HashMap<>();
-
+  static private final HashMap<Integer,List<Task>> TASKS_BY_MONTH = new HashMap<>();
+  static private final List<Task> NORMAL_TASK = new LinkedList<>();
   static private void AddWeeklyReminderToMap(Reminder r) {
     if (r.weekDates == null) {
       return;
@@ -113,12 +162,38 @@ public class ReminderTaskFireBase {
     SINGLE_REMINDER_BY_MONTH.get(month).add(r);
   }
 
+  static private void AddTaskToMap(Task t){
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(t.reminder.reminderTime);
+    int month = calendar.get(Calendar.MONTH);
+    if(!TASKS_BY_MONTH.containsKey(month)){
+      TASKS_BY_MONTH.put(month,new LinkedList<>());
+    }
+    TASKS_BY_MONTH.get(month).add(t);
+  }
+  static private void AddNormalTask(Task t){
+    NORMAL_TASK.add(t);
+  }
   static public @NonNull List<Reminder> GetRemindersInMonth(int month){
     List<Reminder> reminders = SINGLE_REMINDER_BY_MONTH.get(month);
     if(reminders != null){
       return  reminders;
     }
     return new LinkedList<Reminder>();
+  }
+  static public @NonNull List<Task> GetTasksInDate(int date,int month){
+    List<Task> tasks = new LinkedList<>(NORMAL_TASK);
+
+    List<Task> taskInMonth = TASKS_BY_MONTH.get(month);
+    if(taskInMonth != null){
+      Calendar calendar = Calendar.getInstance();
+      List<Task> taskInDate = taskInMonth.stream().filter((t)->{
+        calendar.setTimeInMillis(t.reminder.reminderTime);
+        return calendar.get(Calendar.DATE) == date;
+      }).collect(Collectors.toList());
+      tasks.addAll(taskInDate);
+    }
+    return tasks;
   }
 
   public ReminderTaskFireBase(String deviceUUID) {
@@ -132,7 +207,9 @@ public class ReminderTaskFireBase {
     todayStats = new TimerStats();
 
 
-    getRemindersInAYear(calendar.get(Calendar.YEAR));
+    //getRemindersInAYear(calendar.get(Calendar.YEAR));
+    getTasksInAYear(calendar.get(Calendar.YEAR));
+    getNormalTask();
     /*
     databaseReference.child(userUID)
             .child(TimerStats.TABLE_NAME)
@@ -144,6 +221,21 @@ public class ReminderTaskFireBase {
 
     //addReminder("Today reminder",todayTime);
     //addWeeklyReminder("Today weekly reminder",todayTime,Calendar.MONDAY-1);
+
+    /*
+    Task task = addTask("Task reminder",5,3);
+    if(task != null){
+      List<Task> tasks = new LinkedList<>();
+      tasks.add(task);
+      makeTaskSingleReminder("Today reminder task",todayTime,tasks);
+    }
+    Task task1 = addTask("Task normal",5,3);
+
+     */
+
+
+
+
   }
 
 
@@ -272,7 +364,7 @@ public class ReminderTaskFireBase {
   }
 
   @Nullable
-  public String addTask(String title, int loops, int loopsDone) {
+  public Task addTask(String title, int loops, int loopsDone) {
     Task task = new Task();
     task.title = title;
     task.loops = loops;
@@ -283,7 +375,7 @@ public class ReminderTaskFireBase {
     if (taskId != null) {
       task.id = taskId;
       taskRef.child(taskId).setValue(task);
-      return taskId;
+      return task;
     }
     return null;
   }
@@ -311,6 +403,83 @@ public class ReminderTaskFireBase {
       updateTask(t);
     }
 
+  }
+
+  public void getTasksInAYear(int year){
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(Calendar.YEAR, year);
+
+    calendar.set(Calendar.DAY_OF_YEAR, 1);
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    long startOfYear = calendar.getTimeInMillis();
+
+    calendar.set(Calendar.MONTH, Calendar.DECEMBER);
+    calendar.set(Calendar.DATE, 31);
+    calendar.set(Calendar.HOUR, 23);
+    calendar.set(Calendar.MINUTE, 59);
+    long endOfYear = calendar.getTimeInMillis();
+
+
+    databaseReference.child(this.userUID)
+            .child(Task.TABLE_NAME)
+            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
+            .startAt(startOfYear)
+            .endAt(endOfYear)
+            .addListenerForSingleValueEvent(new ReminderTasksQueryListener());
+
+  }
+
+  public void getNormalTask(){
+    databaseReference.child(this.userUID)
+            .child(Task.TABLE_NAME)
+            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
+            .equalTo(-1)
+            .addListenerForSingleValueEvent(new NormalTaskQueryListener());
+  }
+
+  static class ReminderTasksQueryListener implements com.google.firebase.database.ValueEventListener{
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      if(!snapshot.exists()){
+        return;
+      }
+      Iterable<DataSnapshot> dataList = snapshot.getChildren();
+      for (DataSnapshot data: dataList) {
+        Task task = data.getValue(Task.class);
+        if(task != null){
+          AddTaskToMap(task);
+        }
+      }
+
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
+  }
+
+  static class NormalTaskQueryListener implements com.google.firebase.database.ValueEventListener{
+
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      if(!snapshot.exists()){
+        return;
+      }
+      Iterable<DataSnapshot> dataList = snapshot.getChildren();
+      for (DataSnapshot data: dataList) {
+        Task task = data.getValue(Task.class);
+        if(task != null){
+          AddNormalTask(task);
+        }
+      }
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
   }
 
   class TodayStatsValueEventListener implements ValueEventListener {
