@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.honaglam.scheduleproject.CalendarFragment;
@@ -56,7 +57,6 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
   private int clickedPos = -1;
   private int weekDateOfFirstDayOfMoth;
   public Calendar calendar = Calendar.getInstance();
-  SelectDateCallBack onSelectDateCallBack;
 
 
   static Integer txtPrimaryColor = null;
@@ -70,6 +70,10 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
 
 
+  @Nullable SelectDateCallBack onSelectDateCallBack;
+  @Nullable SelectDateCallBack onMonthChangeCallBack;
+  OnSelectDateCallBack viewHolderSelectDateCallBack = new OnSelectDateCallBack();
+
   public CalendarRecyclerViewAdapterFB(Context context,CalendarFragment.ReminderInDateGetter getter){
     this.context = context;
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth();
@@ -80,12 +84,10 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
 
   public int dateToPos(int date) {
-    int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
-    return pos;
+    return date + 7 + weekDateOfFirstDayOfMoth - 1;
   }
   public int posToDate(int pos) {
-    int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
-    return date;
+    return pos - 7 - weekDateOfFirstDayOfMoth + 1;
   }
 
 
@@ -118,30 +120,41 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
 
   public void increaseMonth() {
-    int oldSize = getItemCount();
     calendar.add(Calendar.MONTH, 1);
     calendar.set(Calendar.DATE, 1);
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
-    int newSize = getItemCount();
     clickedPos = dateToPos(1);
 
-    //this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
+    if(onMonthChangeCallBack != null){
+      onMonthChangeCallBack.onSelectDate(
+              1,
+              calendar.get(Calendar.MONTH),
+              calendar.get(Calendar.YEAR),
+              calendar.get(Calendar.DAY_OF_WEEK)
+      );
+    }
+
+    notifyDataSetChanged();
   }
   public void decreaseMonth() {
-    int oldSize = getItemCount();
     calendar.add(Calendar.MONTH, -1);
     calendar.set(Calendar.DATE, 1);
     weekDateOfFirstDayOfMoth = getFirstDayOfWeekOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH));
-    int newSize = getItemCount();
     clickedPos = dateToPos(1);
 
-    //this.notifyItemRangeChanged(0, Math.max(oldSize, newSize));
-
-
+    if(onMonthChangeCallBack != null) {
+      onMonthChangeCallBack.onSelectDate(
+              1,
+              calendar.get(Calendar.MONTH),
+              calendar.get(Calendar.YEAR),
+              calendar.get(Calendar.DAY_OF_WEEK)
+      );
+    }
+    notifyDataSetChanged();
   }
 
 
-  public void setSelectDateCallBack(SelectDateCallBack callBack){
+  public void setSelectDateCallBack(@NonNull SelectDateCallBack callBack){
     onSelectDateCallBack = callBack;
     onSelectDateCallBack.onSelectDate(
             calendar.get(Calendar.DATE),
@@ -150,6 +163,9 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
             calendar.get(Calendar.DAY_OF_WEEK)
     );
   }
+  public void setOnMonthChangeCallBack(@NonNull SelectDateCallBack callBack){
+    onMonthChangeCallBack = callBack;
+  }
 
 
   @NonNull
@@ -157,7 +173,7 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
   public CalendarViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     CalendarViewHolder viewHolder = new CalendarViewHolder(
             LayoutInflater.from(context).inflate(R.layout.calendar_date_item, parent, false),
-            new OnSelectDateCallBack()
+            viewHolderSelectDateCallBack
     );
     getTxtPrimaryColor(viewHolder);
     getTertiaryColor(viewHolder);

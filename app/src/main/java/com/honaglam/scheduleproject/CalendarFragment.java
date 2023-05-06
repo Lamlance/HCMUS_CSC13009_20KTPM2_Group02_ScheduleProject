@@ -172,23 +172,43 @@ public class CalendarFragment extends Fragment {
 
     calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapterFB(context,new ReminderInDateGetter());
     calendarRecyclerViewAdapter.setSelectDateCallBack((d,m,y,w)->{
+      int oldCount = reminderRecyclerAdapter == null ? -1 : reminderRecyclerAdapter.getItemCount();
       selectedDate = d;
       selectedMonth = m;
       selectedYear = y;
       selectedWeekDay = w;
-      if(reminderRecyclerAdapter != null){
+      int newCount = reminderRecyclerAdapter == null ? -1 : reminderRecyclerAdapter.getItemCount() ;
+      if(reminderRecyclerAdapter != null && newCount != oldCount){
         reminderRecyclerAdapter.notifyDataSetChanged();
       }
+    });
+    calendarRecyclerViewAdapter.setOnMonthChangeCallBack((d,m,y,w)->{
+      selectedDate = d;
+      selectedMonth = m;
+      selectedYear = y;
+      selectedWeekDay = w;
+
+      reminderInMonth = ReminderTaskFireBase.GetRemindersInMonth(selectedMonth);
+      MapReminderMothToDateMap();
+
+      if(reminderRecyclerAdapter != null){
+        int oldCount = reminderRecyclerAdapter.getItemCount();
+        int newCount = reminderRecyclerAdapter.getItemCount();
+        if(oldCount != newCount){
+          reminderRecyclerAdapter.notifyDataSetChanged();
+        }
+      }
+
     });
     recyclerCalendar.setAdapter(calendarRecyclerViewAdapter);
 
     view.findViewById(R.id.btnIncreaseMonth).setOnClickListener(view1 -> {
       calendarRecyclerViewAdapter.increaseMonth();
-      recyclerCalendar.startAnimation(ani_month_r2l);
     });
     view.findViewById(R.id.btnDecreaseMonth).setOnClickListener(view12 -> {
       calendarRecyclerViewAdapter.decreaseMonth();
-      recyclerCalendar.startAnimation(ani_month_l2r);
+      //recyclerCalendar.startAnimation(ani_month_l2r);
+
     });
 
     RecyclerView reminderRecycler = view.findViewById(R.id.recyclerReminders);
@@ -234,8 +254,6 @@ public class CalendarFragment extends Fragment {
     calendar.set(selectedYear, selectedMonth, selectedDate, selectedHour, selectedMinute, 0);
     long remindTime = calendar.getTimeInMillis();
 
-
-    //TODO Firebase Add Reminder
     reminderRepository.addSingleReminder(name,remindTime);
   }
 
