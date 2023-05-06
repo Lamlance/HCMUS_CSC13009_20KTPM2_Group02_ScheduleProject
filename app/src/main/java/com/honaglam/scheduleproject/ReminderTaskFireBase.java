@@ -76,7 +76,7 @@ public class ReminderTaskFireBase {
     public String id;
 
     @Nullable
-    List<Integer> weekDates = null;
+    public List<Integer> weekDates = null;
 
     public Reminder() {
 
@@ -198,7 +198,9 @@ public class ReminderTaskFireBase {
     }
     return tasks;
   }
-
+  static public @NonNull HashMap<Integer, List<Reminder>> GetWeeklyReminderByWeekDay(){
+    return WEEKLY_REMINDER_BY_WEEKDAY;
+  }
   private final String userUID;
 
   static private ReminderTaskFireBase reminderTaskFireBase = null;

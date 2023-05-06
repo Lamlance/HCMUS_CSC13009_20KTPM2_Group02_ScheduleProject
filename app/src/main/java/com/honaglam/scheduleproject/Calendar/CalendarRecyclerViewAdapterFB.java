@@ -207,7 +207,7 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
               (clickedPos == position) ? Color.rgb(159, 62, 65) : highlightColor
       );
       holder.txtDate.setTextColor(Color.WHITE);
-      Log.i("CALENDAR_ADAPTER","SET TEXT WHITE");
+      Log.i("CALENDAR_ADAPTER",date + " has reminder");
     }
 
   }
