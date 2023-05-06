@@ -3,6 +3,7 @@ package com.honaglam.scheduleproject.Calendar;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -58,10 +59,10 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
   SelectDateCallBack onSelectDateCallBack;
 
 
-  Integer txtPrimaryColor = null;
-  Integer highlightColor = null;
-  Integer bgPrimaryColor = null;
-  Integer tertiaryColor = null;
+  static Integer txtPrimaryColor = null;
+  static Integer highlightColor = null;
+  static Integer bgPrimaryColor = null;
+  static Integer tertiaryColor = null;
 
 
   CalendarFragment.ReminderInDateGetter reminderInDateGetter;
@@ -78,11 +79,11 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
 
 
-  private int dateToPos(int date) {
+  public int dateToPos(int date) {
     int pos = date + 7 + weekDateOfFirstDayOfMoth - 1;
     return pos;
   }
-  private int posToDate(int pos) {
+  public int posToDate(int pos) {
     int date = pos - 7 - weekDateOfFirstDayOfMoth + 1;
     return date;
   }
@@ -140,6 +141,16 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
   }
 
 
+  public void setSelectDateCallBack(SelectDateCallBack callBack){
+    onSelectDateCallBack = callBack;
+    onSelectDateCallBack.onSelectDate(
+            calendar.get(Calendar.DATE),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.DAY_OF_WEEK)
+    );
+  }
+
 
   @NonNull
   @Override
@@ -160,6 +171,9 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
     holder.txtDate.setBackgroundColor(
             (clickedPos == position) ? Color.rgb(159, 62, 65) : bgPrimaryColor
     );
+    holder.txtDate.setTextColor(
+            (clickedPos == position) ? Color.WHITE : txtPrimaryColor
+    );
     if (position < 7) {
       holder.txtDate.setText(WEEKDAY_NAMES[position]);
       return;
@@ -177,6 +191,7 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
               (clickedPos == position) ? Color.rgb(159, 62, 65) : highlightColor
       );
       holder.txtDate.setTextColor(Color.WHITE);
+      Log.i("CALENDAR_ADAPTER","SET TEXT WHITE");
     }
 
   }
@@ -199,6 +214,7 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
       }
 
       clickedPos = position;
+
       calendar.set(Calendar.DATE, date);
       notifyItemChanged(oldPos);
       notifyItemChanged(clickedPos);

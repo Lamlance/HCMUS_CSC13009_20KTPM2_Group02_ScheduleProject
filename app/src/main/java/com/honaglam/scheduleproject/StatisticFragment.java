@@ -32,6 +32,7 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +59,7 @@ public class StatisticFragment extends Fragment {
     private MainActivity activity;
     Integer txtPrimaryColor = null;
 
-    private List<ReminderTaskDB.TimerStatsData> data;
+    private List<ReminderTaskFireBase.TimerStats> data;
 
 
     public static StatisticFragment newInstance() {
@@ -83,7 +84,7 @@ public class StatisticFragment extends Fragment {
         float workHours = 0;
 
         if (this.activity != null) {
-            this.data = this.activity.get30StatsBeforeToday();
+            //this.data = this.activity.get30StatsBeforeToday();
             // Collections.reverse(this.data);
             workHours = this.data.stream().mapToLong(e -> e.workDur).sum();
             workHours = workHours / (1000 * 60 * 60);
@@ -161,9 +162,12 @@ public class StatisticFragment extends Fragment {
 
         ArrayList<String> labels = new ArrayList<>();
 
+        Calendar calendar = Calendar.getInstance();
         for (int i = 0; i < this.data.size(); i++) {
-            int date = this.data.get(i).date;
-            int month = this.data.get(i).month;
+            calendar.setTimeInMillis(this.data.get(i).createDate);
+
+            int date = calendar.get(Calendar.DATE);
+            int month = calendar.get(Calendar.MONTH);
             labels.add(String.format("%d/%d", date, month + 1));
         }
 

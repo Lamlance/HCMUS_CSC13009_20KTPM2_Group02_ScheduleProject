@@ -97,26 +97,7 @@ public class HistoryFragment extends Fragment {
       HistoryFragment.this.fromDate = fromDate;
       HistoryFragment.this.toDate = toDate;
 
-      Calendar calendar = Calendar.getInstance();
-      taskDataList = activity.taskDb.getHistoryAtRange(fromDate,toDate);
 
-      taskDataGroupByDate.clear();
-      taskDataGroupByDate = taskDataList.stream().collect(Collectors.groupingBy(t -> {
-        calendar.set(t.year,t.month-1,t.date,0,0,0);
-        return calendar.getTimeInMillis();
-      }));
-
-      dateGroup.clear();
-      dateGroup.addAll(
-              taskDataGroupByDate.keySet()
-                      .stream().sorted().collect(Collectors.toList())
-      );
-
-      try {
-        historyExpandableListAdapter.notifyDataSetChanged();
-      }catch (Exception e){
-        e.printStackTrace();
-      }
     }
   }
 
@@ -125,7 +106,7 @@ public class HistoryFragment extends Fragment {
     public void onClick(int groupPos, int childPos) {
       try {
         Long date = dateGroup.get(groupPos);
-        activity.moveTaskToToDoTask(taskDataGroupByDate.get(date).get(childPos).id);
+        //activity.moveTaskToToDoTask(taskDataGroupByDate.get(date).get(childPos).id);
         taskDataGroupByDate.get(date).remove(childPos);
         if(taskDataGroupByDate.get(date).size() == 0){
           taskDataGroupByDate.remove(date);

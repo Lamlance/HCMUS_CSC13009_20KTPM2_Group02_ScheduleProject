@@ -24,8 +24,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 //import kotlinx.coroutines.scheduling.Task;
-
+/*
 public class ReminderTaskDB extends SQLiteOpenHelper {
+
   private static final int DB_VERSION = 29;
   public static final boolean IS_DEV = true;
   private static final String DB_NAME = "ScheduleProject.db";
@@ -1084,3 +1085,5 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     onCreate(db);
   }
 }
+
+ */

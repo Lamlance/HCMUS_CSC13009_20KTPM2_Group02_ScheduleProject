@@ -130,7 +130,6 @@ public class ReminderTaskFireBase {
   }
 
   static DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-  private final String userUID;
   TimerStats todayStats;
   long todayTime;
 
@@ -139,6 +138,10 @@ public class ReminderTaskFireBase {
   static private final HashMap<Integer, List<Reminder>> WEEKLY_REMINDER_BY_WEEKDAY = new HashMap<>();
   static private final HashMap<Integer,List<Task>> TASKS_BY_MONTH = new HashMap<>();
   static private final List<Task> NORMAL_TASK = new LinkedList<>();
+
+
+
+
   static private void AddWeeklyReminderToMap(Reminder r) {
     if (r.weekDates == null) {
       return;
@@ -196,7 +199,17 @@ public class ReminderTaskFireBase {
     return tasks;
   }
 
-  public ReminderTaskFireBase(String deviceUUID) {
+  private final String userUID;
+
+  static private ReminderTaskFireBase reminderTaskFireBase = null;
+  public static ReminderTaskFireBase GetInstance(String userUID){
+    if(reminderTaskFireBase == null){
+      reminderTaskFireBase = new ReminderTaskFireBase(userUID);
+    }
+    return reminderTaskFireBase;
+  }
+
+  private ReminderTaskFireBase(String deviceUUID) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.HOUR_OF_DAY, 0);
     calendar.set(Calendar.MINUTE, 0);
@@ -207,33 +220,9 @@ public class ReminderTaskFireBase {
     todayStats = new TimerStats();
 
 
-    //getRemindersInAYear(calendar.get(Calendar.YEAR));
+    getRemindersInAYear(calendar.get(Calendar.YEAR));
     getTasksInAYear(calendar.get(Calendar.YEAR));
     getNormalTask();
-    /*
-    databaseReference.child(userUID)
-            .child(TimerStats.TABLE_NAME)
-            .orderByChild(TimerStats.CREATE_DATE_NAME)
-            .equalTo(todayTime)
-            .addListenerForSingleValueEvent(new TodayStatsValueEventListener());
-
-     */
-
-    //addReminder("Today reminder",todayTime);
-    //addWeeklyReminder("Today weekly reminder",todayTime,Calendar.MONDAY-1);
-
-    /*
-    Task task = addTask("Task reminder",5,3);
-    if(task != null){
-      List<Task> tasks = new LinkedList<>();
-      tasks.add(task);
-      makeTaskSingleReminder("Today reminder task",todayTime,tasks);
-    }
-    Task task1 = addTask("Task normal",5,3);
-
-     */
-
-
 
 
   }
@@ -254,13 +243,14 @@ public class ReminderTaskFireBase {
     if (reminderId != null) {
       reminder.id = reminderId;
       singleReminderRef.child(reminderId).setValue(reminder);
+      AddSingleReminderToMap(reminder);
       return reminder;
     }
     return null;
   }
 
   @Nullable
-  private Reminder addWeeklyReminder(String title, List<Integer> weekDates) {
+  public Reminder addWeeklyReminder(String title, List<Integer> weekDates) {
     Reminder reminder = new Reminder();
     reminder.title = title;
     reminder.weekDates = weekDates;
@@ -272,6 +262,7 @@ public class ReminderTaskFireBase {
     if (reminderId != null) {
       reminder.id = reminderId;
       weeklyReminderRef.child(reminderId).setValue(reminder);
+      AddWeeklyReminderToMap(reminder);
       return reminder;
     }
     return null;

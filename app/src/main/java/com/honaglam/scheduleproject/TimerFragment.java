@@ -140,13 +140,7 @@ public class TimerFragment extends Fragment {
 
 
     recyclerTask = view.findViewById(R.id.recyclerTask);
-    /*
-    expandableListAdapter = new TaskExpandableListAdapter(
-            getLayoutInflater(),
-            () -> activity.taskMapByReminder,
-            () -> reminderList
-    );
-     */
+
     expandableListAdapter = new TaskExpandableListAdapterFB(
             getLayoutInflater(),
             new ReminderAndTaskListGetter()
@@ -232,7 +226,7 @@ public class TimerFragment extends Fragment {
   public void onResume() {
     super.onResume();
 
-    activity.updateTodayTask();
+    //activity.updateTodayTask();
     expandableListAdapter.notifyDataSetChanged();
   }
 
@@ -288,64 +282,12 @@ public class TimerFragment extends Fragment {
 
     @Override
     public void onSubmit(String name, Calendar setDate) {
-      /*
-      LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
-
-      ReminderData newReminder = activity.makeTaskReminders(
-              name,
-              setDate.getTimeInMillis(),
-              reminderTaskDataList.stream().map(t -> t.id).collect(Collectors.toList())
-      );
-
-      reminderList.add(newReminder);
-      activity.taskMapByReminder.put(newReminder, reminderTaskDataList);
-
-      Set<TaskData> noneReminderData = reminderTaskDataList.stream()
-              .filter(t -> t.reminderData.equals(TaskData.DEFAULT_TASK_DATA_HOLDER))
-              .collect(Collectors.toSet());
-
-      if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER) && noneReminderData.size() > 0) {
-        List<TaskData> oldList = activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER);
-        LinkedList<TaskData> newList = oldList.stream()
-                .filter(t -> !noneReminderData.contains(t))
-                .collect(Collectors.toCollection(LinkedList::new));
-        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, newList);
-      }
-
-      expandableListAdapter.notifyDataSetChanged();
-       */
+     //TODO set single task reminder
     }
 
     @Override
     public void onSubmitWeekly(String name, Calendar setDate, HashSet<Integer> dailyReminder) {
-      /*
-      LinkedList<TaskData> reminderTaskDataList = new LinkedList<>(expandableListAdapter.getCheckedTask());
-
-      ReminderData newReminder = activity.makeWeeklyReminder(
-              name,
-              setDate.getTimeInMillis(),
-              dailyReminder,
-              reminderTaskDataList.stream().map(t -> t.id).collect(Collectors.toList())
-      );
-
-      Set<TaskData> noneReminderData = reminderTaskDataList.stream()
-              .filter(t -> t.reminderData.equals(TaskData.DEFAULT_TASK_DATA_HOLDER))
-              .collect(Collectors.toSet());
-
-      reminderList.add(newReminder);
-      activity.taskMapByReminder.put(newReminder, reminderTaskDataList);
-
-      if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER) && noneReminderData.size() > 0) {
-        List<TaskData> oldList = activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER);
-        LinkedList<TaskData> newList = oldList.stream()
-                .filter(t -> !noneReminderData.contains(t))
-                .collect(Collectors.toCollection(LinkedList::new));
-        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, newList);
-
-      }
-
-      expandableListAdapter.notifyDataSetChanged();
-       */
+     //TODO set weekly task reminder
     }
 
     @Override
@@ -357,25 +299,7 @@ public class TimerFragment extends Fragment {
   class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
     public void onDataPassed(TaskData taskData) {
-      /*
-      TaskData newData = activity.addTask(
-              taskData.taskName,
-              taskData.numberPomodoros,
-              taskData.numberCompletedPomodoros,
-              taskData.isCompleted,
-              taskData.date,
-              taskData.month,
-              taskData.year);
-      if (activity.taskMapByReminder.containsKey(TaskData.DEFAULT_TASK_DATA_HOLDER)) {
-        activity.taskMapByReminder.get(TaskData.DEFAULT_TASK_DATA_HOLDER).add(newData);
-      } else {
-        LinkedList<TaskData> linkedList = new LinkedList<>();
-        linkedList.add(newData);
-        activity.taskMapByReminder.put(TaskData.DEFAULT_TASK_DATA_HOLDER, linkedList);
-        reminderList.add(TaskData.DEFAULT_TASK_DATA_HOLDER);
-      }
-      expandableListAdapter.notifyDataSetChanged();
-       */
+      //TODO create new task + save to db + notify
     }
   }
 
@@ -392,19 +316,15 @@ public class TimerFragment extends Fragment {
       currentPomodoroState = newState;
       UpdateTimerBackground(newState);
 
+      /*
+      TODO set new timer stats
       activity.addStatsTime(
               oldState == TimerService.WORK_STATE ? prevTimeState : 0,
               oldState == TimerService.SHORT_BREAK_STATE ? prevTimeState : 0,
               oldState == TimerService.LONG_BREAK_STATE ? prevTimeState : 0
       );
+       */
 
-      String stats = String.format(
-              Locale.getDefault(),
-              "%d / %d / %d: Work: %d , Short: %d, Long: %d , PrevState: %d, Added time: %d",
-              activity.taskDb.date, activity.taskDb.month, activity.taskDb.year,
-              activity.taskDb.curWork, activity.taskDb.curShort, activity.taskDb.curLong, oldState, prevTimeState);
-
-      Log.i("Toady_Stats", stats);
     }
   }
 
@@ -413,6 +333,7 @@ public class TimerFragment extends Fragment {
     public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
       if (isAutoSwitchTask) return;
       try {
+        //TODO add count to task
         //expandableListAdapter.addAndUpdateChildView();
       } catch (Exception e) {
         e.printStackTrace();
@@ -429,7 +350,7 @@ public class TimerFragment extends Fragment {
               TimerSetting.TIMER_SETTING_REQUEST_KEY,
               TimerFragment.this,
               new TimerSettingResultListener());
-      ((MainActivity) getActivity()).switchFragment_TimerSetting();
+      activity.switchFragment_TimerSetting();
     }
   }
 

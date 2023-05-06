@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
@@ -35,7 +36,7 @@ import java.util.List;
  * Use the {@link Auth0Fragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Auth0Fragment extends Fragment {
+public class Auth0Fragment extends DialogFragment {
 
 
   public Auth0Fragment() {
