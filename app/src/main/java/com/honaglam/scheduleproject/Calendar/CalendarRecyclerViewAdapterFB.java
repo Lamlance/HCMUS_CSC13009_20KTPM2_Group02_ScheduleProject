@@ -184,19 +184,20 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
-
-    if (position < 7) {
-      holder.txtDate.setText(WEEKDAY_NAMES[position]);
-      return;
-    }
-
+    holder.disableIndicator();
     holder.txtDate.setBackgroundColor(
             (clickedPos == position) ? Color.rgb(159, 62, 65) : bgPrimaryColor
     );
     holder.txtDate.setTextColor(
             (clickedPos == position) ? Color.WHITE : txtPrimaryColor
     );
-    holder.disableIndicator();
+
+    if (position < 7) {
+      holder.txtDate.setText(WEEKDAY_NAMES[position]);
+      return;
+    }
+
+
 
     int weekDate = position % 7;
     int date = posToDate(position);

@@ -154,7 +154,6 @@ public class ReminderTaskFireBase {
       WEEKLY_REMINDER_BY_WEEKDAY.get(weekDate).add(r);
     }
   }
-
   static private void AddSingleReminderToMap(Reminder r) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(r.reminderTime);
@@ -164,6 +163,24 @@ public class ReminderTaskFireBase {
     }
     SINGLE_REMINDER_BY_MONTH.get(month).add(r);
   }
+
+  static private void RemoveWeeklyReminder(Reminder r){
+    if(r.weekDates == null){
+      return;
+    }
+
+    for (Integer wd:r.weekDates) {
+      WEEKLY_REMINDER_BY_WEEKDAY.get(wd).remove(r);
+    }
+  }
+  static private void RemoveSingleReminder(Reminder r){
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(r.reminderTime);
+    int month = calendar.get(Calendar.MONTH);
+
+    SINGLE_REMINDER_BY_MONTH.get(month).remove(r);
+  }
+
 
   static private void AddTaskToMap(Task t){
     Calendar calendar = Calendar.getInstance();
@@ -177,6 +194,8 @@ public class ReminderTaskFireBase {
   static private void AddNormalTask(Task t){
     NORMAL_TASK.add(t);
   }
+
+
   static public @NonNull List<Reminder> GetRemindersInMonth(int month){
     List<Reminder> reminders = SINGLE_REMINDER_BY_MONTH.get(month);
     if(reminders != null){
@@ -199,8 +218,9 @@ public class ReminderTaskFireBase {
     return tasks;
   }
   static public @NonNull HashMap<Integer, List<Reminder>> GetWeeklyReminderByWeekDay(){
-    return WEEKLY_REMINDER_BY_WEEKDAY;
+    return new HashMap<>(WEEKLY_REMINDER_BY_WEEKDAY);
   }
+
   private final String userUID;
 
   static private ReminderTaskFireBase reminderTaskFireBase = null;
@@ -277,12 +297,14 @@ public class ReminderTaskFireBase {
               .child(Reminder.SINGLE_REMINDER_NAME)
               .child(reminder.id)
               .removeValue();
+      RemoveSingleReminder(reminder);
     } else {
       databaseReference.child(userUID)
               .child(Reminder.TABLE_NAME)
               .child(Reminder.WEEKLY_REMINDER_NAME)
               .child(reminder.id)
               .removeValue();
+      RemoveWeeklyReminder(reminder);
     }
   }
 

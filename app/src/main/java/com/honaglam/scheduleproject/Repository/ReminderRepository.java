@@ -22,6 +22,9 @@ public class ReminderRepository {
   public void SetAddReminderCallBack(ReminderAction action){
     OnAddReminder = action;
   }
+  public void SetDeleteReminderCallBack(ReminderAction action){
+    OnDeleteReminder = action;
+  }
 
   private void callReminderAction(ReminderAction action, ReminderTaskFireBase.Reminder reminder){
     if(action == null){
@@ -41,5 +44,10 @@ public class ReminderRepository {
   public void addWeeklyReminder(String title, List<Integer> weekDates){
     ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase.GetInstance(userId).addWeeklyReminder(title,weekDates);
     callReminderAction(OnAddReminder,reminder);
+  }
+
+  public void removeReminder(ReminderTaskFireBase.Reminder reminder){
+    ReminderTaskFireBase.GetInstance(userId).removeReminder(reminder);
+    callReminderAction(OnDeleteReminder,reminder);
   }
 }

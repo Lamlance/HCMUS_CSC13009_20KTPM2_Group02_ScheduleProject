@@ -115,6 +115,7 @@ public class TimerFragment extends Fragment {
     List<ReminderTaskFireBase.Task> taskList = ReminderTaskFireBase.GetTasksInDate(
             calendar.get(Calendar.DATE),calendar.get(Calendar.MONTH)
     );
+
     Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> map = taskList.stream()
             .collect(Collectors.groupingBy(t -> t.reminder));
 

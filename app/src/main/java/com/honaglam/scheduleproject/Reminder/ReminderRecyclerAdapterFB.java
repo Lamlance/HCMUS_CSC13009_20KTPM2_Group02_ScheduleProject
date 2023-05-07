@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +29,7 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
   };
 
   public interface ItemAction {
-    void onAction(int position);
+    void onAction(int position, @Nullable ReminderTaskFireBase.Reminder reminder);
   }
 
 
@@ -46,10 +47,10 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
   }
 
 
-  public void callItemAction(ItemAction action) {
+  public void callItemAction(ItemAction action, ReminderTaskFireBase.Reminder reminder) {
     if (action != null) {
       try {
-        action.onAction(selectedPos);
+        action.onAction(selectedPos,reminder);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -73,27 +74,25 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
     );
     viewHolder.setSelectItemCallback((pos) -> {
       selectedPos = pos;
-      callItemAction(itemClickAction);
+      callItemAction(itemClickAction,null);
     });
     return viewHolder;
   }
 
   @Override
   public void onBindViewHolder(@NonNull ReminderViewHolder holder, int position) {
-    Log.i("REMINDER_RECYCLER", "Bind view holder " + position);
-
-    holder.btnDeleteReminder.setOnClickListener((clickedView) -> {
-      callItemAction(deleteClickAction);
-    });
-    holder.itemView.setBackgroundColor(position == selectedPos ?
-            ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
-            Color.TRANSPARENT);
-
     ReminderTaskFireBase.Reminder data = reminderInDateGetter.getReminder().get(position);
 
     if(data == null){
       return;
     }
+
+    holder.btnDeleteReminder.setOnClickListener((clickedView) -> {
+      callItemAction(deleteClickAction,data);
+    });
+    holder.itemView.setBackgroundColor(position == selectedPos ?
+            ResourcesCompat.getColor(context.getResources(), R.color.selected_white, null) :
+            Color.TRANSPARENT);
 
     if (data.weekDates != null) {
       String weekDateNames = "";
