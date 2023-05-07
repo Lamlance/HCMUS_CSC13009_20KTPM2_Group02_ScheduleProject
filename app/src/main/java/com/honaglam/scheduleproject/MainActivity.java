@@ -8,6 +8,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
+import android.app.Activity;
+import android.app.AlarmManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -204,18 +206,17 @@ public class MainActivity extends AppCompatActivity {
 
 
   //Reminder
-  private class ReminderDBAction{
-
-  }
 
 
 
+  /*
   public static final String NOTIFICATION_CHANEL_ID = "ReminderNotificationChanel";
   NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
           .setSmallIcon(R.drawable.baseline_notifications_active_24)
           .setContentTitle("Reminder notification")
           .setContentText("Reminding")
           .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+   */
 
 
   class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener {

@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapter;
 import com.honaglam.scheduleproject.Calendar.CalendarRecyclerViewAdapterFB;
+import com.honaglam.scheduleproject.MyAlramManager.MyAlarmManager;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
@@ -302,6 +303,8 @@ public class CalendarFragment extends Fragment {
       }
 
       if(reminder.weekDates == null){
+        MyAlarmManager.SetSingleReminderAlarm(context,reminder);
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(reminder.reminderTime);
         int date = calendar.get(Calendar.DATE);
@@ -323,7 +326,7 @@ public class CalendarFragment extends Fragment {
         reminderMapByWeekDay.get(wd).add(reminder);
       }
 
-
+      MyAlarmManager.SetWeeklyReminderAlarm(context,reminder);
       calendarRecyclerViewAdapter.notifyDataSetChanged();
       if(reminder.weekDates.contains(selectedWeekDay)){
         reminderRecyclerAdapter.notifyItemInserted(reminderInDateGetter.getReminder().size() - 1);
