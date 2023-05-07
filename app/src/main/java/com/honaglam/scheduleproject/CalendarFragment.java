@@ -56,6 +56,9 @@ import kotlin.NotImplementedError;
  * create an instance of this fragment.
  */
 public class CalendarFragment extends Fragment {
+  private static final String[] WEEK_DAY_NAMES = new String[]{
+    "SUN","MON","TUE","WED","THU","FRI","SAT"
+  };
 
   RecyclerView recyclerCalendar;
   CalendarRecyclerViewAdapterFB calendarRecyclerViewAdapter;
@@ -199,31 +202,36 @@ public class CalendarFragment extends Fragment {
 
     calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapterFB(context,new ReminderInDateGetter());
     calendarRecyclerViewAdapter.setSelectDateCallBack((d,m,y,w)->{
-      int oldCount = reminderRecyclerAdapter == null ? -1 : reminderRecyclerAdapter.getItemCount();
+      int oldDate = selectedDate;
       selectedDate = d;
       selectedMonth = m;
       selectedYear = y;
       selectedWeekDay = w;
-      int newCount = reminderRecyclerAdapter == null ? -1 : reminderRecyclerAdapter.getItemCount() ;
-      if(reminderRecyclerAdapter != null && newCount != oldCount){
+
+      txtBigDate.setText(String.valueOf(d));
+      txtBigWeekDate.setText(WEEK_DAY_NAMES[w-1]);
+      txtSelectDate.setText(String.format(Locale.getDefault(),"%d/%d/%d",d,m,y));
+
+      if(reminderRecyclerAdapter != null && oldDate != selectedDate){
         reminderRecyclerAdapter.notifyDataSetChanged();
       }
     });
     calendarRecyclerViewAdapter.setOnMonthChangeCallBack((d,m,y,w)->{
+      int oldDate = selectedDate;
       selectedDate = d;
       selectedMonth = m;
       selectedYear = y;
       selectedWeekDay = w;
+
+      txtBigDate.setText(String.valueOf(d));
+      txtBigWeekDate.setText(WEEK_DAY_NAMES[w-1]);
+      txtSelectDate.setText(String.format(Locale.getDefault(),"%d/%d/%d",d,m,y));
 
       reminderInMonth = ReminderTaskFireBase.GetRemindersInMonth(selectedMonth);
       MapReminderMothToDateMap();
 
       if(reminderRecyclerAdapter != null){
-        int oldCount = reminderRecyclerAdapter.getItemCount();
-        int newCount = reminderRecyclerAdapter.getItemCount();
-        if(oldCount != newCount){
-          reminderRecyclerAdapter.notifyDataSetChanged();
-        }
+        reminderRecyclerAdapter.notifyDataSetChanged();
       }
 
     });

@@ -23,6 +23,8 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
   OnClickPositionCallBack clickPositionCallBack = null;
   FrameLayout layoutItemAll;
 
+  View singleReminderIndicator;
+  View weeklyReminderIndicator;
   public interface OnClickPositionCallBack {
     void clickAtPosition(int position) throws NotImplementedError;
   }
@@ -33,6 +35,9 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
     this.clickPositionCallBack = callBack;
 
     txtDate = itemView.findViewById(R.id.txtCalendarDateItem);
+    singleReminderIndicator = itemView.findViewById(R.id.viewSingleReminderIndicator);
+    weeklyReminderIndicator = itemView.findViewById(R.id.viewWeeklyReminderIndicator);
+
     layoutItemAll = itemView.findViewById(R.id.layoutCalendarItemAll);
     this.itemView.setOnClickListener(view -> {
       try {
@@ -44,6 +49,17 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
         e.printStackTrace();
       }
     });
+  }
+
+  public void disableIndicator(){
+    singleReminderIndicator.setVisibility(View.GONE);
+    weeklyReminderIndicator.setVisibility(View.GONE);
+  }
+  public void enableSingleReminderIndicator(){
+    singleReminderIndicator.setVisibility(View.VISIBLE);
+  }
+  public void enableWeeklyReminderIndicator(){
+    weeklyReminderIndicator.setVisibility(View.VISIBLE);
   }
 }
 

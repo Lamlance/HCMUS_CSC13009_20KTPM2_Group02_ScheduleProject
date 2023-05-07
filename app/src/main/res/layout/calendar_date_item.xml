@@ -25,6 +25,20 @@
         android:layout_height="0dp"
         android:textSize="14sp"
         android:id="@+id/txtCalendarDateItem"
-        tools:text="1"/>
+        tools:text="1" />
+    <View
+        android:id="@+id/viewSingleReminderIndicator"
+        android:visibility="gone"
+        android:background="@color/work_color"
+        app:layout_constraintTop_toBottomOf="@+id/txtCalendarDateItem"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"/>
+    <View
+        android:id="@+id/viewWeeklyReminderIndicator"
+        android:visibility="gone"
+        android:background="@color/short_break_color"
+        app:layout_constraintTop_toBottomOf="@+id/viewSingleReminderIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"/>
   </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

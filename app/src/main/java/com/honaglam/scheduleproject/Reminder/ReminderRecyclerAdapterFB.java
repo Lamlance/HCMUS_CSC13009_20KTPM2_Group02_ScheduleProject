@@ -18,10 +18,14 @@ import com.honaglam.scheduleproject.ReminderTaskFireBase;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderViewHolder> {
+  static final String[] WEEK_DAY_NAMES_SHORT = new String[]{
+          "SU", "MO", "TU", "WE", "TH", "FR", "SA"
+  };
 
   public interface ItemAction {
     void onAction(int position);
@@ -36,7 +40,7 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
   CalendarFragment.ReminderInDateGetter reminderInDateGetter;
 
 
-  public ReminderRecyclerAdapterFB(Context context,CalendarFragment.ReminderInDateGetter getter) {
+  public ReminderRecyclerAdapterFB(Context context, CalendarFragment.ReminderInDateGetter getter) {
     this.context = context;
     reminderInDateGetter = getter;
   }
@@ -61,8 +65,6 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
   }
 
 
-
-
   @NonNull
   @Override
   public ReminderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -78,7 +80,7 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
 
   @Override
   public void onBindViewHolder(@NonNull ReminderViewHolder holder, int position) {
-    Log.i("REMINDER_RECYCLER","Bind view holder " + position);
+    Log.i("REMINDER_RECYCLER", "Bind view holder " + position);
 
     holder.btnDeleteReminder.setOnClickListener((clickedView) -> {
       callItemAction(deleteClickAction);
@@ -89,11 +91,23 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
 
     ReminderTaskFireBase.Reminder data = reminderInDateGetter.getReminder().get(position);
 
-    if(data != null){
+    if(data == null){
+      return;
+    }
+
+    if (data.weekDates != null) {
+      String weekDateNames = "";
+      for (Integer wD : data.weekDates) {
+        weekDateNames += WEEK_DAY_NAMES_SHORT[wD-1] + "-";
+      }
+      weekDateNames = weekDateNames.substring(0,weekDateNames.length() - 1);
+      holder.txtId.setText(String.format(Locale.getDefault(),"Weekly: %s",weekDateNames));
+    } else {
       String dateFormat = DateFormat.getDateTimeInstance().format(new Date(data.reminderTime));
       holder.txtId.setText(dateFormat);
-      holder.txtName.setText(data.title);
     }
+
+    holder.txtName.setText(data.title);
 
   }
 

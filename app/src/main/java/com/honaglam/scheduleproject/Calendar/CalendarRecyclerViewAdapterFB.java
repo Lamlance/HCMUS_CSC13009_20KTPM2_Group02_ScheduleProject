@@ -184,16 +184,20 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
   @Override
   public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
+
+    if (position < 7) {
+      holder.txtDate.setText(WEEKDAY_NAMES[position]);
+      return;
+    }
+
     holder.txtDate.setBackgroundColor(
             (clickedPos == position) ? Color.rgb(159, 62, 65) : bgPrimaryColor
     );
     holder.txtDate.setTextColor(
             (clickedPos == position) ? Color.WHITE : txtPrimaryColor
     );
-    if (position < 7) {
-      holder.txtDate.setText(WEEKDAY_NAMES[position]);
-      return;
-    }
+    holder.disableIndicator();
+
     int weekDate = position % 7;
     int date = posToDate(position);
 
@@ -201,13 +205,16 @@ public class CalendarRecyclerViewAdapterFB extends RecyclerView.Adapter<Calendar
 
     holder.txtDate.setText(dateStr);
 
-
-    if (reminderInDateGetter.getReminder(date).size() > 0) {
-      holder.txtDate.setBackgroundColor(
-              (clickedPos == position) ? Color.rgb(159, 62, 65) : highlightColor
-      );
-      holder.txtDate.setTextColor(Color.WHITE);
-      Log.i("CALENDAR_ADAPTER",date + " has reminder");
+    List<ReminderTaskFireBase.Reminder> reminderInDate = reminderInDateGetter.getReminder(date);
+    if (reminderInDate.size() > 0) {
+      boolean hasSingleReminder = reminderInDate.stream().anyMatch(r -> (r.weekDates == null));
+      boolean hasWeeklyReminder = reminderInDate.stream().anyMatch(r -> (r.weekDates != null));
+      if(hasSingleReminder){
+        holder.enableSingleReminderIndicator();
+      }
+      if(hasWeeklyReminder){
+        holder.enableWeeklyReminderIndicator();
+      }
     }
 
   }
