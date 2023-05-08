@@ -36,6 +36,10 @@ public class TaskRepository {
     CallTaskAction(OnAddTask,task);
   }
 
+  public void updateTask(ReminderTaskFireBase.Task task){
+    ReminderTaskFireBase.GetInstance(userId).updateTask(task);
+  }
+
   public void removeTask(ReminderTaskFireBase.Task task){
     ReminderTaskFireBase.GetInstance(userId).removeTask(task);
   }

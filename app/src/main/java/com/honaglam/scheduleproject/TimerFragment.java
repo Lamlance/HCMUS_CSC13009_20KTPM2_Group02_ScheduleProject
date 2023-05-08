@@ -51,12 +51,6 @@ import kotlin.NotImplementedError;
  * create an instance of this fragment.
  */
 public class TimerFragment extends Fragment {
-
-
-  // TODO: Rename parameter arguments, choose names that match
-  // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-  // TODO: Rename and change types of parameters
-
   private TextView txtTimer;
   private TimerFloatingButton btnTimerStart;
   private TimerFloatingButton btnGiveUp;
@@ -66,7 +60,6 @@ public class TimerFragment extends Fragment {
 
 
   private Button btnAddTask;
-
   public TextView txtPomodoro;
   public TextView txtShortBreak;
   public TextView txtLongBreak;
@@ -75,8 +68,13 @@ public class TimerFragment extends Fragment {
   private Context context;
   private MainActivity activity;
 
+
   int currentPomodoroState = TimerService.WORK_STATE;
   static TaskRepository taskRepository;
+
+
+  @Nullable ReminderTaskFireBase.Task selectedTask;
+
 
   public static TimerFragment newInstance(String userId) {
     TimerFragment fragment = new TimerFragment();
@@ -154,6 +152,8 @@ public class TimerFragment extends Fragment {
             getLayoutInflater(),
             new ReminderAndTaskListGetter()
     );
+    expandableListAdapter.SetOnChildClick(new TaskListItemClick());
+    expandableListAdapter.SetOnChildEditClick(new TaskListItemEditClick());
     recyclerTask.setAdapter(expandableListAdapter);
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
 
@@ -238,6 +238,8 @@ public class TimerFragment extends Fragment {
     //activity.updateTodayTask();
     expandableListAdapter.notifyDataSetChanged();
   }
+
+
 
   public void UpdateTimeUI(long millisRemain) {
     int seconds = ((int) millisRemain / 1000) % 60;
@@ -326,13 +328,43 @@ public class TimerFragment extends Fragment {
     }
   }
 
-  class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
+
+
+  static class AddTaskDialogListener implements AddTaskDialog.AddTaskDialogListener {
     @Override
-    public void onDataPassed(TaskData taskData) {
-      //TODO create new task + save to db + notify
-      taskRepository.addTask(taskData.taskName,taskData.numberPomodoros);
+    public void onDataPassed(ReminderTaskFireBase.Task task) {
+      taskRepository.addTask(task.title,task.loops);
     }
   }
+  class UpdateTaskDialogListener implements AddTaskDialog.AddTaskDialogListener{
+    @Override
+    public void onDataPassed(ReminderTaskFireBase.Task task) {
+      int index = taskMapByReminder.get(task.reminder).indexOf(task);
+      if(index >= 0){
+        taskMapByReminder.get(task.reminder).set(index,task);
+        expandableListAdapter.notifyDataSetChanged();
+        taskRepository.updateTask(task);
+      }
+    }
+  }
+
+
+
+  class TaskListItemClick implements TaskExpandableListAdapterFB.ChildClickAction{
+    @Override
+    public void onChild(int group, int child, ReminderTaskFireBase.Task task) {
+      selectedTask = task;
+    }
+  }
+
+  class TaskListItemEditClick implements TaskExpandableListAdapterFB.ChildClickAction{
+    @Override
+    public void onChild(int group, int child, ReminderTaskFireBase.Task task) {
+      selectedTask = task;
+      new AddTaskDialog(context,new UpdateTaskDialogListener(),task).show();
+    }
+  }
+
 
   class TimerTickCallBack implements TimerService.TimerTickCallBack {
     @Override
@@ -362,7 +394,7 @@ public class TimerFragment extends Fragment {
   class TimerOnFinishCallback implements TimerService.TimerOnFinishCallback {
     @Override
     public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
-      if (isAutoSwitchTask) return;
+      //if (isAutoSwitchTask) return;
       try {
         //TODO add count to task
         //expandableListAdapter.addAndUpdateChildView();

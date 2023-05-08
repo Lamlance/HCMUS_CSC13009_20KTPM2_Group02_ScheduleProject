@@ -518,6 +518,8 @@ public class ReminderTaskFireBase {
     ReminderTaskFireBase.RemoveTask(task);
   }
 
+
+
   static class ReminderTasksQueryListener implements com.google.firebase.database.ValueEventListener{
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {

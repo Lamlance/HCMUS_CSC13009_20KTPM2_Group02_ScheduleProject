@@ -1,28 +1,72 @@
 package com.honaglam.scheduleproject.Task;
 
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.ReminderTaskFireBase;
 import com.honaglam.scheduleproject.TimerFragment;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
+  public interface ChildClickAction{
+    void onChild(int group, int child, ReminderTaskFireBase.Task task);
+  }
+
 
   LayoutInflater inflater;
   TimerFragment.ReminderAndTaskListGetter getter;
+
+  @Nullable View prevClickView;
+  @Nullable ChildClickAction onChildClick;
+  @Nullable ChildClickAction onChildDeleteClick;
+  @Nullable ChildClickAction onChildArchiveClick;
+  @Nullable ChildClickAction onChildEditClick;
+
   public TaskExpandableListAdapterFB(LayoutInflater inflater,TimerFragment.ReminderAndTaskListGetter getter){
     super();
     this.inflater = inflater;
     this.getter = getter;
   }
+
+
+
+  public void SetOnChildClick(ChildClickAction action){
+    onChildClick = action;
+  }
+
+  public void SetOnChildDeleteClick(ChildClickAction action){
+    onChildDeleteClick = action;
+  }
+
+  public void SetOnChildArchiveClick(ChildClickAction action){
+    onChildArchiveClick = action;
+  }
+
+  public void SetOnChildEditClick(ChildClickAction action){
+    onChildEditClick = action;
+  }
+
+  private void CallChildAction(ChildClickAction action, int group, int child, ReminderTaskFireBase.Task task){
+    if(action == null){
+      return;
+    }
+    action.onChild(group,child,task);
+  }
+
+
 
   @Override
   public int getGroupCount() {
@@ -104,8 +148,36 @@ public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
     if(task == null){
       return view;
     }
+
     TextView txtTaskName = view.findViewById(R.id.txtTaskName);
+    TextView txtCountPomodoro = view.findViewById(R.id.txtCountPomodoro);
+    CheckBox checkBox = view.findViewById(R.id.checkBoxCompleteTask);
+    ImageButton editBtn = view.findViewById(R.id.imgBtnEditTask);
+    ImageButton deleteBtn = view.findViewById(R.id.imgBtnDeleteTask);
+    ImageButton archiveBtn = view.findViewById(R.id.imgBtnMoveToHistory);
+
     txtTaskName.setText(task.title);
+    txtCountPomodoro.setText(String.format(Locale.getDefault(),"%d/%d",task.loopsDone,task.loops));
+    checkBox.setChecked(false);
+
+    view.setOnClickListener(clickedView -> {
+      if(prevClickView != null){
+        prevClickView.setBackgroundColor(Color.TRANSPARENT);
+      }
+      prevClickView = clickedView;
+      clickedView.setBackgroundColor(Color.parseColor("#80D2D2D2"));
+      CallChildAction(onChildClick,group,child,task);
+    });
+    editBtn.setOnClickListener(clickedView -> {
+      CallChildAction(onChildEditClick,group,child,task);
+    });
+    deleteBtn.setOnClickListener(clickedView -> {
+      CallChildAction(onChildDeleteClick,group,child,task);
+    });
+    archiveBtn.setOnClickListener(clickedView -> {
+      CallChildAction(onChildArchiveClick,group,child,task);
+    });
+
     return view;
   }
 
