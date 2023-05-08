@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentResultListener;
 
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.Repository.TaskRepository;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Task.TaskExpandableListAdapter;
@@ -75,17 +76,22 @@ public class TimerFragment extends Fragment {
   private MainActivity activity;
 
   int currentPomodoroState = TimerService.WORK_STATE;
+  static TaskRepository taskRepository;
 
-  public static TimerFragment newInstance() {
+  public static TimerFragment newInstance(String userId) {
     TimerFragment fragment = new TimerFragment();
     Bundle args = new Bundle();
     fragment.setArguments(args);
+    if(taskRepository == null){
+      taskRepository = new TaskRepository(userId);
+    }
+
     return fragment;
   }
 
 
   Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> taskMapByReminder;
-  List<ReminderTaskFireBase.Reminder> reminderList;
+  HashSet<ReminderTaskFireBase.Reminder> reminderList;
   TaskExpandableListAdapterFB expandableListAdapter;
 
 
@@ -95,7 +101,7 @@ public class TimerFragment extends Fragment {
 
   public class ReminderAndTaskListGetter{
     public List<ReminderTaskFireBase.Reminder> getRemindList(){
-      return reminderList;
+      return new LinkedList<>(reminderList);
     }
     @NonNull
     public List<ReminderTaskFireBase.Task> getTaskInReminder(ReminderTaskFireBase.Reminder reminder){
@@ -123,7 +129,9 @@ public class TimerFragment extends Fragment {
     map.forEach((k,v)->{
       taskMapByReminder.put(k,new LinkedList<>(v));
     });
-    reminderList = new LinkedList<>(map.keySet());
+    reminderList = new HashSet<>(map.keySet());
+
+    taskRepository.SetOnTaskAdded(new TaskAddedCallBack());
   }
 
   @Override
@@ -276,6 +284,27 @@ public class TimerFragment extends Fragment {
 
   }
 
+
+
+  class TaskAddedCallBack implements TaskRepository.OnTaskAction{
+    @Override
+    public void onAction(@Nullable ReminderTaskFireBase.Task task) {
+      if(task == null){
+        return;
+      }
+
+      reminderList.add(task.reminder);
+      if(!taskMapByReminder.containsKey(task.reminder)){
+        taskMapByReminder.put(task.reminder,new LinkedList<>());
+      }
+      taskMapByReminder.get(task.reminder).add(task);
+
+      expandableListAdapter.notifyDataSetChanged();
+    }
+  }
+
+
+
   class SetTimerReminderCallBack implements ReminderAddDialog.ReminderDataCallBack {
     @Override
     public void onSubmit(String name, int hour24h, int minute) {
@@ -301,6 +330,7 @@ public class TimerFragment extends Fragment {
     @Override
     public void onDataPassed(TaskData taskData) {
       //TODO create new task + save to db + notify
+      taskRepository.addTask(taskData.taskName,taskData.numberPomodoros);
     }
   }
 

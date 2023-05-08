@@ -194,7 +194,15 @@ public class ReminderTaskFireBase {
   static private void AddNormalTask(Task t){
     NORMAL_TASK.add(t);
   }
-
+  static private void RemoveTask(Task task){
+    if(task.reminder == Task.DEFAULT_REMINDER){
+      NORMAL_TASK.remove(task);
+    }else{
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTimeInMillis(task.reminder.reminderTime);
+      TASKS_BY_MONTH.get(calendar.get(Calendar.MONTH)).remove(task);
+    }
+  }
 
   static public @NonNull List<Reminder> GetRemindersInMonth(int month){
     List<Reminder> reminders = SINGLE_REMINDER_BY_MONTH.get(month);
@@ -419,6 +427,7 @@ public class ReminderTaskFireBase {
 
 
 
+
   public void updateTask(Task task) {
     databaseReference.child(userUID)
             .child(Task.TABLE_NAME)
@@ -468,7 +477,7 @@ public class ReminderTaskFireBase {
 
   }
 
-  public void getTasksInAYear(int year){
+  private void getTasksInAYear(int year){
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.YEAR, year);
 
@@ -493,12 +502,20 @@ public class ReminderTaskFireBase {
 
   }
 
-  public void getNormalTask(){
+  private void getNormalTask(){
     databaseReference.child(this.userUID)
             .child(Task.TABLE_NAME)
             .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
             .equalTo(-1)
             .addListenerForSingleValueEvent(new NormalTaskQueryListener());
+  }
+
+  public void removeTask(Task task){
+    databaseReference.child(userUID)
+            .child(Task.TABLE_NAME)
+            .child(task.id)
+            .removeValue();
+    ReminderTaskFireBase.RemoveTask(task);
   }
 
   static class ReminderTasksQueryListener implements com.google.firebase.database.ValueEventListener{

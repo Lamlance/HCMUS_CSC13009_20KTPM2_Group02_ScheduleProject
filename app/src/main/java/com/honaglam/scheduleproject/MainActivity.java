@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
       timerService.setStateTime(loadTimerSettingPref());
 
       calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
-      timerFragment = TimerFragment.newInstance();
+      timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
       statisticFragment = StatisticFragment.newInstance();
       historyFragment = HistoryFragment.newInstance();
       auth0Fragment = Auth0Fragment.newInstance();
