@@ -52,8 +52,8 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder {
   }
 
   public void disableIndicator(){
-    singleReminderIndicator.setVisibility(View.GONE);
-    weeklyReminderIndicator.setVisibility(View.GONE);
+    singleReminderIndicator.setVisibility(View.INVISIBLE);
+    weeklyReminderIndicator.setVisibility(View.INVISIBLE);
   }
   public void enableSingleReminderIndicator(){
     singleReminderIndicator.setVisibility(View.VISIBLE);

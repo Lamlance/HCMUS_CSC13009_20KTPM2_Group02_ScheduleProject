@@ -231,6 +231,11 @@ public class ReminderTaskFireBase {
     return reminderTaskFireBase;
   }
 
+
+  public interface  ReminderResultCallBack{
+    void onResult(@Nullable List<Reminder> reminders);
+  }
+
   private ReminderTaskFireBase(String deviceUUID) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -248,8 +253,6 @@ public class ReminderTaskFireBase {
 
 
   }
-
-
 
   @Nullable
   public Reminder addReminder(String title, long time) {
@@ -339,6 +342,51 @@ public class ReminderTaskFireBase {
             .child(Reminder.WEEKLY_REMINDER_NAME)
             .orderByChild(Reminder.REMINDER_TIME_NAME)
             .addListenerForSingleValueEvent(new RemindersQueryListener());
+  }
+
+  public void searchReminder(long startTime,long endTime,@NonNull ReminderResultCallBack callBack){
+    databaseReference.child(userUID)
+            .child(Reminder.TABLE_NAME)
+            .child(Reminder.SINGLE_REMINDER_NAME)
+            .orderByChild(Reminder.REMINDER_TIME_NAME)
+            .startAt(startTime)
+            .endAt(endTime)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+              @Override
+              public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                  callBack.onResult(null);
+                  return;
+                }
+                LinkedList<Reminder> reminderLinkedList = new LinkedList<>();
+                Iterable<DataSnapshot> reminders = snapshot.getChildren();
+                for (DataSnapshot data : reminders) {
+                  Reminder reminder = data.getValue(Reminder.class);
+                  if(reminder != null){
+                    reminderLinkedList.add(reminder);
+                  }
+                }
+                callBack.onResult(reminderLinkedList);
+              }
+
+              @Override
+              public void onCancelled(@NonNull DatabaseError error) {
+
+              }
+            });
+  }
+  public void searchReminder(String title,long startTime,long endTime,@NonNull ReminderResultCallBack callBack){
+    String titleLowerCased = title.toLowerCase();
+    searchReminder(startTime,endTime,(reminders -> {
+      if(reminders == null){
+        callBack.onResult(null);
+        return ;
+      }
+      List<Reminder> filteredReminders = reminders.stream()
+              .filter(r -> r.title.toLowerCase().contains(titleLowerCased))
+              .collect(Collectors.toList());
+      callBack.onResult(filteredReminders);
+    }));
   }
 
   static class RemindersQueryListener implements com.google.firebase.database.ValueEventListener {

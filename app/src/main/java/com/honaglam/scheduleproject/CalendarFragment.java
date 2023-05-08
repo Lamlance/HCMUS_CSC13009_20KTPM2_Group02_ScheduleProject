@@ -83,6 +83,9 @@ public class CalendarFragment extends Fragment {
   HashMap<Integer, List<ReminderTaskFireBase.Reminder>> reminderMapByWeekDay;
 
   public class ReminderInDateGetter{
+    private static boolean returnSearchResult = false;
+    private static @NonNull List<ReminderTaskFireBase.Reminder> SEARCH_RESULT = new LinkedList<>();
+
     @NonNull public List<ReminderTaskFireBase.Reminder> getReminder(int date){
       List<ReminderTaskFireBase.Reminder> remindersInDate = new LinkedList<>();
       if(date <= 0){
@@ -92,10 +95,10 @@ public class CalendarFragment extends Fragment {
       calendar.set(selectedYear,selectedMonth,date);
 
       List<ReminderTaskFireBase.Reminder> singleReminders = singleReminderMapByDate.get(date);
-      Log.i("CALENDAR_FRAGMENT","single reminder size " + (singleReminders == null ? 0 : singleReminders.size()));
+      //Log.i("CALENDAR_FRAGMENT","single reminder size " + (singleReminders == null ? 0 : singleReminders.size()));
 
       List<ReminderTaskFireBase.Reminder> weeklyReminder = getWeeklyReminder(calendar.get(Calendar.DAY_OF_WEEK));
-      Log.i("CALENDAR_FRAGMENT","weekly reminder size " + weeklyReminder.size());
+      //Log.i("CALENDAR_FRAGMENT","weekly reminder size " + weeklyReminder.size());
 
       if(singleReminders != null){
         remindersInDate.addAll(singleReminders);
@@ -107,6 +110,9 @@ public class CalendarFragment extends Fragment {
     }
 
     @NonNull public List<ReminderTaskFireBase.Reminder> getReminder(){
+      if(returnSearchResult){
+        return SEARCH_RESULT;
+      }
       return getReminder(selectedDate);
     }
 
@@ -115,10 +121,10 @@ public class CalendarFragment extends Fragment {
 
 
       if(reminders != null){
-        Log.i("CALENDAR_FRAGMENT","reminderMapByWeekDay size " + reminders.size());
+        //Log.i("CALENDAR_FRAGMENT","reminderMapByWeekDay size " + reminders.size());
         return reminders;
       }
-      Log.i("CALENDAR_FRAGMENT","reminderMapByWeekDay size " + 0);
+      //Log.i("CALENDAR_FRAGMENT","reminderMapByWeekDay size " + 0);
 
       return new LinkedList<>();
     }
@@ -177,6 +183,7 @@ public class CalendarFragment extends Fragment {
 
     reminderRepository.SetAddReminderCallBack(new ReminderAddedCallBack());
     reminderRepository.SetDeleteReminderCallBack(new ReminderDeletedCallBack());
+    reminderRepository.SetSearchResultCallBack(new SearchReminderCallBack());
   }
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -211,6 +218,8 @@ public class CalendarFragment extends Fragment {
       selectedMonth = m;
       selectedYear = y;
       selectedWeekDay = w;
+
+      ReminderInDateGetter.returnSearchResult = false;
 
       txtBigDate.setText(String.valueOf(d));
       txtBigWeekDate.setText(WEEK_DAY_NAMES[w-1]);
@@ -312,6 +321,13 @@ public class CalendarFragment extends Fragment {
     reminderRepository.removeReminder(reminder);
   }
 
+  private void searchReminder(){
+    String searchString = txtSearchReminder.getText().toString();
+
+    reminderRepository.SearchReminder(searchString,searchStartDate,searchEndDate);
+  }
+
+
   class ReminderAddedCallBack implements ReminderRepository.ReminderAction{
     @Override
     public void onAction(@Nullable ReminderTaskFireBase.Reminder reminder) {
@@ -349,7 +365,7 @@ public class CalendarFragment extends Fragment {
       calendarRecyclerViewAdapter.notifyDataSetChanged();
 
       int newSize = reminderInDateGetter.getReminder().size();
-      Log.i("CALENDAR_FRAGMENT","NEW REMINDER SIZE" + newSize);
+      //Log.i("CALENDAR_FRAGMENT","NEW REMINDER SIZE" + newSize);
 
       if(reminder.weekDates.contains(selectedWeekDay)){
           reminderRecyclerAdapter.notifyItemInserted(reminderInDateGetter.getReminder().size() - 1);
@@ -405,13 +421,27 @@ public class CalendarFragment extends Fragment {
               .get(calendar.get(Calendar.DATE))
               .remove(reminder);
 
-      Log.i("CALENDAR_FRAGMENT","REMOVE RESULT " + (removeResult ? "TRUE" : "FALSE"));
+      //Log.i("CALENDAR_FRAGMENT","REMOVE RESULT " + (removeResult ? "TRUE" : "FALSE"));
 
       if(removeResult){
         int pos = calendarRecyclerViewAdapter.dateToPos(calendar.get(Calendar.DATE));
         calendarRecyclerViewAdapter.notifyItemChanged(pos);
         reminderRecyclerAdapter.notifyDataSetChanged();
       }
+    }
+  }
+
+  class SearchReminderCallBack implements ReminderRepository.ReminderSearchResult{
+    @Override
+    public void onAction(@Nullable List<ReminderTaskFireBase.Reminder> reminders) {
+      if(reminders == null){
+        return;
+      }
+
+      ReminderInDateGetter.returnSearchResult = true;
+      ReminderInDateGetter.SEARCH_RESULT.clear();
+      ReminderInDateGetter.SEARCH_RESULT.addAll(reminders);
+      reminderRecyclerAdapter.notifyDataSetChanged();
     }
   }
 
@@ -432,15 +462,6 @@ public class CalendarFragment extends Fragment {
     }
   }
 
-  class FilterBtnClick implements View.OnClickListener{
-    OnSelectFromToDate onSelectFromToDate = new OnSelectFromToDate();
-    ReminderFilterDialog reminderFilterDialog = new ReminderFilterDialog(context,onSelectFromToDate);
-    @Override
-    public void onClick(View view) {
-      reminderFilterDialog.show();
-    }
-  }
-
   class OnSelectFromToDate implements ReminderFilterDialog.OnSelectFromToDate{
     @Override
     public void onSelect(long fromDate, long toDate) {
@@ -449,19 +470,13 @@ public class CalendarFragment extends Fragment {
     }
   }
 
-  private void searchReminder(){
-    String searchString = txtSearchReminder.getText().toString();
-
-    if(searchString.isEmpty() && searchStartDate < 0 && searchEndDate < 0){
-      return;
+  class FilterBtnClick implements View.OnClickListener{
+    OnSelectFromToDate onSelectFromToDate = new OnSelectFromToDate();
+    ReminderFilterDialog reminderFilterDialog = new ReminderFilterDialog(context,onSelectFromToDate);
+    @Override
+    public void onClick(View view) {
+      reminderFilterDialog.show();
     }
-
-    //int oldSize = mainActivity.reminderDataList.size();
-    //int newSize = mainActivity.searchReminder(searchString,searchStartDate,searchEndDate);
-
-    //reminderRecyclerAdapter.notifyItemRangeChanged(0,Math.max(oldSize,newSize));
   }
-
-
 
 }
