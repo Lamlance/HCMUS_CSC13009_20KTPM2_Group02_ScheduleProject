@@ -26,6 +26,7 @@
       android:title="History"
       />
 
+
     <item android:id="@+id/nav_switchTheme"
         android:title="Dark Mode"
         android:icon="@drawable/baseline_dark_mode_24"
