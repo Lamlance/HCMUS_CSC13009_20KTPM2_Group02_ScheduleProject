@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -138,11 +139,11 @@ public class ReminderTaskFireBase {
   static private final HashMap<Integer, List<Reminder>> WEEKLY_REMINDER_BY_WEEKDAY = new HashMap<>();
   static private final HashMap<Integer,List<Task>> TASKS_BY_MONTH = new HashMap<>();
   static private final List<Task> NORMAL_TASK = new LinkedList<>();
+  static private final Map<Integer,List<Task>> WEEKLY_TASKS = new HashMap<>();
 
 
 
-
-  static private void AddWeeklyReminderToMap(Reminder r) {
+  static private void AddWeeklyReminderToMap(@NonNull Reminder r) {
     if (r.weekDates == null) {
       return;
     }
@@ -154,7 +155,7 @@ public class ReminderTaskFireBase {
       WEEKLY_REMINDER_BY_WEEKDAY.get(weekDate).add(r);
     }
   }
-  static private void AddSingleReminderToMap(Reminder r) {
+  static private void AddSingleReminderToMap(@NonNull Reminder r) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(r.reminderTime);
     int month = calendar.get(Calendar.MONTH);
@@ -164,7 +165,7 @@ public class ReminderTaskFireBase {
     SINGLE_REMINDER_BY_MONTH.get(month).add(r);
   }
 
-  static private void RemoveWeeklyReminder(Reminder r){
+  static private void RemoveWeeklyReminder(@NonNull Reminder r){
     if(r.weekDates == null){
       return;
     }
@@ -173,7 +174,7 @@ public class ReminderTaskFireBase {
       WEEKLY_REMINDER_BY_WEEKDAY.get(wd).remove(r);
     }
   }
-  static private void RemoveSingleReminder(Reminder r){
+  static private void RemoveSingleReminder(@NonNull Reminder r){
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(r.reminderTime);
     int month = calendar.get(Calendar.MONTH);
@@ -182,7 +183,7 @@ public class ReminderTaskFireBase {
   }
 
 
-  static private void AddTaskToMap(Task t){
+  static private void AddTaskToMap(@NonNull Task t){
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(t.reminder.reminderTime);
     int month = calendar.get(Calendar.MONTH);
@@ -191,10 +192,27 @@ public class ReminderTaskFireBase {
     }
     TASKS_BY_MONTH.get(month).add(t);
   }
-  static private void AddNormalTask(Task t){
-    NORMAL_TASK.add(t);
+  static private void AddNormalOrWeeklyTask(@NonNull Task t){
+    if(t.reminder.weekDates == null){
+      NORMAL_TASK.add(t);
+      return;
+    }
+    AddWeeklyTask(t);
   }
-  static private void RemoveTask(Task task){
+  static private void AddWeeklyTask(@NonNull Task t){
+    if(t.reminder.weekDates == null){
+      return;
+    }
+
+    for (Integer wd: t.reminder.weekDates) {
+      if(!WEEKLY_TASKS.containsKey(wd)){
+        WEEKLY_TASKS.put(wd,new LinkedList<>());
+      }
+      WEEKLY_TASKS.get(wd).add(t);
+      //Log.i("FIREBASE","ADDING WEEKLY TASK " + t.title + " " + wd);
+    }
+  }
+  static private void RemoveTask(@NonNull Task task){
     if(task.reminder == Task.DEFAULT_REMINDER){
       NORMAL_TASK.remove(task);
     }else{
@@ -212,6 +230,7 @@ public class ReminderTaskFireBase {
     return new LinkedList<Reminder>();
   }
   static public @NonNull List<Task> GetTasksInDate(int date,int month){
+
     List<Task> tasks = new LinkedList<>(NORMAL_TASK);
 
     List<Task> taskInMonth = TASKS_BY_MONTH.get(month);
@@ -223,6 +242,16 @@ public class ReminderTaskFireBase {
       }).collect(Collectors.toList());
       tasks.addAll(taskInDate);
     }
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(Calendar.MONTH,month);
+    calendar.set(Calendar.DATE,date);
+    List<Task> taskInWeekDate = WEEKLY_TASKS.get(calendar.get(Calendar.DAY_OF_WEEK));
+    if(taskInWeekDate != null){
+      //Log.i("FIREBASE","Today " + taskInWeekDate.size() + " weekly tasks");
+      tasks.addAll(taskInWeekDate);
+    }
+
     return tasks;
   }
   static public @NonNull HashMap<Integer, List<Reminder>> GetWeeklyReminderByWeekDay(){
@@ -257,7 +286,7 @@ public class ReminderTaskFireBase {
 
     getRemindersInAYear(calendar.get(Calendar.YEAR));
     getTasksInAYear(calendar.get(Calendar.YEAR));
-    getNormalTask();
+    getNormalAndWeeklyTask();
 
 
   }
@@ -503,7 +532,7 @@ public class ReminderTaskFireBase {
 
   }
 
-  private void getNormalTask(){
+  private void getNormalAndWeeklyTask(){
     databaseReference.child(this.userUID)
             .child(Task.TABLE_NAME)
             .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
@@ -554,9 +583,10 @@ public class ReminderTaskFireBase {
       for (DataSnapshot data: dataList) {
         Task task = data.getValue(Task.class);
         if(task != null){
-          AddNormalTask(task);
+          AddNormalOrWeeklyTask(task);
         }
       }
+
     }
 
     @Override

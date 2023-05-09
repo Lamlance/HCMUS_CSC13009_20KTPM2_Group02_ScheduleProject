@@ -171,6 +171,7 @@ public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
     if(!task.reminder.equals(ReminderTaskFireBase.Task.DEFAULT_REMINDER)){
       checkBox.setVisibility(View.GONE);
     }else{
+      checkBox.setVisibility(View.VISIBLE);
       checkBox.setOnCheckedChangeListener((compoundButton, isChecked) -> {
         if(onChildChecked != null){
           onChildChecked.onChildCheck(group,child,task,isChecked);

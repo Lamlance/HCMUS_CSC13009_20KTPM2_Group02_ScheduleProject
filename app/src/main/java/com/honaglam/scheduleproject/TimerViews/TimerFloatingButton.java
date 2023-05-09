@@ -39,8 +39,8 @@ public class TimerFloatingButton extends FloatingActionButton {
   public int[] onCreateDrawableState(int extraSpace) {
     final int[] drawableState = super.onCreateDrawableState(extraSpace+4+STATE_THEME_ARRAY.length);
 
-    Log.i("DRAW_POMODORO_STATE","Draw btn state: " + currState);
-    Log.i("DRAW_POMODORO_STATE","Draw btn theme: " + currTheme);
+    //Log.i("DRAW_POMODORO_STATE","Draw btn state: " + currState);
+    //Log.i("DRAW_POMODORO_STATE","Draw btn theme: " + currTheme);
 
     if(currState == TimerService.SHORT_BREAK_STATE){
       mergeDrawableStates(drawableState,new int[]{STATE_SHORT,STATE_THEME_ARRAY[currTheme]});
