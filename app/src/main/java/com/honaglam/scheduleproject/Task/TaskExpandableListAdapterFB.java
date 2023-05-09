@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -25,6 +26,9 @@ public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
     void onChild(int group, int child, ReminderTaskFireBase.Task task);
   }
 
+  public interface ChildCheckAction{
+    void onChildCheck(int group, int child, ReminderTaskFireBase.Task task, boolean isChecked);
+  }
 
   LayoutInflater inflater;
   TimerFragment.ReminderAndTaskListGetter getter;
@@ -34,6 +38,7 @@ public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
   @Nullable ChildClickAction onChildDeleteClick;
   @Nullable ChildClickAction onChildArchiveClick;
   @Nullable ChildClickAction onChildEditClick;
+  @Nullable ChildCheckAction onChildChecked;
 
   public TaskExpandableListAdapterFB(LayoutInflater inflater,TimerFragment.ReminderAndTaskListGetter getter){
     super();
@@ -42,6 +47,9 @@ public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
   }
 
 
+  public void SetOnChildChecked(ChildCheckAction action){
+    onChildChecked = action;
+  }
 
   public void SetOnChildClick(ChildClickAction action){
     onChildClick = action;
@@ -159,6 +167,18 @@ public class TaskExpandableListAdapterFB extends BaseExpandableListAdapter {
     txtTaskName.setText(task.title);
     txtCountPomodoro.setText(String.format(Locale.getDefault(),"%d/%d",task.loopsDone,task.loops));
     checkBox.setChecked(false);
+
+    if(!task.reminder.equals(ReminderTaskFireBase.Task.DEFAULT_REMINDER)){
+      checkBox.setVisibility(View.GONE);
+    }else{
+      checkBox.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+        if(onChildChecked != null){
+          onChildChecked.onChildCheck(group,child,task,isChecked);
+        }
+      });
+    }
+
+
 
     view.setOnClickListener(clickedView -> {
       if(prevClickView != null){

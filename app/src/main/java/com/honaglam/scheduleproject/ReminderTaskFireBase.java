@@ -452,29 +452,30 @@ public class ReminderTaskFireBase {
     return null;
   }
 
-  public void makeTaskSingleReminder(String title, long time, List<Task> tasks) {
+  public @Nullable Reminder makeTaskSingleReminder(String title, long time, List<Task> tasks) {
     Reminder reminder = addReminder(title, time);
     if (reminder == null) {
-      return;
+      return null;
     }
 
     for (Task t : tasks) {
       t.reminder = reminder;
       updateTask(t);
     }
+    return reminder;
   }
 
-  public void makeTaskWeeklyReminder(String title, List<Integer> weekDates, List<Task> tasks) {
+  public @Nullable Reminder makeTaskWeeklyReminder(String title, List<Integer> weekDates, List<Task> tasks) {
     Reminder reminder = addWeeklyReminder(title, weekDates);
     if (reminder == null) {
-      return;
+      return null;
     }
 
     for (Task t : tasks) {
       t.reminder = reminder;
       updateTask(t);
     }
-
+    return reminder;
   }
 
   private void getTasksInAYear(int year){

@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentResultListener;
 
@@ -74,7 +75,7 @@ public class TimerFragment extends Fragment {
 
 
   @Nullable ReminderTaskFireBase.Task selectedTask;
-
+  HashSet<ReminderTaskFireBase.Task> checkedTask = new HashSet<>();
 
   public static TimerFragment newInstance(String userId) {
     TimerFragment fragment = new TimerFragment();
@@ -130,6 +131,7 @@ public class TimerFragment extends Fragment {
     reminderList = new HashSet<>(map.keySet());
 
     taskRepository.SetOnTaskAdded(new TaskAddedCallBack());
+    taskRepository.SetOnTasksSetReminder(new TasksSetReminderCallBack());
   }
 
   @Override
@@ -154,6 +156,8 @@ public class TimerFragment extends Fragment {
     );
     expandableListAdapter.SetOnChildClick(new TaskListItemClick());
     expandableListAdapter.SetOnChildEditClick(new TaskListItemEditClick());
+    expandableListAdapter.SetOnChildChecked(new TaskListChildChecked());
+
     recyclerTask.setAdapter(expandableListAdapter);
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
 
@@ -198,37 +202,26 @@ public class TimerFragment extends Fragment {
     timerSetting.setOnClickListener(new TimerSettingFragmentClick());
 
     btnSkip = (TimerFloatingButton) view.findViewById((R.id.btnSkip));
-    btnSkip.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        try {
-          activity.skip();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
+    btnSkip.setOnClickListener(view12 -> {
+      try {
+        activity.skip();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     });
 
     btnTimerSetReminder = view.findViewById(R.id.btnTimerSetReminder);
-    btnTimerSetReminder.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        /*
-        if (expandableListAdapter.getCheckedTask().size() > 0) {
-          new ReminderAddDialog(activity, new SetTimerReminderCallBack()).show();
-        }
-         */
+    btnTimerSetReminder.setOnClickListener(view1 -> {
+      if(checkedTask.size() <= 0){
+        Toast.makeText(context, "Please check task(s) need to remind", Toast.LENGTH_SHORT).show();
       }
+      new ReminderAddDialog(context, new SetTimerReminderCallBack()).show();
     });
 
     UpdateTimerBackground(currentPomodoroState);
     setThemeId(activity.loadTimerSettingPref().prefTheme);
     Log.i("DRAW_POMODORO_STATE", "FRAGMENT VIEW CREATED");
 
-    //expandableListAdapter.setChildUpdateCallBack(new ChildUpdatedCallBack());
-    //expandableListAdapter.setArchiveClickCallBack(new ArchiveChildTaskCallBack());
-    //expandableListAdapter.setDeleteClickCallBack(new DeleteChildTaskCallBack());
-    //expandableListAdapter.setEditClickCallBack(new EditChildTaskCallBack());
   }
 
   @Override
@@ -304,7 +297,24 @@ public class TimerFragment extends Fragment {
       expandableListAdapter.notifyDataSetChanged();
     }
   }
+  class TasksSetReminderCallBack implements TaskRepository.OnTasksSetReminder{
+    @Override
+    public void onAction(List<ReminderTaskFireBase.Task> tasks, @Nullable ReminderTaskFireBase.Reminder reminder) {
+      if(reminder == null){
+        return;
+      }
+      if(!taskMapByReminder.containsKey(ReminderTaskFireBase.Task.DEFAULT_REMINDER)){
+        return;
+      }
 
+
+      reminderList.add(reminder);
+      taskMapByReminder.put(reminder,new LinkedList<>(tasks));
+      taskMapByReminder.get(ReminderTaskFireBase.Task.DEFAULT_REMINDER).removeAll(tasks);
+
+      expandableListAdapter.notifyDataSetChanged();
+    }
+  }
 
 
   class SetTimerReminderCallBack implements ReminderAddDialog.ReminderDataCallBack {
@@ -314,12 +324,20 @@ public class TimerFragment extends Fragment {
 
     @Override
     public void onSubmit(String name, Calendar setDate) {
+      if(checkedTask.size() <= 0){
+        return;
+      }
+      taskRepository.setTasksSingleReminder(name,setDate.getTimeInMillis(),new LinkedList<>(checkedTask));
      //TODO set single task reminder
     }
 
     @Override
     public void onSubmitWeekly(String name, Calendar setDate, HashSet<Integer> dailyReminder) {
-     //TODO set weekly task reminder
+      if(checkedTask.size() <= 0){
+        return;
+      }
+      taskRepository.setTaskWeeklyReminder(name,new LinkedList<>(dailyReminder),new LinkedList<>(checkedTask));
+      //TODO set weekly task reminder
     }
 
     @Override
@@ -364,6 +382,18 @@ public class TimerFragment extends Fragment {
       new AddTaskDialog(context,new UpdateTaskDialogListener(),task).show();
     }
   }
+
+  class TaskListChildChecked implements TaskExpandableListAdapterFB.ChildCheckAction{
+    @Override
+    public void onChildCheck(int group, int child, ReminderTaskFireBase.Task task, boolean isChecked) {
+      if (isChecked) {
+        checkedTask.add(task);
+      } else {
+        checkedTask.remove(task);
+      }
+    }
+  }
+
 
 
   class TimerTickCallBack implements TimerService.TimerTickCallBack {
