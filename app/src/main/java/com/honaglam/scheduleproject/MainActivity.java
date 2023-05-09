@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_SCHEDULE = "scheduler";
   public static final String FRAGMENT_TAG_STATISTIC = "statstic";
   public static final String FRAGMENT_TAG_HISTORY = "history";
+  public static final String FRAGMENT_TAG_LEADERBOARD = "leaderboard";
 
   private static final String UUID_KEY = "SchedulerKey";
   public boolean darkModeIsOn = false;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
   private StatisticFragment statisticFragment;
   private HistoryFragment historyFragment;
 
+  private LeaderboardFragment leaderboardFragment;
 
   SharedPreferences userTimerSetting;
   static final String PREF_KEY_WORK_TIME = "work_time";
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
   static final int IS_TIMER_FRAGMENT = 2;
   static final int IS_STATISTIC_FRAGMENT = 3;
   static final int IS_HISTORY_FRAGMENT = 4;
+  static final int IS_LEADERBOARD_FRAGMENT = 5;
 
   int currentFragment = IS_CALENDAR_FRAGMENT;
 
@@ -204,6 +207,19 @@ public class MainActivity extends AppCompatActivity {
             .beginTransaction()
             .replace(R.id.fragmentContainerView, historyFragment, FRAGMENT_TAG_HISTORY)
             .addToBackStack(FRAGMENT_TAG_HISTORY)
+            .commit();
+    return true;
+  }
+
+  // Switch to Leaderboard Fragment
+  public boolean switchFragment_Leaderboard() {
+    if (leaderboardFragment.isVisible()) {
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, leaderboardFragment, FRAGMENT_TAG_LEADERBOARD)
+            .addToBackStack(FRAGMENT_TAG_LEADERBOARD)
             .commit();
     return true;
   }
@@ -746,10 +762,13 @@ public class MainActivity extends AppCompatActivity {
           Toast.makeText(MainActivity.this, "Select Report", Toast.LENGTH_SHORT).show();
           return switchFragment_Statistic();
         case R.id.nav_history:
-
           currentFragment = IS_HISTORY_FRAGMENT;
           Toast.makeText(MainActivity.this, "Select History", Toast.LENGTH_SHORT).show();
           return switchFragment_History();
+        case R.id.nav_leaderboard:
+          currentFragment = IS_LEADERBOARD_FRAGMENT;
+          Toast.makeText(MainActivity.this, "Select Leaderboard", Toast.LENGTH_SHORT).show();
+          return switchFragment_Leaderboard();
       }
       return false;
     }
@@ -765,7 +784,7 @@ public class MainActivity extends AppCompatActivity {
       timerFragment = TimerFragment.newInstance();
       statisticFragment = StatisticFragment.newInstance();
       historyFragment = HistoryFragment.newInstance();
-
+      leaderboardFragment = LeaderboardFragment.newInstance();
       fragmentManager
               .beginTransaction()
               .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_TIMER)
@@ -773,7 +792,6 @@ public class MainActivity extends AppCompatActivity {
               .commit();
 
     }
-
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
 
