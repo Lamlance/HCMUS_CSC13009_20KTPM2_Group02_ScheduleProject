@@ -30,212 +30,234 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.honaglam.scheduleproject.Repository.StatsRepository;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 public class StatisticFragment extends Fragment {
 
-    private static final int MAX_X_SHOW = 7;
-    private static final int MAX_X_VALUE = 30;
+  private static final int MAX_X_SHOW = 7;
+  private static final int MAX_X_VALUE = 30;
 
-    private static final int MILIS_TO_MINS = 60 * 1000;
-    private static final int GROUPS = 2;
-    private static final String GROUP_1_LABEL = "Work time";
-    private static final String GROUP_2_LABEL = "Break time";
-    private static final float BAR_SPACE = 0.2f;
-    private static final float BAR_WIDTH = 0.25f;
+  private static final int MILIS_TO_MINS = 60 * 1000;
+  private static final int GROUPS = 2;
+  private static final String GROUP_1_LABEL = "Work time";
+  private static final String GROUP_2_LABEL = "Break time";
+  private static final float BAR_SPACE = 0.2f;
+  private static final float BAR_WIDTH = 0.25f;
 
-    private static final double WORK_TIME = 358.7;
+  private static final double WORK_TIME = 358.7;
 
-    private BarChart barChart;
-    private PieChart pieChart;
-    private TextView txtTotalTime;
+  private BarChart barChart;
+  private PieChart pieChart;
+  private TextView txtTotalTime;
 
-    private MainActivity activity;
-    Integer txtPrimaryColor = null;
+  private MainActivity activity;
+  Integer txtPrimaryColor = null;
 
-    private List<ReminderTaskFireBase.TimerStats> data;
+  private @Nullable List<ReminderTaskFireBase.TimerStats> data = null;
+  static StatsRepository statsRepository;
 
-
-    public static StatisticFragment newInstance() {
-        StatisticFragment fragment = new StatisticFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
+  public static StatisticFragment newInstance(String userId) {
+    StatisticFragment fragment = new StatisticFragment();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+    if(statsRepository == null){
+        statsRepository = new StatsRepository(userId);
     }
 
-    public StatisticFragment() {
+    return fragment;
+  }
 
-    }
+  public StatisticFragment() {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+  }
 
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this.activity = (MainActivity) getActivity();
-        float workHours = 0;
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
 
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    this.activity = (MainActivity) getActivity();
+
+        /*
         if (this.activity != null) {
             //this.data = this.activity.get30StatsBeforeToday();
             // Collections.reverse(this.data);
             workHours = this.data.stream().mapToLong(e -> e.workDur).sum();
             workHours = workHours / (1000 * 60 * 60);
         }
+         */
 
 
-        // set text primary color
-        if(txtPrimaryColor == null){
-            TypedValue textTypedValue = new TypedValue();
-            Resources.Theme textTheme = container.getContext().getTheme();
-            textTheme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, textTypedValue, true);
-            txtPrimaryColor = textTypedValue.data;
-        }
-
-        LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_statistic, container, false);
-
-        BarChart barChart = linearLayout.findViewById(R.id.barChart);
-        PieChart pieChart = linearLayout.findViewById(R.id.pieChart);
-        TextView txtTotalTime = linearLayout.findViewById(R.id.txtTotalTime);
-
-        BarData data = createBarChartData();
-        this.barChart = barChart;
-        configureChartAppearance();
-        prepareChartData(data);
-
-        PieData pieData = createPieCharData();
-        this.pieChart = pieChart;
-        configurePieChartAppearance();
-        preparePieChartData(pieData);
-
-        txtTotalTime.setText("You have focused " + String.format("%.2f", workHours) + " hours in 30 days recently.");
-        txtTotalTime.setTextColor(txtPrimaryColor);
-        return linearLayout;
+    // set text primary color
+    if (txtPrimaryColor == null) {
+      TypedValue textTypedValue = new TypedValue();
+      Resources.Theme textTheme = container.getContext().getTheme();
+      textTheme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, textTypedValue, true);
+      txtPrimaryColor = textTypedValue.data;
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    statsRepository.SetGetStatsCompleted((stats) -> {
+      data = new LinkedList<>(stats);
+      reDrawChartsAndText();
+    });
+
+    return (LinearLayout) inflater.inflate(R.layout.fragment_statistic, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    this.barChart = view.findViewById(R.id.barChart);
+    this.pieChart = view.findViewById(R.id.pieChart);
+    txtTotalTime = view.findViewById(R.id.txtTotalTime);
+
+    statsRepository.get30Stats30DaysBefore();
+  }
+
+  private void reDrawChartsAndText(){
+    float workHours = 0;
+    //Collections.reverse(this.data);
+
+    workHours = this.data.stream().mapToLong(e -> e.workDur).sum();
+    workHours = workHours / (1000 * 60 * 60); //Millis -> hour
+
+    Log.i("STATS","Data size " + data.size());
+    Log.i("STATS","Work hour " + workHours);
+
+    BarData barChartData = createBarChartData();
+    configureChartAppearance();
+    prepareChartData(barChartData);
+
+    PieData pieData = createPieCharData();
+    configurePieChartAppearance();
+    preparePieChartData(pieData);
+
+    txtTotalTime.setText("You have focused " + String.format("%.2f", workHours) + " hours in 30 days recently.");
+    txtTotalTime.setTextColor(txtPrimaryColor);
+  }
+
+  private BarData createBarChartData() {
+
+    Random rng = new Random();
+
+    ArrayList<BarEntry> values1 = new ArrayList<>();
+    ArrayList<BarEntry> values2 = new ArrayList<>();
+
+    for (int i = 0; i < this.data.size(); i++) {
+      values1.add(new BarEntry(i, this.data.get(i).workDur / MILIS_TO_MINS));
+      values2.add(new BarEntry(i, (this.data.get(i).shortDur + this.data.get(i).longDur) / MILIS_TO_MINS));
     }
 
 
-    private BarData createBarChartData() {
-        Random rng = new Random();
+    BarDataSet set1 = new BarDataSet(values1, GROUP_1_LABEL);
+    BarDataSet set2 = new BarDataSet(values2, GROUP_2_LABEL);
+    set1.setColor(ColorTemplate.MATERIAL_COLORS[0]);
+    set2.setColor(ColorTemplate.MATERIAL_COLORS[1]);
 
-        ArrayList<BarEntry> values1 = new ArrayList<>();
-        ArrayList<BarEntry> values2 = new ArrayList<>();
+    set1.setDrawValues(false);
+    set2.setDrawValues(false);
 
-        for (int i = 0; i < this.data.size(); i++) {
-            values1.add(new BarEntry(i, this.data.get(i).workDur / MILIS_TO_MINS));
-            values2.add(new BarEntry(i, (this.data.get(i).shortDur + this.data.get(i).longDur) / MILIS_TO_MINS));
-        }
+    ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+    dataSets.add(set1);
+    dataSets.add(set2);
 
+    return new BarData(dataSets);
+  }
 
-        BarDataSet set1 = new BarDataSet(values1, GROUP_1_LABEL);
-        BarDataSet set2 = new BarDataSet(values2, GROUP_2_LABEL);
-        set1.setColor(ColorTemplate.MATERIAL_COLORS[0]);
-        set2.setColor(ColorTemplate.MATERIAL_COLORS[1]);
+  private void configureChartAppearance() {
+    barChart.setPinchZoom(false);
+    barChart.setDrawBarShadow(false);
+    barChart.setDrawGridBackground(true);
+    barChart.setDrawValueAboveBar(false);
 
-        set1.setDrawValues(false);
-        set2.setDrawValues(false);
+    barChart.getDescription().setEnabled(false);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set1);
-        dataSets.add(set2);
+    ArrayList<String> labels = new ArrayList<>();
 
-        return new BarData(dataSets);
-    }
-    private void configureChartAppearance() {
-        barChart.setPinchZoom(false);
-        barChart.setDrawBarShadow(false);
-        barChart.setDrawGridBackground(true);
-        barChart.setDrawValueAboveBar(false);
+    Calendar calendar = Calendar.getInstance();
+    for (int i = 0; i < this.data.size(); i++) {
+      calendar.setTimeInMillis(this.data.get(i).createDate);
 
-        barChart.getDescription().setEnabled(false);
-
-        ArrayList<String> labels = new ArrayList<>();
-
-        Calendar calendar = Calendar.getInstance();
-        for (int i = 0; i < this.data.size(); i++) {
-            calendar.setTimeInMillis(this.data.get(i).createDate);
-
-            int date = calendar.get(Calendar.DATE);
-            int month = calendar.get(Calendar.MONTH);
-            labels.add(String.format("%d/%d", date, month + 1));
-        }
-
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setGranularity(1f);
-        xAxis.setDrawGridLines(true);
-        xAxis.setDrawAxisLine(false);
-        xAxis.setCenterAxisLabels(false);
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-        xAxis.setTextColor(txtPrimaryColor);
-        YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setDrawGridLines(true);
-        leftAxis.setDrawAxisLine(true);
-        leftAxis.setSpaceTop(35f);
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setTextColor(txtPrimaryColor);
-
-        barChart.getAxisRight().setEnabled(false);
-        barChart.getXAxis().setAxisMinimum(0);
-        barChart.getXAxis().setAxisMaximum(MAX_X_VALUE);
-        barChart.setVisibleXRangeMaximum(MAX_X_SHOW);
-
-
-
-    }
-    private void prepareChartData(BarData data) {
-        barChart.setData(data);
-        barChart.getBarData().setBarWidth(BAR_WIDTH);
-        Legend k = barChart.getLegend();
-        k.setTextColor(txtPrimaryColor);
-        float groupSpace = 1f - ((BAR_SPACE + BAR_WIDTH) * GROUPS);
-        barChart.groupBars(0, groupSpace, BAR_SPACE);
-
-        barChart.invalidate();
+      int date = calendar.get(Calendar.DATE);
+      int month = calendar.get(Calendar.MONTH);
+      labels.add(String.format("%d/%d", date, month + 1));
     }
 
-    private PieData createPieCharData() {
-        List<PieEntry> entries = new ArrayList<>();
+    XAxis xAxis = barChart.getXAxis();
+    xAxis.setGranularity(1f);
+    xAxis.setDrawGridLines(true);
+    xAxis.setDrawAxisLine(false);
+    xAxis.setCenterAxisLabels(false);
+    xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+    xAxis.setTextColor(txtPrimaryColor);
+    YAxis leftAxis = barChart.getAxisLeft();
+    leftAxis.setDrawGridLines(true);
+    leftAxis.setDrawAxisLine(true);
+    leftAxis.setSpaceTop(35f);
+    leftAxis.setAxisMinimum(0f);
+    leftAxis.setTextColor(txtPrimaryColor);
 
-        long workTime = this.data.stream().mapToLong(e -> e.workDur).sum();
-        long breakTime = this.data.stream().mapToLong(e -> (e.longDur + e.shortDur)).sum();
+    barChart.getAxisRight().setEnabled(false);
+    barChart.getXAxis().setAxisMinimum(0);
+    barChart.getXAxis().setAxisMaximum(MAX_X_VALUE);
+    barChart.setVisibleXRangeMaximum(MAX_X_SHOW);
 
 
-        float workPercent = (float) workTime / (workTime + breakTime);
-        workPercent = Math.round(workPercent * 100);
-        float breakPercent = 100 - workPercent;
+  }
 
-        entries.add(new PieEntry(workPercent, "Work"));
-        entries.add(new PieEntry(breakPercent, "Break"));
+  private void prepareChartData(BarData data) {
+    barChart.setData(data);
+    barChart.getBarData().setBarWidth(BAR_WIDTH);
+    Legend k = barChart.getLegend();
+    k.setTextColor(txtPrimaryColor);
+    float groupSpace = 1f - ((BAR_SPACE + BAR_WIDTH) * GROUPS);
+    barChart.groupBars(0, groupSpace, BAR_SPACE);
 
-        PieDataSet dataSet = new PieDataSet(entries, "");
+    barChart.invalidate();
+  }
 
-        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-        dataSet.setValueTextColor(Color.BLACK);
-        dataSet.setValueTextSize(10f);
+  private PieData createPieCharData() {
+    List<PieEntry> entries = new ArrayList<>();
 
-        return new PieData(dataSet);
-    }
+    long workTime = this.data.stream().mapToLong(e -> e.workDur).sum();
+    long breakTime = this.data.stream().mapToLong(e -> (e.longDur + e.shortDur)).sum();
 
-    private void configurePieChartAppearance() {
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setCenterText("Work/ Break");
-    }
 
-    private void preparePieChartData(PieData data) {
-        pieChart.setData(data);
-        Legend l = pieChart.getLegend();
-        l.setTextColor(txtPrimaryColor);
-        pieChart.invalidate();
-    }
+    float workPercent = (float) workTime / (workTime + breakTime);
+    workPercent = Math.round(workPercent * 100);
+    float breakPercent = 100 - workPercent;
+
+    entries.add(new PieEntry(workPercent, "Work"));
+    entries.add(new PieEntry(breakPercent, "Break"));
+
+    PieDataSet dataSet = new PieDataSet(entries, "");
+
+    dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+    dataSet.setValueTextColor(Color.BLACK);
+    dataSet.setValueTextSize(10f);
+
+    return new PieData(dataSet);
+  }
+
+  private void configurePieChartAppearance() {
+    pieChart.getDescription().setEnabled(false);
+    pieChart.setCenterText("Work/ Break");
+  }
+
+  private void preparePieChartData(PieData data) {
+    pieChart.setData(data);
+    Legend l = pieChart.getLegend();
+    l.setTextColor(txtPrimaryColor);
+    pieChart.invalidate();
+  }
 }

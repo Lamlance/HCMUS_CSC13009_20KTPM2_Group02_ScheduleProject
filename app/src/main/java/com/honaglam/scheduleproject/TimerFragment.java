@@ -439,15 +439,6 @@ public class TimerFragment extends Fragment {
       currentPomodoroState = newState;
       UpdateTimerBackground(newState);
       statsRepository.addTimeTodayTask(oldState,prevTimeState);
-      /*
-      TODO set new timer stats
-      activity.addStatsTime(
-              oldState == TimerService.WORK_STATE ? prevTimeState : 0,
-              oldState == TimerService.SHORT_BREAK_STATE ? prevTimeState : 0,
-              oldState == TimerService.LONG_BREAK_STATE ? prevTimeState : 0
-      );
-       */
-
     }
   }
 

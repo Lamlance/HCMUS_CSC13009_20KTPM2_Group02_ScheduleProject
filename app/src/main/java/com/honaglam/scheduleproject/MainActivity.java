@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
   private void InitFragment(){
     calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
     timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
-    statisticFragment = StatisticFragment.newInstance();
+    statisticFragment = StatisticFragment.newInstance("lamhoangdien113@gmail,com");
     historyFragment = HistoryFragment.newInstance();
     auth0Fragment = Auth0Fragment.newInstance();
 

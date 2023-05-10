@@ -26,18 +26,12 @@ public class ReminderTaskFireBase {
   public static class TimerStats implements Serializable {
     public static final String TABLE_NAME = "TimerStats";
     public static final String CREATE_DATE_NAME = "createDate";
-    public long createDate;
+    public long createDate = 0;
     public long workDur = 0;
     public long shortDur = 0;
     public long longDur = 0;
 
     TimerStats() {
-      Calendar calendar = Calendar.getInstance();
-      calendar.set(Calendar.HOUR_OF_DAY, 0);
-      calendar.set(Calendar.MINUTE, 0);
-      calendar.set(Calendar.SECOND, 0);
-      calendar.set(Calendar.MILLISECOND, 0);
-      createDate = calendar.getTimeInMillis();
     }
 
     @NonNull
@@ -319,10 +313,12 @@ public class ReminderTaskFireBase {
       calendar.set(Calendar.HOUR_OF_DAY, 0);
       calendar.set(Calendar.MINUTE, 0);
       calendar.set(Calendar.SECOND, 0);
+      calendar.set(Calendar.MILLISECOND, 0);
       todayTime = calendar.getTimeInMillis();
 
       todayStats = new TimerStats();
-      createTodayStats();
+      todayStats.createDate = calendar.getTimeInMillis();
+      createTodayStats(todayStats);
 
       getRemindersInAYear(calendar.get(Calendar.YEAR), () -> {
         Log.i("FIREBASE","Finish getting reminders in a year");
@@ -708,11 +704,13 @@ public class ReminderTaskFireBase {
 
 
 
-
-  public void createTodayStats(){
+  public interface GetStatsCompletedCallBack{
+    void onCompleted(@NonNull List<TimerStats> stats,long startTime,long endTime);
+  }
+  public void createTodayStats(TimerStats stats){
     databaseReference.child(userUID).child(TimerStats.TABLE_NAME)
             .orderByKey()
-            .equalTo(String.valueOf(todayTime))
+            .equalTo(String.valueOf(stats.createDate))
             .addListenerForSingleValueEvent(new TodayStatsValueEventListener());
   }
   public void addTimeTodayTask(int state,long time){
@@ -730,6 +728,58 @@ public class ReminderTaskFireBase {
             .child(TimerStats.TABLE_NAME)
             .child(String.valueOf(todayStats.createDate))
             .setValue(todayStats);
+  }
+  public void getTimeStats30DaysBefore(GetStatsCompletedCallBack completedCallBack){
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    calendar.set(Calendar.MILLISECOND, 0);
+    long endTime = calendar.getTimeInMillis();
+
+    calendar.add(Calendar.DATE,-30);
+    long startTime = calendar.getTimeInMillis();
+
+    databaseReference.child(userUID)
+            .child(TimerStats.TABLE_NAME)
+            .orderByChild(TimerStats.CREATE_DATE_NAME)
+            .startAt(startTime)
+            .endAt(endTime)
+            .addListenerForSingleValueEvent(new GetManyStatsListener(completedCallBack, startTime, endTime));
+  }
+
+  static class GetManyStatsListener implements ValueEventListener{
+    GetStatsCompletedCallBack completedCallBack;
+    long startTime;
+    long endTime;
+    GetManyStatsListener(GetStatsCompletedCallBack statsCompletedCallBack,long start,long end){
+      completedCallBack = statsCompletedCallBack;
+      startTime = start;
+      endTime = end;
+    }
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      List<TimerStats> statsList = new LinkedList<>();
+
+      if(!snapshot.exists()){
+        completedCallBack.onCompleted(statsList,startTime,endTime);
+        return;
+      }
+      Iterable<DataSnapshot> statsData = snapshot.getChildren();
+      for (DataSnapshot data: statsData) {
+        TimerStats timerStats = data.getValue(TimerStats.class);
+        if(timerStats != null){
+          Log.i("FIREBASE","Create date " + timerStats.createDate);
+          statsList.add(timerStats);
+        }
+      }
+      completedCallBack.onCompleted(statsList,startTime,endTime);
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
   }
 
   class TodayStatsValueEventListener implements ValueEventListener {
