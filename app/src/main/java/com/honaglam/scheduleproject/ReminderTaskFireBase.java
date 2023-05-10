@@ -10,17 +10,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ReminderTaskFireBase {
@@ -135,6 +132,14 @@ public class ReminderTaskFireBase {
   long todayTime;
 
 
+  public static class Initialize{
+
+  }
+  static boolean GET_REMINDER_COMPLETED = false;
+  static boolean GET_SINGLE_REMIND_TASK_COMPLETED = false;
+  static boolean GET_WEEKLY_REMIND_TASK_COMPLETED = false;
+
+
   static private final HashMap<Integer, List<Reminder>> SINGLE_REMINDER_BY_MONTH = new HashMap<>();
   static private final HashMap<Integer, List<Reminder>> WEEKLY_REMINDER_BY_WEEKDAY = new HashMap<>();
   static private final HashMap<Integer,List<Task>> TASKS_BY_MONTH = new HashMap<>();
@@ -194,6 +199,7 @@ public class ReminderTaskFireBase {
   }
   static private void AddNormalOrWeeklyTask(@NonNull Task t){
     if(t.reminder.weekDates == null){
+      Log.i("FIREBASE","NORMAL TASK");
       NORMAL_TASK.add(t);
       return;
     }
@@ -243,6 +249,7 @@ public class ReminderTaskFireBase {
       tasks.addAll(taskInDate);
     }
 
+
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.MONTH,month);
     calendar.set(Calendar.DATE,date);
@@ -260,12 +267,32 @@ public class ReminderTaskFireBase {
 
   private final String userUID;
 
+
+
   static private ReminderTaskFireBase reminderTaskFireBase = null;
   public static ReminderTaskFireBase GetInstance(String userUID){
     if(reminderTaskFireBase == null){
-      reminderTaskFireBase = new ReminderTaskFireBase(userUID);
+      reminderTaskFireBase = new ReminderTaskFireBase(userUID, () -> {});
     }
     return reminderTaskFireBase;
+  }
+
+  public static ReminderTaskFireBase GetInstance(String userUID,OnCompleted onCompleted){
+    if(reminderTaskFireBase == null){
+      reminderTaskFireBase = new ReminderTaskFireBase(userUID,onCompleted);
+    }
+    return reminderTaskFireBase;
+  }
+
+  protected static void RemoveInstance(){
+    SINGLE_REMINDER_BY_MONTH.clear();
+    WEEKLY_REMINDER_BY_WEEKDAY.clear();
+
+    TASKS_BY_MONTH.clear();
+    NORMAL_TASK.clear();
+    WEEKLY_TASKS.clear();
+
+    reminderTaskFireBase = null;
   }
 
 
@@ -273,23 +300,199 @@ public class ReminderTaskFireBase {
     void onResult(@Nullable List<Reminder> reminders);
   }
 
-  private ReminderTaskFireBase(String deviceUUID) {
+  protected interface OnCompleted{
+    void onCompleted();
+  }
+
+  class InitializeThread implements Runnable{
+    OnCompleted onCompleted;
+    InitializeThread(OnCompleted completed){
+      this.onCompleted = completed;
+    }
+    @Override
+    public void run() {
+      Log.i("FIREBASE","Starting Initializing thread");
+
+      Calendar calendar = Calendar.getInstance();
+      calendar.set(Calendar.HOUR_OF_DAY, 0);
+      calendar.set(Calendar.MINUTE, 0);
+      calendar.set(Calendar.SECOND, 0);
+      todayTime = calendar.getTimeInMillis();
+
+      todayStats = new TimerStats();
+
+      getRemindersInAYear(calendar.get(Calendar.YEAR), () -> {
+        Log.i("FIREBASE","Finish getting reminders in a year");
+        getTasksInAYear(calendar.get(Calendar.YEAR), () -> {
+          Log.i("FIREBASE","Finish getting Task in a year");
+          getNormalAndWeeklyTask(() -> {
+            Log.i("FIREBASE","Finish getting normal and weekly task");
+            onCompleted.onCompleted();
+          });
+        });
+      });
+    }
+  }
+
+  private ReminderTaskFireBase(String deviceUUID,OnCompleted onCompleted) {
+    userUID = deviceUUID;
+    Log.i("FIREBASE","Create Initialize thread");
+    new Thread(new InitializeThread(onCompleted)).start();
+  }
+
+  //Initialize
+  public void getRemindersInAYear(int year,@NonNull OnCompleted onCompletedInitial) {
     Calendar calendar = Calendar.getInstance();
+    calendar.set(Calendar.YEAR, year);
+
+    calendar.set(Calendar.DAY_OF_YEAR, 1);
     calendar.set(Calendar.HOUR_OF_DAY, 0);
     calendar.set(Calendar.MINUTE, 0);
-    calendar.set(Calendar.SECOND, 0);
-    todayTime = calendar.getTimeInMillis();
+    long startOfYear = calendar.getTimeInMillis();
 
-    userUID = deviceUUID;
-    todayStats = new TimerStats();
+    calendar.set(Calendar.MONTH, Calendar.DECEMBER);
+    calendar.set(Calendar.DATE, 31);
+    calendar.set(Calendar.HOUR, 23);
+    calendar.set(Calendar.MINUTE, 59);
+    long endOfYear = calendar.getTimeInMillis();
 
+    ReminderTaskFireBase.SINGLE_REMINDER_BY_MONTH.clear();
+    ReminderTaskFireBase.WEEKLY_REMINDER_BY_WEEKDAY.clear();
 
-    getRemindersInAYear(calendar.get(Calendar.YEAR));
-    getTasksInAYear(calendar.get(Calendar.YEAR));
-    getNormalAndWeeklyTask();
+    databaseReference.child(userUID)
+            .child(Reminder.TABLE_NAME)
+            .child(Reminder.SINGLE_REMINDER_NAME)
+            .orderByChild(Reminder.REMINDER_TIME_NAME)
+            .startAt(startOfYear)
+            .endAt(endOfYear)
+            .addListenerForSingleValueEvent(new RemindersQueryListener(() -> {
+              databaseReference.child(userUID)
+                      .child(Reminder.TABLE_NAME)
+                      .child(Reminder.WEEKLY_REMINDER_NAME)
+                      .orderByChild(Reminder.REMINDER_TIME_NAME)
+                      .addListenerForSingleValueEvent(new RemindersQueryListener(onCompletedInitial));
+            }));
 
 
   }
+  private void getTasksInAYear(int year,OnCompleted onCompleted){
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(Calendar.YEAR, year);
+
+    calendar.set(Calendar.DAY_OF_YEAR, 1);
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    long startOfYear = calendar.getTimeInMillis();
+
+    calendar.set(Calendar.MONTH, Calendar.DECEMBER);
+    calendar.set(Calendar.DATE, 31);
+    calendar.set(Calendar.HOUR, 23);
+    calendar.set(Calendar.MINUTE, 59);
+    long endOfYear = calendar.getTimeInMillis();
+
+
+    databaseReference.child(this.userUID)
+            .child(Task.TABLE_NAME)
+            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
+            .startAt(startOfYear)
+            .endAt(endOfYear)
+            .addListenerForSingleValueEvent(new ReminderTasksQueryListener(onCompleted::onCompleted));
+
+  }
+  private void getNormalAndWeeklyTask(OnCompleted onCompleted){
+    databaseReference.child(this.userUID)
+            .child(Task.TABLE_NAME)
+            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
+            .equalTo(-1)
+            .addListenerForSingleValueEvent(new NormalTaskQueryListener(onCompleted));
+  }
+  static class ReminderTasksQueryListener implements com.google.firebase.database.ValueEventListener{
+    @NonNull protected OnCompleted onCompleted;
+    ReminderTasksQueryListener(@NonNull OnCompleted completed){
+      onCompleted = completed;
+    }
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      if(!snapshot.exists()){
+        return;
+      }
+      Iterable<DataSnapshot> dataList = snapshot.getChildren();
+      for (DataSnapshot data: dataList) {
+        Task task = data.getValue(Task.class);
+        if(task != null){
+          AddTaskToMap(task);
+        }
+      }
+      onCompleted.onCompleted();
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
+  }
+  static class NormalTaskQueryListener implements com.google.firebase.database.ValueEventListener{
+    @NonNull OnCompleted onCompleted;
+
+    NormalTaskQueryListener(@NonNull OnCompleted completed) {
+      onCompleted = completed;
+    }
+
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      if(!snapshot.exists()){
+        return;
+      }
+      Iterable<DataSnapshot> dataList = snapshot.getChildren();
+      for (DataSnapshot data: dataList) {
+        Task task = data.getValue(Task.class);
+        if(task != null){
+          AddNormalOrWeeklyTask(task);
+        }
+      }
+
+      onCompleted.onCompleted();
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
+  }
+  static class RemindersQueryListener implements com.google.firebase.database.ValueEventListener {
+    @NonNull protected OnCompleted onCompleted;
+    RemindersQueryListener(@NonNull OnCompleted completed){
+      onCompleted = completed;
+    }
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      if (!snapshot.exists()) {
+        onCompleted.onCompleted();
+        return;
+      }
+      Iterable<DataSnapshot> reminders = snapshot.getChildren();
+      for (DataSnapshot data : reminders) {
+        Reminder reminder = data.getValue(Reminder.class);
+        if (reminder == null) {
+          continue;
+        }
+        if (reminder.weekDates == null) {
+          ReminderTaskFireBase.AddSingleReminderToMap(reminder);
+        } else {
+          ReminderTaskFireBase.AddWeeklyReminderToMap(reminder);
+        }
+      }
+      onCompleted.onCompleted();
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
+  }
+
+  //===============
+
 
   @Nullable
   public Reminder addReminder(String title, long time) {
@@ -348,38 +551,6 @@ public class ReminderTaskFireBase {
     }
   }
 
-  public void getRemindersInAYear(int year) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.set(Calendar.YEAR, year);
-
-    calendar.set(Calendar.DAY_OF_YEAR, 1);
-    calendar.set(Calendar.HOUR_OF_DAY, 0);
-    calendar.set(Calendar.MINUTE, 0);
-    long startOfYear = calendar.getTimeInMillis();
-
-    calendar.set(Calendar.MONTH, Calendar.DECEMBER);
-    calendar.set(Calendar.DATE, 31);
-    calendar.set(Calendar.HOUR, 23);
-    calendar.set(Calendar.MINUTE, 59);
-    long endOfYear = calendar.getTimeInMillis();
-
-    ReminderTaskFireBase.SINGLE_REMINDER_BY_MONTH.clear();
-    ReminderTaskFireBase.WEEKLY_REMINDER_BY_WEEKDAY.clear();
-
-    databaseReference.child(userUID)
-            .child(Reminder.TABLE_NAME)
-            .child(Reminder.SINGLE_REMINDER_NAME)
-            .orderByChild(Reminder.REMINDER_TIME_NAME)
-            .startAt(startOfYear)
-            .endAt(endOfYear)
-            .addListenerForSingleValueEvent(new RemindersQueryListener());
-
-    databaseReference.child(userUID)
-            .child(Reminder.TABLE_NAME)
-            .child(Reminder.WEEKLY_REMINDER_NAME)
-            .orderByChild(Reminder.REMINDER_TIME_NAME)
-            .addListenerForSingleValueEvent(new RemindersQueryListener());
-  }
 
   public void searchReminder(long startTime,long endTime,@NonNull ReminderResultCallBack callBack){
     databaseReference.child(userUID)
@@ -426,174 +597,118 @@ public class ReminderTaskFireBase {
     }));
   }
 
-  static class RemindersQueryListener implements com.google.firebase.database.ValueEventListener {
-    @Override
-    public void onDataChange(@NonNull DataSnapshot snapshot) {
-      if (!snapshot.exists()) {
-        return;
-      }
-      Iterable<DataSnapshot> reminders = snapshot.getChildren();
-      for (DataSnapshot data : reminders) {
-        Reminder reminder = data.getValue(Reminder.class);
-        if (reminder == null) {
-          continue;
-        }
 
-        if (reminder.weekDates == null) {
-          ReminderTaskFireBase.AddSingleReminderToMap(reminder);
-        } else {
-          ReminderTaskFireBase.AddWeeklyReminderToMap(reminder);
-        }
 
-      }
-    }
 
-    @Override
-    public void onCancelled(@NonNull DatabaseError error) {
-
-    }
+  public interface OnTaskModifyCompleted{
+    void onCompleted(@Nullable Task task);
+  }
+  public interface OnTaskSetReminderCompleted{
+    void onComplete(@Nullable Reminder reminder,@NonNull List<Task> tasks);
   }
 
+  public interface OnActionFailed{
+    void onFail(DatabaseError error);
+  }
 
-
-
-  public void updateTask(Task task) {
+  public void updateTask(Task taskData,@NonNull OnTaskModifyCompleted onCompleted) {
     databaseReference.child(userUID)
             .child(Task.TABLE_NAME)
-            .child(task.id)
-            .setValue(task);
+            .child(taskData.id)
+            .setValue(taskData)
+            .addOnCompleteListener(task1 -> {
+              onCompleted.onCompleted(taskData);
+            });
   }
 
-  @Nullable
-  public Task addTask(String title, int loops, int loopsDone) {
-    Task task = new Task();
-    task.title = title;
-    task.loops = loops;
-    task.loopsDone = loopsDone;
+
+  public void addTask(String title, int loops, int loopsDone,@NonNull OnTaskModifyCompleted onCompleted) {
+    Task taskData = new Task();
+    taskData.title = title;
+    taskData.loops = loops;
+    taskData.loopsDone = loopsDone;
     DatabaseReference taskRef = databaseReference.child(userUID)
             .child(Task.TABLE_NAME);
     String taskId = taskRef.push().getKey();
     if (taskId != null) {
-      task.id = taskId;
-      taskRef.child(taskId).setValue(task);
-      return task;
+      taskData.id = taskId;
+      taskRef.child(taskId).setValue(taskData).addOnCompleteListener(task1 -> {
+        onCompleted.onCompleted(taskData);
+      });
+      return;
     }
-    return null;
+    onCompleted.onCompleted(null);
   }
 
-  public @Nullable Reminder makeTaskSingleReminder(String title, long time, List<Task> tasks) {
+  public void makeTaskSingleReminder(
+          String title, long time, List<Task> tasks,
+          OnTaskSetReminderCompleted completed) {
+
     Reminder reminder = addReminder(title, time);
     if (reminder == null) {
-      return null;
+      return;
     }
+
+    Map<String,Object> taskMap = new HashMap<>();
 
     for (Task t : tasks) {
       t.reminder = reminder;
-      updateTask(t);
-    }
-    return reminder;
-  }
-
-  public @Nullable Reminder makeTaskWeeklyReminder(String title, List<Integer> weekDates, List<Task> tasks) {
-    Reminder reminder = addWeeklyReminder(title, weekDates);
-    if (reminder == null) {
-      return null;
+      taskMap.put(t.id,t);
     }
 
-    for (Task t : tasks) {
-      t.reminder = reminder;
-      updateTask(t);
-    }
-    return reminder;
-  }
-
-  private void getTasksInAYear(int year){
-    Calendar calendar = Calendar.getInstance();
-    calendar.set(Calendar.YEAR, year);
-
-    calendar.set(Calendar.DAY_OF_YEAR, 1);
-    calendar.set(Calendar.HOUR_OF_DAY, 0);
-    calendar.set(Calendar.MINUTE, 0);
-    long startOfYear = calendar.getTimeInMillis();
-
-    calendar.set(Calendar.MONTH, Calendar.DECEMBER);
-    calendar.set(Calendar.DATE, 31);
-    calendar.set(Calendar.HOUR, 23);
-    calendar.set(Calendar.MINUTE, 59);
-    long endOfYear = calendar.getTimeInMillis();
-
-
-    databaseReference.child(this.userUID)
-            .child(Task.TABLE_NAME)
-            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
-            .startAt(startOfYear)
-            .endAt(endOfYear)
-            .addListenerForSingleValueEvent(new ReminderTasksQueryListener());
-
-  }
-
-  private void getNormalAndWeeklyTask(){
-    databaseReference.child(this.userUID)
-            .child(Task.TABLE_NAME)
-            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
-            .equalTo(-1)
-            .addListenerForSingleValueEvent(new NormalTaskQueryListener());
-  }
-
-  public void removeTask(Task task){
     databaseReference.child(userUID)
             .child(Task.TABLE_NAME)
-            .child(task.id)
-            .removeValue();
-    ReminderTaskFireBase.RemoveTask(task);
+            .updateChildren(taskMap, (error, ref) -> {
+              if(error == null){
+                completed.onComplete(reminder,tasks);
+              }else{
+                Log.e("FIREBASE", error.getDetails());
+              }
+            });
+  }
+
+  public void makeTaskWeeklyReminder(
+          String title, List<Integer> weekDates, List<Task> tasks,
+          OnTaskSetReminderCompleted completed) {
+
+    Reminder reminder = addWeeklyReminder(title, weekDates);
+    if (reminder == null) {
+      return;
+    }
+
+    Map<String,Object> taskMap = new HashMap<>();
+
+    for (Task t : tasks) {
+      t.reminder = reminder;
+      taskMap.put(t.id,t);
+    }
+    databaseReference.child(userUID)
+            .child(Task.TABLE_NAME)
+            .updateChildren(taskMap, (error, ref) -> {
+              if(error == null){
+                completed.onComplete(reminder,tasks);
+              }
+              else{
+                Log.e("FIREBASE", error.getDetails());
+              }
+            });
   }
 
 
 
-  static class ReminderTasksQueryListener implements com.google.firebase.database.ValueEventListener{
-    @Override
-    public void onDataChange(@NonNull DataSnapshot snapshot) {
-      if(!snapshot.exists()){
-        return;
-      }
-      Iterable<DataSnapshot> dataList = snapshot.getChildren();
-      for (DataSnapshot data: dataList) {
-        Task task = data.getValue(Task.class);
-        if(task != null){
-          AddTaskToMap(task);
-        }
-      }
-
-    }
-
-    @Override
-    public void onCancelled(@NonNull DatabaseError error) {
-
-    }
+  public void removeTask(Task taskData,@NonNull OnTaskModifyCompleted onCompleted){
+    databaseReference.child(userUID)
+            .child(Task.TABLE_NAME)
+            .child(taskData.id)
+            .removeValue()
+            .addOnCompleteListener(task -> {
+              onCompleted.onCompleted(taskData);
+            });
   }
 
-  static class NormalTaskQueryListener implements com.google.firebase.database.ValueEventListener{
 
-    @Override
-    public void onDataChange(@NonNull DataSnapshot snapshot) {
-      if(!snapshot.exists()){
-        return;
-      }
-      Iterable<DataSnapshot> dataList = snapshot.getChildren();
-      for (DataSnapshot data: dataList) {
-        Task task = data.getValue(Task.class);
-        if(task != null){
-          AddNormalOrWeeklyTask(task);
-        }
-      }
 
-    }
 
-    @Override
-    public void onCancelled(@NonNull DatabaseError error) {
-
-    }
-  }
 
   class TodayStatsValueEventListener implements ValueEventListener {
     @Override

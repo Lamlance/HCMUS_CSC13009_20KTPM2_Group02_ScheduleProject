@@ -1,5 +1,6 @@
 package com.honaglam.scheduleproject.Repository;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.honaglam.scheduleproject.ReminderTaskFireBase;
@@ -38,37 +39,44 @@ public class TaskRepository {
     onTasksSetReminder = action;
   }
 
+  public void SetOnTaskDeleted(OnTaskAction action){OnDeleteTask = action;}
+
 
   public void addTask(String title,int loops){
-    ReminderTaskFireBase.Task task = ReminderTaskFireBase.GetInstance(userId).addTask(title,loops,0);
-    CallTaskAction(OnAddTask,task);
+    ReminderTaskFireBase.GetInstance(userId).addTask(title,loops,0,task ->{
+      CallTaskAction(OnAddTask,task);
+    });
   }
 
   public void updateTask(ReminderTaskFireBase.Task task){
-    ReminderTaskFireBase.GetInstance(userId).updateTask(task);
+    ReminderTaskFireBase.GetInstance(userId).updateTask(task,newTask -> {
+    });
   }
 
   public void removeTask(ReminderTaskFireBase.Task task){
-    ReminderTaskFireBase.GetInstance(userId).removeTask(task);
+    ReminderTaskFireBase.GetInstance(userId).removeTask(task,removedTask -> {
+      CallTaskAction(OnDeleteTask,removedTask);
+    });
   }
 
 
   public void setTasksSingleReminder(String reminderTitle, long reminderTime, List<ReminderTaskFireBase.Task> tasks){
-    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase
+    ReminderTaskFireBase
             .GetInstance(userId)
-            .makeTaskSingleReminder(reminderTitle,reminderTime,tasks);
-    if(onTasksSetReminder != null){
-      onTasksSetReminder.onAction(tasks,reminder);
-    }
+            .makeTaskSingleReminder(reminderTitle, reminderTime, tasks, (reminder, taskList) -> {
+              if(onTasksSetReminder != null){
+                onTasksSetReminder.onAction(taskList,reminder);
+              }
+            });
   }
 
   public void setTaskWeeklyReminder(String reminderTitle, List<Integer> remindWeekDays, List<ReminderTaskFireBase.Task> tasks){
-    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase
+    ReminderTaskFireBase
             .GetInstance(userId)
-            .makeTaskWeeklyReminder(reminderTitle,remindWeekDays,tasks);
-
-    if(onTasksSetReminder != null){
-      onTasksSetReminder.onAction(tasks,reminder);
-    }
+            .makeTaskWeeklyReminder(reminderTitle, remindWeekDays, tasks, (reminder, taskList) -> {
+              if(onTasksSetReminder != null){
+                onTasksSetReminder.onAction(taskList,reminder);
+              }
+            });
   }
 }

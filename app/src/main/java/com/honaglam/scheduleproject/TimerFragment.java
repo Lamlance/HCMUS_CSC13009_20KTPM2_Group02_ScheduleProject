@@ -132,6 +132,7 @@ public class TimerFragment extends Fragment {
 
     taskRepository.SetOnTaskAdded(new TaskAddedCallBack());
     taskRepository.SetOnTasksSetReminder(new TasksSetReminderCallBack());
+    taskRepository.SetOnTaskDeleted(new TaskRemovedReminderCallBack());
   }
 
   @Override
@@ -157,7 +158,7 @@ public class TimerFragment extends Fragment {
     expandableListAdapter.SetOnChildClick(new TaskListItemClick());
     expandableListAdapter.SetOnChildEditClick(new TaskListItemEditClick());
     expandableListAdapter.SetOnChildChecked(new TaskListChildChecked());
-
+    expandableListAdapter.SetOnChildDeleteClick(new TaskListChildDeleteClick());
     recyclerTask.setAdapter(expandableListAdapter);
     layoutTimerFragment = view.findViewById(R.id.layoutTimerFragment);
 
@@ -308,6 +309,7 @@ public class TimerFragment extends Fragment {
       }
 
 
+
       reminderList.add(reminder);
       taskMapByReminder.put(reminder,new LinkedList<>(tasks));
       taskMapByReminder.get(ReminderTaskFireBase.Task.DEFAULT_REMINDER).removeAll(tasks);
@@ -315,7 +317,19 @@ public class TimerFragment extends Fragment {
       expandableListAdapter.notifyDataSetChanged();
     }
   }
+  class TaskRemovedReminderCallBack implements TaskRepository.OnTaskAction{
+    @Override
+    public void onAction(@Nullable ReminderTaskFireBase.Task task) {
+      if(task == null){
+        return;
+      }
 
+      if(taskMapByReminder.get(task.reminder).remove(task)){
+        expandableListAdapter.notifyDataSetChanged();
+      };
+
+    }
+  }
 
   class SetTimerReminderCallBack implements ReminderAddDialog.ReminderDataCallBack {
     @Override
@@ -378,7 +392,6 @@ public class TimerFragment extends Fragment {
   class TaskListItemEditClick implements TaskExpandableListAdapterFB.ChildClickAction{
     @Override
     public void onChild(int group, int child, ReminderTaskFireBase.Task task) {
-      selectedTask = task;
       new AddTaskDialog(context,new UpdateTaskDialogListener(),task).show();
     }
   }
@@ -391,6 +404,13 @@ public class TimerFragment extends Fragment {
       } else {
         checkedTask.remove(task);
       }
+    }
+  }
+
+  static class TaskListChildDeleteClick implements TaskExpandableListAdapterFB.ChildClickAction{
+    @Override
+    public void onChild(int group, int child, ReminderTaskFireBase.Task task) {
+      taskRepository.removeTask(task);
     }
   }
 

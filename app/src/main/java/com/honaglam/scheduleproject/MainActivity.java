@@ -1,6 +1,7 @@
 package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -10,6 +11,8 @@ import androidx.fragment.app.FragmentManager;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +30,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.honaglam.scheduleproject.Task.TaskData;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
@@ -71,15 +75,18 @@ public class MainActivity extends AppCompatActivity {
 
   ReminderBroadcastReceiver reminderBroadcastReceiver;
 
-  ReminderTaskFireBase fireBase = ReminderTaskFireBase.GetInstance("lamhoangdien113@gmail,com");
+  ReminderTaskFireBase fireBase;
 
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+
     setContentView(R.layout.activity_main);
 
+
+    Log.i("MAIN_ACTIVITY","INIT UI");
     fragmentManager = getSupportFragmentManager();
     userTimerSetting = getSharedPreferences("userTimerSetting", MODE_PRIVATE);
 
@@ -105,10 +112,12 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
+    /*
     int stackCount = fragmentManager.getBackStackEntryCount();
     for (int i = 0; i < stackCount; ++i) {
       fragmentManager.popBackStack();
     }
+     */
 
     reminderBroadcastReceiver = new ReminderBroadcastReceiver();
     IntentFilter filter = new IntentFilter("com.hoanglam.scheduleproject.reminder");
@@ -125,8 +134,37 @@ public class MainActivity extends AppCompatActivity {
       Log.i("ON_DESTROY", "ACTIVITY UNBINDING SERVICE");
       unbindService(timerServiceConnection);
     }
+    ReminderTaskFireBase.RemoveInstance();
+    Log.i("ON_DESTROY", "Removing db instance");
+
   }
 
+  private void InitFragment(){
+    calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
+    timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
+    statisticFragment = StatisticFragment.newInstance();
+    historyFragment = HistoryFragment.newInstance();
+    auth0Fragment = Auth0Fragment.newInstance();
+
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_TIMER)
+            .addToBackStack(FRAGMENT_TAG_TIMER)
+            .commit();
+  }
+
+  private void InitFireBase(){
+    Dialog dialog = new MaterialAlertDialogBuilder(this)
+            .setMessage("Loading db")
+            .setCancelable(false)
+            .create();
+    fireBase = ReminderTaskFireBase.GetInstance("lamhoangdien113@gmail,com", () -> {
+      Log.i("MAIN_ACTIVITY","FINISH INIT DATA");
+      InitFragment();
+      dialog.dismiss();
+    });
+    dialog.show();
+  }
 
   //Timer Service
   public void startTimer() {
@@ -353,18 +391,7 @@ public class MainActivity extends AppCompatActivity {
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
       timerService.setStateTime(loadTimerSettingPref());
-
-      calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
-      timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
-      statisticFragment = StatisticFragment.newInstance();
-      historyFragment = HistoryFragment.newInstance();
-      auth0Fragment = Auth0Fragment.newInstance();
-
-      fragmentManager
-              .beginTransaction()
-              .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_TIMER)
-              .addToBackStack(FRAGMENT_TAG_TIMER)
-              .commit();
+      InitFireBase();
 
     }
 
