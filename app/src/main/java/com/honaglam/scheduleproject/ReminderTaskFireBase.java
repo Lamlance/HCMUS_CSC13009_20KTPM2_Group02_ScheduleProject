@@ -5,6 +5,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -320,6 +322,7 @@ public class ReminderTaskFireBase {
       todayTime = calendar.getTimeInMillis();
 
       todayStats = new TimerStats();
+      createTodayStats();
 
       getRemindersInAYear(calendar.get(Calendar.YEAR), () -> {
         Log.i("FIREBASE","Finish getting reminders in a year");
@@ -621,7 +624,6 @@ public class ReminderTaskFireBase {
             });
   }
 
-
   public void addTask(String title, int loops, int loopsDone,@NonNull OnTaskModifyCompleted onCompleted) {
     Task taskData = new Task();
     taskData.title = title;
@@ -694,8 +696,6 @@ public class ReminderTaskFireBase {
             });
   }
 
-
-
   public void removeTask(Task taskData,@NonNull OnTaskModifyCompleted onCompleted){
     databaseReference.child(userUID)
             .child(Task.TABLE_NAME)
@@ -709,14 +709,34 @@ public class ReminderTaskFireBase {
 
 
 
+  public void createTodayStats(){
+    databaseReference.child(userUID).child(TimerStats.TABLE_NAME)
+            .orderByKey()
+            .equalTo(String.valueOf(todayTime))
+            .addListenerForSingleValueEvent(new TodayStatsValueEventListener());
+  }
+  public void addTimeTodayTask(int state,long time){
+    if(state == TimerService.WORK_STATE){
+      todayStats.workDur += time;
+    }
+    if(state == TimerService.SHORT_BREAK_STATE){
+      todayStats.shortDur += time;
+    }
+    if(state == TimerService.LONG_BREAK_STATE){
+      todayStats.longDur += time;
+    }
+
+    databaseReference.child(userUID)
+            .child(TimerStats.TABLE_NAME)
+            .child(String.valueOf(todayStats.createDate))
+            .setValue(todayStats);
+  }
 
   class TodayStatsValueEventListener implements ValueEventListener {
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
       if (!snapshot.exists()) {
-        Log.i("FireBase", "Creating today stats");
-
         databaseReference.child(userUID).child(TimerStats.TABLE_NAME)
                 .child(String.valueOf(todayTime))
                 .setValue(todayStats);

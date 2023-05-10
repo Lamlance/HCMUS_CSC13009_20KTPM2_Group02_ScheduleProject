@@ -26,6 +26,7 @@ import androidx.fragment.app.FragmentResultListener;
 import com.honaglam.scheduleproject.MyAlramManager.MyAlarmManager;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.Repository.StatsRepository;
 import com.honaglam.scheduleproject.Repository.TaskRepository;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
 import com.honaglam.scheduleproject.Task.TaskData;
@@ -73,7 +74,7 @@ public class TimerFragment extends Fragment {
 
   int currentPomodoroState = TimerService.WORK_STATE;
   static TaskRepository taskRepository;
-
+  static StatsRepository statsRepository;
 
   @Nullable ReminderTaskFireBase.Task selectedTask;
   HashSet<ReminderTaskFireBase.Task> checkedTask = new HashSet<>();
@@ -85,7 +86,9 @@ public class TimerFragment extends Fragment {
     if(taskRepository == null){
       taskRepository = new TaskRepository(userId);
     }
-
+    if(statsRepository == null){
+      statsRepository = new StatsRepository(userId);
+    }
     return fragment;
   }
 
@@ -359,7 +362,6 @@ public class TimerFragment extends Fragment {
         return;
       }
       taskRepository.setTaskWeeklyReminder(name,new LinkedList<>(dailyReminder),new LinkedList<>(checkedTask));
-      //TODO set weekly task reminder
     }
 
     @Override
@@ -436,7 +438,7 @@ public class TimerFragment extends Fragment {
     public void onStateChange(int newState, long prevTimeState, int oldState) {
       currentPomodoroState = newState;
       UpdateTimerBackground(newState);
-
+      statsRepository.addTimeTodayTask(oldState,prevTimeState);
       /*
       TODO set new timer stats
       activity.addStatsTime(
