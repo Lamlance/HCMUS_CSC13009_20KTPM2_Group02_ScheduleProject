@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.FragmentResultListener;
 
+import com.honaglam.scheduleproject.MyAlramManager.MyAlarmManager;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Repository.TaskRepository;
@@ -116,20 +117,6 @@ public class TimerFragment extends Fragment {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Calendar calendar = Calendar.getInstance();
-    List<ReminderTaskFireBase.Task> taskList = ReminderTaskFireBase.GetTasksInDate(
-            calendar.get(Calendar.DATE),calendar.get(Calendar.MONTH)
-    );
-
-    Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> map = taskList.stream()
-            .collect(Collectors.groupingBy(t -> t.reminder));
-
-    taskMapByReminder = new HashMap<>();
-    map.forEach((k,v)->{
-      taskMapByReminder.put(k,new LinkedList<>(v));
-    });
-    reminderList = new HashSet<>(map.keySet());
-
     taskRepository.SetOnTaskAdded(new TaskAddedCallBack());
     taskRepository.SetOnTasksSetReminder(new TasksSetReminderCallBack());
     taskRepository.SetOnTaskDeleted(new TaskRemovedReminderCallBack());
@@ -147,6 +134,20 @@ public class TimerFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+
+    Calendar calendar = Calendar.getInstance();
+    List<ReminderTaskFireBase.Task> taskList = ReminderTaskFireBase.GetTasksInDate(
+            calendar.get(Calendar.DATE),calendar.get(Calendar.MONTH)
+    );
+
+    Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> map = taskList.stream()
+            .collect(Collectors.groupingBy(t -> t.reminder));
+
+    taskMapByReminder = new HashMap<>();
+    map.forEach((k,v)->{
+      taskMapByReminder.put(k,new LinkedList<>(v));
+    });
+    reminderList = new HashSet<>(map.keySet());
 
 
     recyclerTask = view.findViewById(R.id.recyclerTask);
@@ -308,13 +309,17 @@ public class TimerFragment extends Fragment {
         return;
       }
 
-
-
       reminderList.add(reminder);
       taskMapByReminder.put(reminder,new LinkedList<>(tasks));
       taskMapByReminder.get(ReminderTaskFireBase.Task.DEFAULT_REMINDER).removeAll(tasks);
 
       expandableListAdapter.notifyDataSetChanged();
+
+      if(reminder.weekDates == null){
+        MyAlarmManager.SetSingleReminderAlarm(context,reminder);
+      }else{
+        MyAlarmManager.SetWeeklyReminderAlarm(context,reminder);
+      }
     }
   }
   class TaskRemovedReminderCallBack implements TaskRepository.OnTaskAction{
@@ -325,6 +330,10 @@ public class TimerFragment extends Fragment {
       }
 
       if(taskMapByReminder.get(task.reminder).remove(task)){
+        if(taskMapByReminder.get(task.reminder).size() == 0){
+          taskMapByReminder.remove(task.reminder);
+          reminderList.remove(task.reminder);
+        }
         expandableListAdapter.notifyDataSetChanged();
       };
 
@@ -342,7 +351,6 @@ public class TimerFragment extends Fragment {
         return;
       }
       taskRepository.setTasksSingleReminder(name,setDate.getTimeInMillis(),new LinkedList<>(checkedTask));
-     //TODO set single task reminder
     }
 
     @Override
