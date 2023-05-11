@@ -147,6 +147,9 @@ public class StatisticFragment extends Fragment {
   }
 
   private BarData createBarChartData() {
+    if(data == null){
+      return null;
+    }
 
     Random rng = new Random();
 
@@ -154,8 +157,10 @@ public class StatisticFragment extends Fragment {
     ArrayList<BarEntry> values2 = new ArrayList<>();
 
     for (int i = 0; i < this.data.size(); i++) {
-      values1.add(new BarEntry(i, this.data.get(i).workDur / MILIS_TO_MINS));
-      values2.add(new BarEntry(i, (this.data.get(i).shortDur + this.data.get(i).longDur) / MILIS_TO_MINS));
+      ReminderTaskFireBase.TimerStats stats = this.data.get(i);
+
+      values1.add(new BarEntry(i, (float) stats.workDur / (float) MILIS_TO_MINS));
+      values2.add(new BarEntry(i, (float) (this.data.get(i).shortDur + this.data.get(i).longDur) / MILIS_TO_MINS));
     }
 
 

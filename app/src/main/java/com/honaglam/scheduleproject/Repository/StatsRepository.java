@@ -7,7 +7,11 @@ import androidx.annotation.Nullable;
 
 import com.honaglam.scheduleproject.ReminderTaskFireBase;
 
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StatsRepository {
   public interface GetStatsDataCallBack{
@@ -39,9 +43,28 @@ public class StatsRepository {
     }
     @Override
     public void onCompleted(@NonNull List<ReminderTaskFireBase.TimerStats> stats, long startTime, long endTime) {
-      if(getStats30DayCompleted != null){
-        getStats30DayCompleted.onGet(stats);
+      if(getStats30DayCompleted == null){
+        return;
       }
+      List<ReminderTaskFireBase.TimerStats> statsList = new LinkedList<>(stats);
+
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTimeInMillis(startTime);
+
+      for(;calendar.getTimeInMillis() <= endTime;calendar.add(Calendar.DATE,1)){
+        long timeInMillis = calendar.getTimeInMillis();
+        if(stats.stream().anyMatch(s -> s.createDate == timeInMillis)){
+          continue;
+        }
+        statsList.add(ReminderTaskFireBase.TimerStats.GetEmptyStatsAt(timeInMillis));
+      }
+      List<ReminderTaskFireBase.TimerStats> sortedList = statsList.stream()
+              .sorted(Comparator.comparingLong(s->s.createDate*-1))
+              .collect(Collectors.toList());
+
+
+      getStats30DayCompleted.onGet(sortedList);
+
     }
   }
 

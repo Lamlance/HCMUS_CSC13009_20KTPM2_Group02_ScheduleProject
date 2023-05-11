@@ -26,6 +26,13 @@ public class ReminderTaskFireBase {
   public static class TimerStats implements Serializable {
     public static final String TABLE_NAME = "TimerStats";
     public static final String CREATE_DATE_NAME = "createDate";
+
+    public static TimerStats GetEmptyStatsAt (long date){
+      TimerStats timerStats = new TimerStats();
+      timerStats.createDate = date;
+      return timerStats;
+    }
+
     public long createDate = 0;
     public long workDur = 0;
     public long shortDur = 0;
