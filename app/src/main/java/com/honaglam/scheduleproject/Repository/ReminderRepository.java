@@ -55,17 +55,17 @@ public class ReminderRepository {
   }
 
   public void addSingleReminder(String title, long time) {
-    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase.GetInstance(userId).addReminder(title, time);
+    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase.GetInstance(userId,"Reminder").addReminder(title, time);
     callReminderAction(OnAddReminder, reminder);
   }
 
   public void addWeeklyReminder(String title, List<Integer> weekDates) {
-    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase.GetInstance(userId).addWeeklyReminder(title, weekDates);
+    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase.GetInstance(userId,"Reminder").addWeeklyReminder(title, weekDates);
     callReminderAction(OnAddReminder, reminder);
   }
 
   public void removeReminder(ReminderTaskFireBase.Reminder reminder) {
-    ReminderTaskFireBase.GetInstance(userId).removeReminder(reminder);
+    ReminderTaskFireBase.GetInstance(userId,"Reminder").removeReminder(reminder);
     callReminderAction(OnDeleteReminder, reminder);
   }
 
@@ -81,7 +81,7 @@ public class ReminderRepository {
     }
 
     if(isEmptyTitle){
-      ReminderTaskFireBase.GetInstance(userId).searchReminder(timeStart, timeEnd, reminders -> {
+      ReminderTaskFireBase.GetInstance(userId,"Reminder").searchReminder(timeStart, timeEnd, reminders -> {
         OnSearchResult.onAction(reminders);
       });
       return;
@@ -101,7 +101,7 @@ public class ReminderRepository {
       timeEnd = calendar.getTimeInMillis();
     }
 
-    ReminderTaskFireBase.GetInstance(userId).searchReminder(title,timeStart,timeEnd,reminders -> {
+    ReminderTaskFireBase.GetInstance(userId,"Reminder").searchReminder(title,timeStart,timeEnd,reminders -> {
       OnSearchResult.onAction(reminders);
     });
   }

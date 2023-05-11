@@ -58,18 +58,18 @@ public class TaskRepository {
   }
 
   public void addTask(String title, int loops) {
-    ReminderTaskFireBase.GetInstance(userId).addTask(title, loops, 0, task -> {
+    ReminderTaskFireBase.GetInstance(userId,"Task").addTask(title, loops, 0, task -> {
       CallTaskAction(OnAddTask, task);
     });
   }
 
   public void updateTask(ReminderTaskFireBase.Task task) {
-    ReminderTaskFireBase.GetInstance(userId).updateTask(task, newTask -> {
+    ReminderTaskFireBase.GetInstance(userId,"Task").updateTask(task, newTask -> {
     });
   }
 
   public void removeTask(ReminderTaskFireBase.Task task) {
-    ReminderTaskFireBase.GetInstance(userId).removeTask(task, removedTask -> {
+    ReminderTaskFireBase.GetInstance(userId,"Task").removeTask(task, removedTask -> {
       CallTaskAction(OnDeleteTask, removedTask);
     });
   }
@@ -77,7 +77,7 @@ public class TaskRepository {
 
   public void setTasksSingleReminder(String reminderTitle, long reminderTime, List<ReminderTaskFireBase.Task> tasks) {
     ReminderTaskFireBase
-            .GetInstance(userId)
+            .GetInstance(userId,"Task")
             .makeTaskSingleReminder(reminderTitle, reminderTime, tasks, (reminder, taskList) -> {
               if (onTasksSetReminder != null) {
                 onTasksSetReminder.onAction(taskList, reminder);
@@ -87,7 +87,7 @@ public class TaskRepository {
 
   public void setTaskWeeklyReminder(String reminderTitle, List<Integer> remindWeekDays, List<ReminderTaskFireBase.Task> tasks) {
     ReminderTaskFireBase
-            .GetInstance(userId)
+            .GetInstance(userId,"Task")
             .makeTaskWeeklyReminder(reminderTitle, remindWeekDays, tasks, (reminder, taskList) -> {
               if (onTasksSetReminder != null) {
                 onTasksSetReminder.onAction(taskList, reminder);
@@ -101,7 +101,7 @@ public class TaskRepository {
       return;
     }
 
-    ReminderTaskFireBase.GetInstance(userId).SearchSingleReminderTask(startTime, endTime, taskList -> {
+    ReminderTaskFireBase.GetInstance(userId,"Reminder").SearchSingleReminderTask(startTime, endTime, taskList -> {
       onTaskSearchCompleted.onCompleted(taskList);
     });
   }

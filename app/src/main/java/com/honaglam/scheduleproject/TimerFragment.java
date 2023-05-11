@@ -342,7 +342,6 @@ public class TimerFragment extends Fragment {
 
     }
   }
-
   class SetTimerReminderCallBack implements ReminderAddDialog.ReminderDataCallBack {
     @Override
     public void onSubmit(String name, int hour24h, int minute) {
@@ -444,14 +443,19 @@ public class TimerFragment extends Fragment {
 
   class TimerOnFinishCallback implements TimerService.TimerOnFinishCallback {
     @Override
-    public void onFinish(boolean isAutoSwitchTask) throws NotImplementedError {
+    public void onFinish(boolean isAutoSwitchTask)  {
       //if (isAutoSwitchTask) return;
-      try {
-        //TODO add count to task
-        //expandableListAdapter.addAndUpdateChildView();
-      } catch (Exception e) {
-        e.printStackTrace();
+      if(selectedTask == null){
+        return;
       }
+      selectedTask.loopsDone += 1;
+      int index = taskMapByReminder.get(selectedTask.reminder).indexOf(selectedTask);
+      if(index >= 0){
+        taskMapByReminder.get(selectedTask.reminder).set(index,selectedTask);
+        expandableListAdapter.notifyDataSetChanged();
+        taskRepository.updateTask(selectedTask);
+      }
+      //Todo add count task
     }
   }
 

@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
 
-    Log.i("MAIN_ACTIVITY","INIT UI");
+    Log.i("MAIN_ACTIVITY","INIT UI ON CREATE");
     fragmentManager = getSupportFragmentManager();
     userTimerSetting = getSharedPreferences("userTimerSetting", MODE_PRIVATE);
 
@@ -125,21 +125,26 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
+
+
   @Override
   protected void onDestroy() {
-    super.onDestroy();
+    ReminderTaskFireBase.RemoveInstance();
 
+    Log.i("ON_DESTROY", "Removing db instance");
+    super.onDestroy();
     Log.i("ON_DESTROY", "ACTIVITY DESTROYING");
     if (timerServiceConnection != null) {
       Log.i("ON_DESTROY", "ACTIVITY UNBINDING SERVICE");
       unbindService(timerServiceConnection);
     }
-    ReminderTaskFireBase.RemoveInstance();
-    Log.i("ON_DESTROY", "Removing db instance");
+
 
   }
 
   private void InitFragment(){
+    Log.i("MAIN_ACTIVITY","INIT NEW FRAGMENT");
+
     calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
     timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
     statisticFragment = StatisticFragment.newInstance("lamhoangdien113@gmail,com");
@@ -154,17 +159,19 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void InitFireBase(){
-    Dialog dialog = new MaterialAlertDialogBuilder(this)
+    Dialog dialog = new MaterialAlertDialogBuilder(MainActivity.this)
             .setMessage("Loading db")
             .setCancelable(false)
             .create();
+    dialog.show();
+    Log.i("MAIN_ACTIVITY","Getting instance");
     fireBase = ReminderTaskFireBase.GetInstance("lamhoangdien113@gmail,com", () -> {
       Log.i("MAIN_ACTIVITY","FINISH INIT DATA");
-      InitFragment();
       dialog.dismiss();
+      InitFragment();
     });
-    dialog.show();
   }
+
 
   //Timer Service
   public void startTimer() {
@@ -241,21 +248,6 @@ public class MainActivity extends AppCompatActivity {
             prefTheme
     );
   }
-
-
-  //Reminder
-
-
-
-  /*
-  public static final String NOTIFICATION_CHANEL_ID = "ReminderNotificationChanel";
-  NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
-          .setSmallIcon(R.drawable.baseline_notifications_active_24)
-          .setContentTitle("Reminder notification")
-          .setContentText("Reminding")
-          .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-   */
-
 
   class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener {
     @Override
@@ -391,6 +383,7 @@ public class MainActivity extends AppCompatActivity {
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
       timerService.setStateTime(loadTimerSettingPref());
+      Log.i("MAIN_ACTIVITY","InitFireBase");
       InitFireBase();
 
     }

@@ -25,7 +25,7 @@ public class StatsRepository {
   @Nullable GetStatsDataCallBack getStats30DayCompleted;
 
   public void addTimeTodayTask(int state,long time){
-    ReminderTaskFireBase.GetInstance(uuid).addTimeTodayTask(state,time);
+    ReminderTaskFireBase.GetInstance(uuid,"Stats").addTimeTodayTask(state,time);
   }
 
   public void SetGetStatsCompleted(GetStatsDataCallBack completedCallBack){
@@ -33,7 +33,7 @@ public class StatsRepository {
   }
 
   public void get30Stats30DaysBefore(){
-    ReminderTaskFireBase.GetInstance(uuid).getTimeStats30DaysBefore(new StatsSearchResult(getStats30DayCompleted));
+    ReminderTaskFireBase.GetInstance(uuid,"Stats").getTimeStats30DaysBefore(new StatsSearchResult(getStats30DayCompleted));
   }
 
   static class StatsSearchResult implements ReminderTaskFireBase.GetStatsCompletedCallBack{

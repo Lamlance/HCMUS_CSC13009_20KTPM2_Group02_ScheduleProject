@@ -264,17 +264,19 @@ public class ReminderTaskFireBase {
 
 
   static private ReminderTaskFireBase reminderTaskFireBase = null;
-  public static ReminderTaskFireBase GetInstance(String userUID){
+  public static ReminderTaskFireBase GetInstance(String userUID,String Tag){
     if(reminderTaskFireBase == null){
-      reminderTaskFireBase = new ReminderTaskFireBase(userUID, () -> {});
+      reminderTaskFireBase = new ReminderTaskFireBase(userUID, () -> {
+        Log.i("FIREBASE","EMPTY ON COMPLETED " + Tag);
+      });
     }
     return reminderTaskFireBase;
   }
 
   public static ReminderTaskFireBase GetInstance(String userUID,OnCompleted onCompleted){
-    if(reminderTaskFireBase == null){
-      reminderTaskFireBase = new ReminderTaskFireBase(userUID,onCompleted);
-    }
+    Log.i("FIREBASE","Non empty on completed");
+    reminderTaskFireBase = null;
+    reminderTaskFireBase = new ReminderTaskFireBase(userUID,onCompleted);
     return reminderTaskFireBase;
   }
 
@@ -298,6 +300,11 @@ public class ReminderTaskFireBase {
     void onCompleted();
   }
 
+
+
+
+
+  //Initialize ==========================
   class InitializeThread implements Runnable{
     OnCompleted onCompleted;
     InitializeThread(OnCompleted completed){
@@ -334,12 +341,32 @@ public class ReminderTaskFireBase {
   private ReminderTaskFireBase(String deviceUUID,OnCompleted onCompleted) {
     userUID = deviceUUID;
     Log.i("FIREBASE","Create Initialize thread");
-    new Thread(new InitializeThread(onCompleted)).start();
+    //new Thread(new InitializeThread(onCompleted)).start();
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    calendar.set(Calendar.MILLISECOND, 0);
+    todayTime = calendar.getTimeInMillis();
+
+    todayStats = new TimerStats();
+    todayStats.createDate = calendar.getTimeInMillis();
+    createTodayStats(todayStats);
+
+    getRemindersInAYear(calendar.get(Calendar.YEAR), () -> {
+      Log.i("FIREBASE","Finish getting reminders in a year");
+      getTasksInAYear(calendar.get(Calendar.YEAR), () -> {
+        Log.i("FIREBASE","Finish getting Task in a year");
+        getNormalAndWeeklyTask(() -> {
+          Log.i("FIREBASE","Finish getting normal and weekly task");
+          onCompleted.onCompleted();
+        });
+      });
+    });
+
   }
 
-
-
-  //Initialize ==========================
   public void getRemindersInAYear(int year,@NonNull OnCompleted onCompletedInitial) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.YEAR, year);
@@ -395,7 +422,7 @@ public class ReminderTaskFireBase {
             .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
             .startAt(startOfYear)
             .endAt(endOfYear)
-            .addListenerForSingleValueEvent(new ReminderTasksQueryListener(onCompleted::onCompleted));
+            .addListenerForSingleValueEvent(new ReminderTasksQueryListener(onCompleted));
 
   }
   private void getNormalAndWeeklyTask(OnCompleted onCompleted){
