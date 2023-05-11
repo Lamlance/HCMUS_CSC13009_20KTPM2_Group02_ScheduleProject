@@ -440,6 +440,7 @@ public class ReminderTaskFireBase {
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {
       if(!snapshot.exists()){
+        onCompleted.onCompleted();
         return;
       }
       Iterable<DataSnapshot> dataList = snapshot.getChildren();
@@ -467,6 +468,7 @@ public class ReminderTaskFireBase {
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {
       if(!snapshot.exists()){
+        onCompleted.onCompleted();
         return;
       }
       Iterable<DataSnapshot> dataList = snapshot.getChildren();

@@ -1,18 +1,16 @@
 package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentResultListener;
 
-import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,22 +28,22 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.auth0.android.result.UserProfile;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
-import com.honaglam.scheduleproject.Task.TaskData;
+import com.honaglam.scheduleproject.Authorizer.MyAuthorizer;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 //import com.honaglam.scheduleproject.UserSetting.UserSettings;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
-
+  @NonNull static String USER_ID= "";
+  public static String GetUserId(){
+    return USER_ID;
+  }
   public boolean darkModeIsOn = false;
   //Timer
   private Intent timerIntent;
@@ -86,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
 
-    Log.i("MAIN_ACTIVITY","INIT UI ON CREATE");
+    //Log.i("MAIN_ACTIVITY","INIT UI ON CREATE");
     fragmentManager = getSupportFragmentManager();
     userTimerSetting = getSharedPreferences("userTimerSetting", MODE_PRIVATE);
 
@@ -123,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
     IntentFilter filter = new IntentFilter("com.hoanglam.scheduleproject.reminder");
     registerReceiver(reminderBroadcastReceiver, filter);
 
+    InitLogin();
   }
 
 
@@ -145,17 +144,19 @@ public class MainActivity extends AppCompatActivity {
   private void InitFragment(){
     Log.i("MAIN_ACTIVITY","INIT NEW FRAGMENT");
 
-    calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
-    timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
-    statisticFragment = StatisticFragment.newInstance("lamhoangdien113@gmail,com");
-    historyFragment = HistoryFragment.newInstance("lamhoangdien113@gmail,com");
+    calendarFragment = CalendarFragment.newInstance(MainActivity.USER_ID);
+    timerFragment = TimerFragment.newInstance(MainActivity.USER_ID);
+    statisticFragment = StatisticFragment.newInstance(MainActivity.USER_ID);
+    historyFragment = HistoryFragment.newInstance(MainActivity.USER_ID);
     auth0Fragment = Auth0Fragment.newInstance();
+
 
     fragmentManager
             .beginTransaction()
             .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_TIMER)
             .addToBackStack(FRAGMENT_TAG_TIMER)
             .commit();
+
   }
 
   private void InitFireBase(){
@@ -165,15 +166,27 @@ public class MainActivity extends AppCompatActivity {
             .create();
     dialog.show();
     Log.i("MAIN_ACTIVITY","Getting instance");
-    fireBase = ReminderTaskFireBase.GetInstance("lamhoangdien113@gmail,com", () -> {
+    fireBase = ReminderTaskFireBase.GetInstance(USER_ID, () -> {
       Log.i("MAIN_ACTIVITY","FINISH INIT DATA");
       dialog.dismiss();
       InitFragment();
     });
   }
 
+  private void InitLogin(){
+    new MyAuthorizer(this).login(userProfile -> {
+      if(userProfile == null || userProfile.getEmail() == null){
+        return;
+      }
+      Log.i("MAIN_ACTIVITY","User email " + userProfile.getEmail());
+      MainActivity.USER_ID = userProfile.getEmail().replace(".",",");
+      InitFireBase();
+    });
+  }
 
-  //Timer Service
+
+
+  //Timer Service===========================================
   public void startTimer() {
     if (timerService != null) {
       timerService.startTimer();
@@ -248,6 +261,8 @@ public class MainActivity extends AppCompatActivity {
             prefTheme
     );
   }
+  //=====================================================
+
 
   class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener {
     @Override
@@ -331,9 +346,8 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
-  public boolean switchFragment_TimerSetting() {
+  public void switchFragment_TimerSetting() {
     TimerSetting.newInstance(loadTimerSettingPref()).show(fragmentManager, "SettingFragment");
-    return true;
   }
 
   public boolean switchFragment_Auth() {
@@ -384,7 +398,6 @@ public class MainActivity extends AppCompatActivity {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
       timerService.setStateTime(loadTimerSettingPref());
       Log.i("MAIN_ACTIVITY","InitFireBase");
-      InitFireBase();
 
     }
 
@@ -393,4 +406,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
   }
+
+
 }
