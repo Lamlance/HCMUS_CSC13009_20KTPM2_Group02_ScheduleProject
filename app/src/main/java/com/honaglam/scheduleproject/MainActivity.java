@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
     calendarFragment = CalendarFragment.newInstance("lamhoangdien113@gmail,com");
     timerFragment = TimerFragment.newInstance("lamhoangdien113@gmail,com");
     statisticFragment = StatisticFragment.newInstance("lamhoangdien113@gmail,com");
-    historyFragment = HistoryFragment.newInstance();
+    historyFragment = HistoryFragment.newInstance("lamhoangdien113@gmail,com");
     auth0Fragment = Auth0Fragment.newInstance();
 
     fragmentManager

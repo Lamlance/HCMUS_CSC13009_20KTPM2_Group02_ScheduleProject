@@ -78,13 +78,13 @@ public class CalendarFragment extends Fragment {
 
 
   List<ReminderTaskFireBase.Reminder> reminderInMonth;
-  Map<Integer, List<ReminderTaskFireBase.Reminder>> singleReminderMapByDate;
+  Map<Integer, LinkedList<ReminderTaskFireBase.Reminder>> singleReminderMapByDate;
 
   HashMap<Integer, List<ReminderTaskFireBase.Reminder>> reminderMapByWeekDay;
 
   public class ReminderInDateGetter{
     private static boolean returnSearchResult = false;
-    private static @NonNull List<ReminderTaskFireBase.Reminder> SEARCH_RESULT = new LinkedList<>();
+    private static final @NonNull List<ReminderTaskFireBase.Reminder> SEARCH_RESULT = new LinkedList<>();
 
     @NonNull public List<ReminderTaskFireBase.Reminder> getReminder(int date){
       List<ReminderTaskFireBase.Reminder> remindersInDate = new LinkedList<>();
@@ -346,11 +346,11 @@ public class CalendarFragment extends Fragment {
         if(!singleReminderMapByDate.containsKey(date)){
           singleReminderMapByDate.put(date,new LinkedList<>());
         }
-        singleReminderMapByDate.get(date).add(reminder);
+        singleReminderMapByDate.get(date).addFirst(reminder);
 
         int pos = calendarRecyclerViewAdapter.dateToPos(date);
         calendarRecyclerViewAdapter.notifyItemChanged(pos);
-        reminderRecyclerAdapter.notifyItemInserted(reminderInDateGetter.getReminder(date).size() - 1);
+        reminderRecyclerAdapter.notifyItemInserted(0);
         return;
       }
 

@@ -134,15 +134,6 @@ public class ReminderTaskFireBase {
   TimerStats todayStats;
   long todayTime;
 
-
-  public static class Initialize{
-
-  }
-  static boolean GET_REMINDER_COMPLETED = false;
-  static boolean GET_SINGLE_REMIND_TASK_COMPLETED = false;
-  static boolean GET_WEEKLY_REMIND_TASK_COMPLETED = false;
-
-
   static private final HashMap<Integer, List<Reminder>> SINGLE_REMINDER_BY_MONTH = new HashMap<>();
   static private final HashMap<Integer, List<Reminder>> WEEKLY_REMINDER_BY_WEEKDAY = new HashMap<>();
   static private final HashMap<Integer,List<Task>> TASKS_BY_MONTH = new HashMap<>();
@@ -346,7 +337,9 @@ public class ReminderTaskFireBase {
     new Thread(new InitializeThread(onCompleted)).start();
   }
 
-  //Initialize
+
+
+  //Initialize ==========================
   public void getRemindersInAYear(int year,@NonNull OnCompleted onCompletedInitial) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.YEAR, year);
@@ -497,9 +490,10 @@ public class ReminderTaskFireBase {
     }
   }
 
-  //===============
+  //=========================================
 
 
+  //Reminder ================================
   @Nullable
   public Reminder addReminder(String title, long time) {
     Reminder reminder = new Reminder();
@@ -603,18 +597,18 @@ public class ReminderTaskFireBase {
     }));
   }
 
+  //=============================================
 
 
-
+  //Task ========================================
   public interface OnTaskModifyCompleted{
     void onCompleted(@Nullable Task task);
   }
   public interface OnTaskSetReminderCompleted{
     void onComplete(@Nullable Reminder reminder,@NonNull List<Task> tasks);
   }
-
-  public interface OnActionFailed{
-    void onFail(DatabaseError error);
+  public interface OnTaskSearchCompleted{
+    void onCompleted(@NonNull List<Task> taskList);
   }
 
   public void updateTask(Task taskData,@NonNull OnTaskModifyCompleted onCompleted) {
@@ -709,8 +703,42 @@ public class ReminderTaskFireBase {
             });
   }
 
+  public void SearchSingleReminderTask(long startTime,long endTime,@NonNull OnTaskSearchCompleted onCompleted){
+    databaseReference.child(userUID)
+            .child(Task.TABLE_NAME)
+            .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
+            .startAt(startTime)
+            .endAt(endTime)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+              @Override
+              public void onDataChange(@NonNull DataSnapshot snapshot) {
+                LinkedList<Task> taskLinkedList = new LinkedList<>();
+                if(!snapshot.exists()){
+                  onCompleted.onCompleted(taskLinkedList);
+                  return;
+                }
+
+                Iterable<DataSnapshot> taskSnapShot = snapshot.getChildren();
+                for (DataSnapshot s: taskSnapShot) {
+                  Task task = s.getValue(Task.class);
+                  if(task != null){
+                    taskLinkedList.add(task);
+                  }
+                }
+
+                onCompleted.onCompleted(taskLinkedList);
+              }
+
+              @Override
+              public void onCancelled(@NonNull DatabaseError error) {
+                onCompleted.onCompleted(new LinkedList<>());
+              }
+            });
+  }
+  //===================================
 
 
+  //Stats ====================================
   public interface GetStatsCompletedCallBack{
     void onCompleted(@NonNull List<TimerStats> stats,long startTime,long endTime);
   }
@@ -754,7 +782,6 @@ public class ReminderTaskFireBase {
             .endAt(endTime)
             .addListenerForSingleValueEvent(new GetManyStatsListener(completedCallBack, startTime, endTime));
   }
-
   static class GetManyStatsListener implements ValueEventListener{
     GetStatsCompletedCallBack completedCallBack;
     long startTime;
@@ -788,7 +815,6 @@ public class ReminderTaskFireBase {
 
     }
   }
-
   class TodayStatsValueEventListener implements ValueEventListener {
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -816,4 +842,6 @@ public class ReminderTaskFireBase {
 
     }
   }
+  //=============================================
+
 }
