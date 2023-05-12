@@ -41,6 +41,7 @@ import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
+
   @NonNull static UserAuthData USER_PROFILE = UserAuthData.GetInstance();
   public static String GetUserId(){
     return USER_PROFILE.USER_ID;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
   private Button toolbarBtn;
   private boolean nightMode;
 
+
   SharedPreferences userTimerSetting;
   static final String PREF_KEY_WORK_TIME = "work_time";
   static final String PREF_KEY_SHORT_TIME = "short_time";
@@ -69,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
   static final String PREF_KEY_THEME = "theme";
 
   ReminderBroadcastReceiver reminderBroadcastReceiver;
-
   ReminderTaskFireBase fireBase;
 
 
@@ -106,13 +107,6 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.openDrawer(Gravity.LEFT);
       }
     });
-
-    /*
-    int stackCount = fragmentManager.getBackStackEntryCount();
-    for (int i = 0; i < stackCount; ++i) {
-      fragmentManager.popBackStack();
-    }
-     */
 
     reminderBroadcastReceiver = new ReminderBroadcastReceiver();
     IntentFilter filter = new IntentFilter("com.hoanglam.scheduleproject.reminder");
@@ -183,6 +177,19 @@ public class MainActivity extends AppCompatActivity {
     });
   }
   //=======================================================
+
+  // Switch to Leaderboard Fragment
+  public boolean switchFragment_Leaderboard() {
+    if (leaderboardFragment.isVisible()) {
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, leaderboardFragment, FRAGMENT_TAG_LEADERBOARD)
+            .addToBackStack(FRAGMENT_TAG_LEADERBOARD)
+            .commit();
+    return true;
+  }
 
 
   //Timer Service===========================================
@@ -366,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
       int id = item.getItemId();
-
       if (id == R.id.nav_timer) {
         currentFragment = IS_TIMER_FRAGMENT;
         Toast.makeText(MainActivity.this, "Select Timer", Toast.LENGTH_SHORT).show();
@@ -386,7 +392,6 @@ public class MainActivity extends AppCompatActivity {
       } else if (id == R.id.nav_auth) {
         return switchFragment_Auth();
       }
-
       return false;
     }
   }
@@ -396,10 +401,7 @@ public class MainActivity extends AppCompatActivity {
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
       timerService = ((TimerService.LocalBinder) iBinder).getService();
       timerService.setStateTime(loadTimerSettingPref());
-      Log.i("MAIN_ACTIVITY","InitFireBase");
-
     }
-
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
 
