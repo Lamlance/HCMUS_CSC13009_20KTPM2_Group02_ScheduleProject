@@ -25,12 +25,9 @@ import androidx.fragment.app.FragmentResultListener;
 
 import com.honaglam.scheduleproject.MyAlramManager.MyAlarmManager;
 import com.honaglam.scheduleproject.Reminder.ReminderAddDialog;
-import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Repository.StatsRepository;
 import com.honaglam.scheduleproject.Repository.TaskRepository;
 import com.honaglam.scheduleproject.Task.AddTaskDialog;
-import com.honaglam.scheduleproject.Task.TaskData;
-import com.honaglam.scheduleproject.Task.TaskExpandableListAdapter;
 import com.honaglam.scheduleproject.Task.TaskExpandableListAdapterFB;
 import com.honaglam.scheduleproject.TimerViews.TimerFloatingButton;
 import com.honaglam.scheduleproject.TimerViews.TimerViewGroupConstraint;
@@ -41,12 +38,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import kotlin.NotImplementedError;
 
 /**
  * A simple {@link Fragment} subclass.

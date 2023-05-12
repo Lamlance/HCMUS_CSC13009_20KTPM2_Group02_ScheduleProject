@@ -13,18 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.honaglam.scheduleproject.History.HistoryExpandableListAdapter;
 import com.honaglam.scheduleproject.History.HistoryExpandableListAdapterFB;
 import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
-import com.honaglam.scheduleproject.Repository.ReminderRepository;
 import com.honaglam.scheduleproject.Repository.TaskRepository;
-import com.honaglam.scheduleproject.Task.TaskData;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

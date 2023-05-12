@@ -1,14 +1,11 @@
 package com.honaglam.scheduleproject;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentResultListener;
 
 import android.app.Dialog;
 import android.content.ComponentName;
@@ -28,17 +25,14 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import com.auth0.android.result.UserProfile;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.honaglam.scheduleproject.Authorizer.MyAuthorizer;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
-import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.UserSetting.UserAuthData;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 //import com.honaglam.scheduleproject.UserSetting.UserSettings;
 
-import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -140,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
     statisticFragment = StatisticFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
     historyFragment = HistoryFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
     auth0Fragment = Auth0Fragment.newInstance();
-    leaderboardFragment = LeaderboardFragment.newInstance();
+    leaderboardFragment = LeaderboardFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
 
     fragmentManager
             .beginTransaction()
@@ -375,6 +369,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+      if(fragmentManager.getBackStackEntryCount() == 0){
+        return false;
+      }
+
       int id = item.getItemId();
       if (id == R.id.nav_timer) {
         currentFragment = IS_TIMER_FRAGMENT;

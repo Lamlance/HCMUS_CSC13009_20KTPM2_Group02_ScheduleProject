@@ -25,7 +25,7 @@
         android:textSize="15dp"
         android:text="Top user focus time"/>
 
-    <ExpandableListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerLeaderboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

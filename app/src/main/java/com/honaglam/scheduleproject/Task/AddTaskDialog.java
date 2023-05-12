@@ -11,9 +11,6 @@ import androidx.annotation.NonNull;
 
 import com.honaglam.scheduleproject.R;
 import com.honaglam.scheduleproject.ReminderTaskFireBase;
-import com.honaglam.scheduleproject.Task.TaskData;
-
-import java.time.LocalDate;
 
 public class AddTaskDialog extends Dialog {
 
@@ -28,9 +25,7 @@ public class AddTaskDialog extends Dialog {
   Button btnDown;
   Button btnSave;
   Button btnCancel;
-  TaskData tempData = new TaskData(
-          "",0,0,
-          -1,false,0,0,0);
+  ReminderTaskFireBase.Task tempData = new ReminderTaskFireBase.Task();
   AddTaskDialogListener listener;
 
   public AddTaskDialog(@NonNull Context context, AddTaskDialogListener listener) {
@@ -38,6 +33,10 @@ public class AddTaskDialog extends Dialog {
     this.listener = listener;
     setContentView(R.layout.add_task_dialog);
 
+    tempData.loopsDone = 0;
+    tempData.loops = 1;
+    tempData.id = "";
+    tempData.title = "";
 
     // Set width for dialog
     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -52,21 +51,15 @@ public class AddTaskDialog extends Dialog {
     btnDown = findViewById(R.id.btnDown);
     btnUp = findViewById(R.id.btnUp);
 
-    btnUp.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        tempData.numberPomodoros++;
-        editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
-      }
+    btnUp.setOnClickListener(view -> {
+      tempData.loops++;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
-    btnDown.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        if (tempData.numberPomodoros == 1) return;
-        tempData.numberPomodoros--;
-        editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
-      }
+    btnDown.setOnClickListener(view -> {
+      if (tempData.loops == 1) return;
+      tempData.loops--;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
 
@@ -91,12 +84,7 @@ public class AddTaskDialog extends Dialog {
       }
     });
 
-    btnCancel.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        dismiss();
-      }
-    });
+    btnCancel.setOnClickListener(view -> dismiss());
   }
 
 
@@ -120,21 +108,21 @@ public class AddTaskDialog extends Dialog {
     btnDown = findViewById(R.id.btnDown);
     btnUp = findViewById(R.id.btnUp);
 
-    tempData.taskName = oldData.title;
-    tempData.numberPomodoros = oldData.loops;
+    tempData.title = oldData.title;
+    tempData.loops = oldData.loops;
 
-    editTxtTaskName.setText(tempData.taskName);
-    editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
+    editTxtTaskName.setText(tempData.title);
+    editTextCountPomodoro.setText(Integer.toString(tempData.loops));
 
     btnUp.setOnClickListener(view -> {
-      tempData.numberPomodoros++;
-      editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
+      tempData.loops++;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
     btnDown.setOnClickListener(view -> {
-      if (tempData.numberPomodoros == 1) return;
-      tempData.numberPomodoros--;
-      editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
+      if (tempData.loops == 1) return;
+      tempData.loops--;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
 

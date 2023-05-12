@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.honaglam.scheduleproject.ReminderTaskFireBase;
+import com.honaglam.scheduleproject.TimerService;
 
 import java.util.Calendar;
 import java.util.Comparator;
@@ -26,6 +27,9 @@ public class StatsRepository {
 
   public void addTimeTodayTask(int state,long time){
     ReminderTaskFireBase.GetInstance(uuid,"Stats").addTimeTodayTask(state,time);
+    if(state == TimerService.WORK_STATE){
+      ReminderTaskFireBase.GetInstance(uuid,"Stats").addScore(time);
+    }
   }
 
   public void SetGetStatsCompleted(GetStatsDataCallBack completedCallBack){

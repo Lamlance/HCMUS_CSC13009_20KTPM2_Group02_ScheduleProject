@@ -3,14 +3,24 @@ package com.honaglam.scheduleproject;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
+import com.honaglam.scheduleproject.LeaderBoard.LeaderBoardRecyclerAdapter;
+import com.honaglam.scheduleproject.Repository.ScoreRepository;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,40 +32,73 @@ import java.util.List;
  */
 
 public class LeaderboardFragment extends Fragment {
+  static ScoreRepository scoreRepository;
 
+  Context context;
+  RecyclerView recyclerViewLeaderList;
+  LeaderBoardRecyclerAdapter leaderBoardRecyclerAdapter;
 
-    MainActivity mainActivity;
-    Context context;
-    ExpandableListView expandableListView;
-    public LeaderboardFragment() {
-        // Required empty public constructor
+  List<ReminderTaskFireBase.ScoreBoard> scoreBoardList = new LinkedList<>();
+
+  public class ScoreBoardListGetter{
+    @NonNull public List<ReminderTaskFireBase.ScoreBoard> getList(){
+      return scoreBoardList;
+    }
+  }
+
+  public LeaderboardFragment() {
+    // Required empty public constructor
+  }
+
+  public static LeaderboardFragment newInstance(String uid) {
+    LeaderboardFragment fragment = new LeaderboardFragment();
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+    if(scoreRepository == null){
+      scoreRepository = new ScoreRepository(uid);
     }
 
-    public static LeaderboardFragment newInstance() {
-        LeaderboardFragment fragment = new LeaderboardFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    return fragment;
+  }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    scoreRepository.SetOnRankingResultCallBack(new GetRankingUserCallBack());
+  }
+
+  @Override
+  public void onAttach(@NonNull Context context) {
+    super.onAttach(context);
+    this.context = context;
+  }
+
+  @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    leaderBoardRecyclerAdapter = new LeaderBoardRecyclerAdapter(inflater,new ScoreBoardListGetter());
+    View view = inflater.inflate(R.layout.fragment_leaderboard, container, false);
+    return view;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    recyclerViewLeaderList = view.findViewById(R.id.recyclerLeaderboard);
+    recyclerViewLeaderList.setLayoutManager(new LinearLayoutManager(context));
+    recyclerViewLeaderList.setAdapter(leaderBoardRecyclerAdapter);
+
+    scoreRepository.getTop10Ranking();
+  }
+
+
+  class GetRankingUserCallBack implements ScoreRepository.OnRankingResultCallBack{
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onResult(List<ReminderTaskFireBase.ScoreBoard> scoreList) {
+      Collections.reverse(scoreList);
+      scoreBoardList.clear();
+      scoreBoardList.addAll(scoreList);
+
+      leaderBoardRecyclerAdapter.notifyDataSetChanged();
     }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        mainActivity = (MainActivity) getActivity();
-        context = requireContext();
-        View view = inflater.inflate(R.layout.fragment_leaderboard, container, false);
-
-        // Initialize ExpandableListView for leaderboard items
-        expandableListView = view.findViewById(R.id.recyclerLeaderboard);
-
-        return inflater.inflate(R.layout.fragment_leaderboard, container, false);
-    }
-
-
+  }
 }

@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -873,4 +874,101 @@ public class ReminderTaskFireBase {
   }
   //=============================================
 
+
+  //Score========================================
+  public static class ScoreBoard{
+    private static final String SCORE_TABLE_NAME = "ScoreBoard";
+    private static final String SCORE_COL_NAME = "score";
+    public long score = 0;
+
+    @Exclude public String userId = "";
+  }
+
+  public interface ScoreBoardResultCallBack{
+    void onResult(List<ScoreBoard> scores);
+  }
+
+  public void setScore(ScoreBoard value){
+    databaseReference
+            .child(ScoreBoard.SCORE_TABLE_NAME)
+            .child(userUID).setValue(value);
+  }
+
+  public void addScore(long score){
+    databaseReference
+            .child(ScoreBoard.SCORE_TABLE_NAME).orderByKey().equalTo(userUID)
+            .addListenerForSingleValueEvent(new UserScoreListener(score));
+  }
+
+  public void getTop10Score(ScoreBoardResultCallBack callBack){
+    databaseReference
+            .child(ScoreBoard.SCORE_TABLE_NAME).
+            orderByChild(ScoreBoard.SCORE_COL_NAME)
+            .limitToLast(10)
+            .addListenerForSingleValueEvent(new RankingScoreListener(callBack));
+  }
+
+  class UserScoreListener implements ValueEventListener{
+    long addScore = 0;
+    UserScoreListener(long add){
+      addScore = add;
+    }
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      if(!snapshot.exists()){
+        setScore(new ScoreBoard());
+        return;
+      }
+      Iterable<DataSnapshot> children = snapshot.getChildren();
+      for (DataSnapshot child: children) {
+        ScoreBoard currScore = child.getValue(ScoreBoard.class);
+        if(currScore == null){
+          setScore(new ScoreBoard());
+        }else {
+          currScore.score += addScore;
+          setScore(currScore);
+        }
+
+        break;
+      }
+
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
+  }
+
+  static class RankingScoreListener implements ValueEventListener{
+    ScoreBoardResultCallBack scoreBoardResultCallBack;
+    RankingScoreListener(@NonNull ScoreBoardResultCallBack callBack){
+      scoreBoardResultCallBack = callBack;
+    }
+
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+      List<ScoreBoard> scoreBoardList = new LinkedList<>();
+      if(!snapshot.exists()){
+        scoreBoardResultCallBack.onResult(scoreBoardList);
+        return;
+      }
+
+      Iterable<DataSnapshot> scoreData = snapshot.getChildren();
+      for (DataSnapshot data: scoreData) {
+        ScoreBoard scoreBoard = data.getValue(ScoreBoard.class);
+        if(scoreBoard != null){
+          scoreBoard.userId = data.getKey();
+          scoreBoardList.add(scoreBoard);
+        }
+      }
+      scoreBoardResultCallBack.onResult(scoreBoardList);
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+
+    }
+  }
+  //=============================================
 }
