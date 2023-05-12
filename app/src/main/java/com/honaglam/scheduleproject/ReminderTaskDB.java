@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
 import com.honaglam.scheduleproject.Task.TaskData;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -23,8 +24,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 //import kotlinx.coroutines.scheduling.Task;
-
+/*
 public class ReminderTaskDB extends SQLiteOpenHelper {
+
   private static final int DB_VERSION = 29;
   public static final boolean IS_DEV = true;
   private static final String DB_NAME = "ScheduleProject.db";
@@ -42,16 +44,28 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   long curShort = 0;
   long curLong = 0;
 
-  private static class ReminderTable implements BaseColumns {
+  public static class ReminderTable implements BaseColumns, Serializable {
     public static final String TABLE_NAME = "REMINDER";
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_TIME = "time";
     //public static final String COLUMN_NAME_FATHER = "father";
     public static final String COLUMN_NAME_WEEKDAY = "weekday";
+
+    public long id;
+    public String title;
+    public long time;
+    public int weekday;
+
+    public ReminderTable(long id, String title, long time, int weekday) {
+      this.id = id;
+      this.title = title;
+      this.time = time;
+      this.weekday = weekday;
+    }
   }
 
-  private static class TaskTable implements BaseColumns {
+  public static class TaskTable implements BaseColumns, Serializable {
     public static final String TABLE_NAME = "POMODORO_TASK";
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
@@ -62,23 +76,43 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_DATE = "date";
     public static final String COLUMN_NAME_MONTH = "month";
     public static final String COLUMN_NAME_YEAR = "year";
+
+    long id;
+    String title;
+    int loops;
+    int loopsDone;
+    int history;
+    int date;
+    int month;
+    int year;
   }
 
-  private static class StatsTable implements BaseColumns {
-    private static final String TABLE_NAME = "TimerStats";
+  public static class StatsTable implements BaseColumns, Serializable {
+    public static final String TABLE_NAME = "TimerStats";
     public static final String COLUMN_NAME_WORK_DURATION = "work_duration";
     public static final String COLUMN_NAME_SHORT_DURATION = "short_duration";
     public static final String COLUMN_NAME_LONG_DURATION = "long_duration";
     public static final String COLUMN_NAME_DATE = "date";
     public static final String COLUMN_NAME_MONTH = "month";
     public static final String COLUMN_NAME_YEAR = "year";
+
+    int date;
+    int month;
+    int year;
+    long workDur;
+    long shortDur;
+    long longDur;
   }
 
-  private static class TaskReminderTable implements BaseColumns {
+  public static class TaskReminderTable implements BaseColumns, Serializable {
     public static final String TABLE_NAME = "TaskReminder";
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_REMINDER_ID = "reminder_id";
     public static final String COLUMN_NAME_TASK_ID = "task_id";
+
+    long id;
+    long reminder_id;
+    long task_id;
   }
 
   boolean todayStatsCreated = false;
@@ -973,6 +1007,37 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
   //===
 
 
+  public List<ReminderTable> getAllReminderTableData(){
+    List<ReminderTable> reminders = new ArrayList<ReminderTable>();
+
+    try(
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor cursor = db.rawQuery("SELECT * FROM " + ReminderTable.TABLE_NAME,null);
+    ){
+      if(!cursor.moveToFirst()){
+        return  reminders;
+      }
+      int idIndex = cursor.getColumnIndex(ReminderTable.COLUMN_NAME_ID);
+      int timeIndex = cursor.getColumnIndex(ReminderTable.COLUMN_NAME_TIME);
+      int titleIndex = cursor.getColumnIndex(ReminderTable.COLUMN_NAME_TITLE);
+      int weekDayIndex = cursor.getColumnIndex(ReminderTable.COLUMN_NAME_WEEKDAY);
+      do{
+        long id = cursor.getLong(idIndex);
+        String title = cursor.getString(titleIndex);
+        long time = cursor.getLong(timeIndex);
+        int weekday = cursor.isNull(weekDayIndex) ? 0 : cursor.getInt(weekDayIndex);
+
+        reminders.add(new ReminderTable(id,title,time,weekday));
+
+      }while (cursor.moveToNext());
+
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+
+    return  reminders;
+  }
+
   public void createSampleData() {
     Calendar calendar = Calendar.getInstance();
 
@@ -1020,3 +1085,5 @@ public class ReminderTaskDB extends SQLiteOpenHelper {
     onCreate(db);
   }
 }
+
+ */

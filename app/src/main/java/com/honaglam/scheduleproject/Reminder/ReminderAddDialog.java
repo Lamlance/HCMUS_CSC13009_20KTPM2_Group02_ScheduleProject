@@ -142,6 +142,8 @@ public class ReminderAddDialog extends Dialog {
 
   void setEnableDaily(boolean isEnable) {
     linearLayoutDailyBtn.setVisibility(isEnable ? View.VISIBLE : View.GONE);
+
+    dailyReminder.add(currCalendar.get(Calendar.DAY_OF_WEEK));
   }
 
   class AddReminderButton implements View.OnClickListener {

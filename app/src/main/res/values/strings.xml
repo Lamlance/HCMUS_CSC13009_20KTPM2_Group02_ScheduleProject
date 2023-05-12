@@ -1,19 +1,21 @@
 <resources>
-    <string name="app_name">ScheduleProject</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="confirm">Confirm</string>
-    <string name="accept">Accept</string>
-    <string name="pomodoro">Pomodoro</string>
-    <string name="pomodoro_settings">Pomodoro Settings</string>
-    <string name="cancel">Cancel</string>
-    <string name="short_break">Short Break</string>
-    <string name="long_break">Long Break</string>
-    <string name="give_up">GIVE UP</string>
-    <string name="settings">Settings</string>
-    <string name="start">START</string>
-    <string name="timer">TIMER</string>
-    <string name="time_minutes">Time (minutes)</string>
-    <string name="date_format">DD/MM/YYYY</string>
-    <string name="est_pomodoro">Est Pomodoros:</string>
+
+  <string name="app_name">ScheduleProject</string>
+  <!-- TODO: Remove or change this placeholder text -->
+  <string name="hello_blank_fragment">Hello blank fragment</string>
+  <string name="confirm">Confirm</string>
+  <string name="accept">Accept</string>
+  <string name="pomodoro">Pomodoro</string>
+  <string name="pomodoro_settings">Pomodoro Settings</string>
+  <string name="cancel">Cancel</string>
+  <string name="short_break">Short Break</string>
+  <string name="long_break">Long Break</string>
+  <string name="give_up">GIVE UP</string>
+  <string name="settings">Settings</string>
+  <string name="start">START</string>
+  <string name="timer">TIMER</string>
+  <string name="time_minutes">Time (minutes)</string>
+  <string name="date_format">DD/MM/YYYY</string>
+  <string name="est_pomodoro">Est Pomodoros:</string>
+  <string name="com_auth0_domain">dev-j07rhfbc.us.auth0.com</string>
 </resources>
