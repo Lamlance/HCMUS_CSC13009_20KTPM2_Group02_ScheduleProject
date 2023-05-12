@@ -10,14 +10,12 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 
 import com.honaglam.scheduleproject.R;
-import com.honaglam.scheduleproject.Task.TaskData;
-
-import java.time.LocalDate;
+import com.honaglam.scheduleproject.ReminderTaskFireBase;
 
 public class AddTaskDialog extends Dialog {
 
   public interface AddTaskDialogListener {
-    void onDataPassed(TaskData taskData);
+    void onDataPassed(ReminderTaskFireBase.Task taskData);
   }
 
   EditText editTxtTaskName;
@@ -27,9 +25,7 @@ public class AddTaskDialog extends Dialog {
   Button btnDown;
   Button btnSave;
   Button btnCancel;
-  TaskData tempData = new TaskData(
-          "",0,0,
-          -1,false,0,0,0);
+  ReminderTaskFireBase.Task tempData = new ReminderTaskFireBase.Task();
   AddTaskDialogListener listener;
 
   public AddTaskDialog(@NonNull Context context, AddTaskDialogListener listener) {
@@ -37,6 +33,10 @@ public class AddTaskDialog extends Dialog {
     this.listener = listener;
     setContentView(R.layout.add_task_dialog);
 
+    tempData.loopsDone = 0;
+    tempData.loops = 1;
+    tempData.id = "";
+    tempData.title = "";
 
     // Set width for dialog
     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -51,21 +51,15 @@ public class AddTaskDialog extends Dialog {
     btnDown = findViewById(R.id.btnDown);
     btnUp = findViewById(R.id.btnUp);
 
-    btnUp.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        tempData.numberPomodoros++;
-        editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
-      }
+    btnUp.setOnClickListener(view -> {
+      tempData.loops++;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
-    btnDown.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        if (tempData.numberPomodoros == 1) return;
-        tempData.numberPomodoros--;
-        editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
-      }
+    btnDown.setOnClickListener(view -> {
+      if (tempData.loops == 1) return;
+      tempData.loops--;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
 
@@ -80,38 +74,26 @@ public class AddTaskDialog extends Dialog {
           return;
         }
 
-        tempData.taskName = taskName;
-        tempData.numberPomodoros = countPomodoro;
-        LocalDate currentDate = LocalDate.now();
-        tempData.date= currentDate.getDayOfMonth();
-        tempData.month= currentDate.getMonthValue();
-        tempData.year = currentDate.getYear();
+        ReminderTaskFireBase.Task task = new ReminderTaskFireBase.Task();
 
-        listener.onDataPassed(tempData);
+        task.title = taskName;
+        task.loops = countPomodoro;
+
+        listener.onDataPassed(task);
         dismiss();
       }
     });
 
-    btnCancel.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        dismiss();
-      }
-    });
+    btnCancel.setOnClickListener(view -> dismiss());
   }
 
 
   public AddTaskDialog(@NonNull Context context,
                        AddTaskDialogListener listener,
-                       TaskData oldData) {
+                       ReminderTaskFireBase.Task oldData) {
     super(context);
     this.listener = listener;
     setContentView(R.layout.add_task_dialog);
-
-    TaskData tempData = new TaskData(
-            oldData.taskName,
-            oldData.numberPomodoros,oldData.numberCompletedPomodoros,
-            oldData.id,oldData.isCompleted,oldData.date,oldData.month,oldData.year);
 
     // Set width for dialog
     WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -126,52 +108,40 @@ public class AddTaskDialog extends Dialog {
     btnDown = findViewById(R.id.btnDown);
     btnUp = findViewById(R.id.btnUp);
 
+    tempData.title = oldData.title;
+    tempData.loops = oldData.loops;
 
-    editTxtTaskName.setText(tempData.taskName);
-    editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
+    editTxtTaskName.setText(tempData.title);
+    editTextCountPomodoro.setText(Integer.toString(tempData.loops));
 
-    btnUp.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        tempData.numberPomodoros++;
-        editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
-      }
+    btnUp.setOnClickListener(view -> {
+      tempData.loops++;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
-    btnDown.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        if (tempData.numberPomodoros == 1) return;
-        tempData.numberPomodoros--;
-        editTextCountPomodoro.setText(Integer.toString(tempData.numberPomodoros));
-      }
+    btnDown.setOnClickListener(view -> {
+      if (tempData.loops == 1) return;
+      tempData.loops--;
+      editTextCountPomodoro.setText(Integer.toString(tempData.loops));
     });
 
 
-    btnSave.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        String taskName = editTxtTaskName.getText().toString();
-        int countPomodoro = Integer.parseInt(editTextCountPomodoro.getText().toString());
+    btnSave.setOnClickListener(view -> {
+      String taskName = editTxtTaskName.getText().toString();
+      int countPomodoro = Integer.parseInt(editTextCountPomodoro.getText().toString());
 
-        if (taskName.equals("")) {
-          dismiss();
-          return;
-        }
-
-        tempData.taskName = taskName;
-        tempData.numberPomodoros = countPomodoro;
-
-        listener.onDataPassed(tempData);
+      if (taskName.equals("")) {
         dismiss();
+        return;
       }
+
+      oldData.title = taskName;
+      oldData.loops = countPomodoro;
+
+      listener.onDataPassed(oldData);
+      dismiss();
     });
 
-    btnCancel.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        dismiss();
-      }
-    });
+    btnCancel.setOnClickListener(view -> dismiss());
   }
 }

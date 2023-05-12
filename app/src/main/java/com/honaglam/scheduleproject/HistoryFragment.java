@@ -2,6 +2,7 @@ package com.honaglam.scheduleproject;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,29 +13,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.honaglam.scheduleproject.History.HistoryExpandableListAdapter;
+import com.honaglam.scheduleproject.History.HistoryExpandableListAdapterFB;
 import com.honaglam.scheduleproject.Reminder.ReminderFilterDialog;
-import com.honaglam.scheduleproject.Task.TaskData;
+import com.honaglam.scheduleproject.Repository.TaskRepository;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 
 public class HistoryFragment extends Fragment {
-  HistoryExpandableListAdapter historyExpandableListAdapter;
+  HistoryExpandableListAdapterFB historyExpandableListAdapter;
   private Context context;
   private ExpandableListView expandableListHistory;
-  private MainActivity activity;
-
-  public static HistoryFragment newInstance() {
+  static TaskRepository taskRepository;
+  public static HistoryFragment newInstance(String uuid) {
     HistoryFragment fragment = new HistoryFragment();
     Bundle args = new Bundle();
     fragment.setArguments(args);
+    if(taskRepository == null){
+      taskRepository = new TaskRepository(uuid);
+    }
     return fragment;
   }
 
@@ -43,17 +45,31 @@ public class HistoryFragment extends Fragment {
   }
 
   ReminderFilterDialog historyFilter;
-  List<TaskData> taskDataList;
-  List<Long> dateGroup = new ArrayList<>();
-  Map<Long,List<TaskData>> taskDataGroupByDate = new HashMap<>();
+  final LinkedList<ReminderTaskFireBase.Task> taskDataList = new LinkedList<>();
+  final Map<ReminderTaskFireBase.Reminder,List<ReminderTaskFireBase.Task>> taskMapByReminder = new HashMap<>();
+
+  public class TaskDataGetter{
+    public @NonNull List<ReminderTaskFireBase.Reminder> getReminders(){
+      return new LinkedList<>(taskMapByReminder.keySet());
+    }
+    public @NonNull List<ReminderTaskFireBase.Task> getTaskFromReminder(ReminderTaskFireBase.Reminder reminder){
+      List<ReminderTaskFireBase.Task> tasks = taskMapByReminder.get(reminder);
+      if(tasks == null){
+        return new LinkedList<>();
+      }
+      return tasks;
+    }
+  }
+
+  @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    taskRepository.SetOnTaskSearchCompleted(new TaskSearchResultListener());
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
-    activity = (MainActivity) getActivity();
     context = requireContext();
     historyFilter = new ReminderFilterDialog(context, new TaskDataDateFilterCallBack());
     LinearLayout historyLayout = (LinearLayout) inflater.inflate(R.layout.fragment_history, container, false);
@@ -67,13 +83,9 @@ public class HistoryFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     context = getContext();
-    activity = (MainActivity) getActivity();
 
-    historyExpandableListAdapter = new HistoryExpandableListAdapter(
-            getLayoutInflater(),
-            () -> taskDataGroupByDate,
-            () -> dateGroup);
-    historyExpandableListAdapter.setClickMakeTaskCallBack(new ChildItemUnarchiveCallBack());
+    historyExpandableListAdapter = new HistoryExpandableListAdapterFB(getLayoutInflater(),new TaskDataGetter());
+    //historyExpandableListAdapter.setClickMakeTaskCallBack(new ChildItemUnarchiveCallBack());
 
 
     expandableListHistory = view.findViewById(R.id.recyclerHistory);
@@ -83,61 +95,6 @@ public class HistoryFragment extends Fragment {
       historyFilter.show();
     });
     // TODO: List task history
-  }
-
-  long fromDate;
-  long toDate;
-
-  class TaskDataDateFilterCallBack implements ReminderFilterDialog.OnSelectFromToDate{
-    @Override
-    public void onSelect(long fromDate, long toDate) {
-      HistoryFragment.this.fromDate = fromDate;
-      HistoryFragment.this.toDate = toDate;
-
-      Calendar calendar = Calendar.getInstance();
-      taskDataList = activity.taskDb.getHistoryAtRange(fromDate,toDate);
-
-      taskDataGroupByDate.clear();
-      taskDataGroupByDate = taskDataList.stream().collect(Collectors.groupingBy(t -> {
-        calendar.set(t.year,t.month-1,t.date,0,0,0);
-        return calendar.getTimeInMillis();
-      }));
-
-      dateGroup.clear();
-      dateGroup.addAll(
-              taskDataGroupByDate.keySet()
-                      .stream().sorted().collect(Collectors.toList())
-      );
-
-      try {
-        historyExpandableListAdapter.notifyDataSetChanged();
-      }catch (Exception e){
-        e.printStackTrace();
-      }
-    }
-  }
-
-  class ChildItemUnarchiveCallBack implements HistoryExpandableListAdapter.ChildItemClickCallBack{
-    @Override
-    public void onClick(int groupPos, int childPos) {
-      try {
-        Long date = dateGroup.get(groupPos);
-        activity.moveTaskToToDoTask(taskDataGroupByDate.get(date).get(childPos).id);
-        taskDataGroupByDate.get(date).remove(childPos);
-        if(taskDataGroupByDate.get(date).size() == 0){
-          taskDataGroupByDate.remove(date);
-          dateGroup.remove(groupPos);
-        }
-        historyExpandableListAdapter.notifyDataSetChanged();
-      }catch (Exception e){
-        e.printStackTrace();
-      }
-
-    }
-  }
-
-  @Override
-  public void onResume() {
     if(fromDate > 0 && toDate > 0 ){
       new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
     }else{
@@ -147,6 +104,52 @@ public class HistoryFragment extends Fragment {
       fromDate = calendar.getTimeInMillis();
       new TaskDataDateFilterCallBack().onSelect(fromDate,toDate);
     }
+
+  }
+
+  long fromDate = -1;
+  long toDate = -1;
+
+  private void MapTaskDataByReminder(){
+    taskMapByReminder.clear();
+    Map<ReminderTaskFireBase.Reminder,List<ReminderTaskFireBase.Task>>
+            taskGroupByReminder = taskDataList.stream().collect(Collectors.groupingBy(t -> t.reminder));
+    taskMapByReminder.putAll(taskGroupByReminder);
+
+    Log.i("HISTORY","SEARCH RESULT " + taskDataList.size());
+    historyExpandableListAdapter.notifyDataSetChanged();
+  }
+
+  class TaskDataDateFilterCallBack implements ReminderFilterDialog.OnSelectFromToDate{
+    @Override
+    public void onSelect(long fromDate, long toDate) {
+      HistoryFragment.this.fromDate = fromDate;
+      HistoryFragment.this.toDate = toDate;
+
+      taskRepository.searchTaskInRange(fromDate,toDate);
+    }
+  }
+
+  /*
+  class ChildItemUnarchiveCallBack implements HistoryExpandableListAdapter.ChildItemClickCallBack{
+    @Override
+    public void onClick(int groupPos, int childPos) {
+    }
+  }
+   */
+
+  class TaskSearchResultListener implements TaskRepository.OnTaskSearchCompleted{
+    @Override
+    public void onCompleted(@NonNull List<ReminderTaskFireBase.Task> tasks) {
+      taskDataList.clear();
+      taskDataList.addAll(tasks);
+      MapTaskDataByReminder();
+
+    }
+  }
+  @Override
+  public void onResume() {
+
 
     super.onResume();
   }

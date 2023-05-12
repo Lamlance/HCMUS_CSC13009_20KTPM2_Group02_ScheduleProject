@@ -12,6 +12,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.honaglam.scheduleproject.MainActivity;
+import com.honaglam.scheduleproject.MyAlramManager.MyAlarmManager;
 
 public class ReminderBroadcastReceiver extends BroadcastReceiver {
   public static final String NAME_TAG = "ReminderName";
@@ -32,7 +33,7 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
     int reminderId = intent.getIntExtra(REMINDER_ID_KEY,-1);
 
     NotificationChannel notificationChannel = new NotificationChannel(
-            MainActivity.NOTIFICATION_CHANEL_ID, "REMINDER_NOTIFICATION_CHANEL" ,
+            MyAlarmManager.NOTIFICATION_CHANEL_ID, "REMINDER_NOTIFICATION_CHANEL" ,
             NotificationManager. IMPORTANCE_HIGH ) ;
     notificationManager.createNotificationChannel(notificationChannel) ;
 

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "352689544618",
+    "firebase_url": "https://pomodoroproject-d7e70-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "pomodoroproject-d7e70",
+    "storage_bucket": "pomodoroproject-d7e70.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352689544618:android:eb2bfaadac60ba28941fd3",
+        "android_client_info": {
+          "package_name": "com.honaglam.scheduleproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352689544618-2pci7cq3oava74cttlb8vrdfp2gdn1ql.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDApxw_vFTETbRP_8PLBYKkl2GBXZMvSrQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "352689544618-2pci7cq3oava74cttlb8vrdfp2gdn1ql.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -26,6 +26,18 @@
       android:title="History"
       />
 
+    <item
+        android:id="@+id/nav_leaderboard"
+        android:icon="@drawable/social_leaderboard_fill0_wght400_grad0_opsz48"
+        android:title="Leaderboard" 
+    />
+
+    <item
+        android:id="@+id/nav_auth"
+        android:icon="@drawable/baseline_move_to_inbox_24"
+        android:title="User"
+        />
+
     <item android:id="@+id/nav_switchTheme"
         android:title="Dark Mode"
         android:icon="@drawable/baseline_dark_mode_24"
