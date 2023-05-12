@@ -14,6 +14,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.auth0.android.Auth0;
 import com.auth0.android.authentication.AuthenticationAPIClient;
@@ -22,6 +25,10 @@ import com.auth0.android.callback.Callback;
 import com.auth0.android.provider.WebAuthProvider;
 import com.auth0.android.result.Credentials;
 import com.auth0.android.result.UserProfile;
+import com.honaglam.scheduleproject.Authorizer.MyAuthorizer;
+import com.squareup.picasso.Picasso;
+
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,15 +61,15 @@ public class Auth0Fragment extends DialogFragment {
     return dialog;
   }
 
-  @Nullable
   @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    return super.onCreateView(inflater, container, savedInstanceState);
-    //return inflater.inflate(R.layout.fragment_autho, container, false);
-
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
   }
 
-
+  @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.fragment_autho,container,false);
+  }
 
   @Override
   public void onAttach(@NonNull Context context) {
@@ -70,11 +77,27 @@ public class Auth0Fragment extends DialogFragment {
     this.context = context;
   }
 
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
 
+    TextView txtEmail = view.findViewById(R.id.txtUserProfileEmail);
+    ImageView imageProfile = view.findViewById(R.id.imageViewUserAvatar);
+    Button btnLogout = view.findViewById(R.id.btnLogoutAuthFragment);
 
-
-
-
-
-
+    txtEmail.setText(MainActivity.GetUserId().replace(",","."));
+    if(!MainActivity.GetUserImageURL().isBlank()){
+      Picasso.get().load(MainActivity.GetUserImageURL()).into(imageProfile);
+    }
+    btnLogout.setOnClickListener(clickedView -> {
+      if(context == null){
+        return;
+      }
+      new MyAuthorizer(context).logout(isSuccess -> {
+       if(isSuccess){
+         requireActivity().finish();
+       }
+      });
+    });
+  }
 }

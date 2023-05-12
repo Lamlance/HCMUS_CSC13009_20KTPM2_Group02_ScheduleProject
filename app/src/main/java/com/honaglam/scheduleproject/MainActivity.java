@@ -34,27 +34,24 @@ import com.google.android.material.navigation.NavigationView;
 import com.honaglam.scheduleproject.Authorizer.MyAuthorizer;
 import com.honaglam.scheduleproject.Reminder.ReminderBroadcastReceiver;
 import com.honaglam.scheduleproject.Reminder.ReminderData;
+import com.honaglam.scheduleproject.UserSetting.UserAuthData;
 import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 //import com.honaglam.scheduleproject.UserSetting.UserSettings;
 
 import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
-  @NonNull static String USER_ID= "";
+  @NonNull static UserAuthData USER_PROFILE = UserAuthData.GetInstance();
   public static String GetUserId(){
-    return USER_ID;
+    return USER_PROFILE.USER_ID;
   }
+  public static String GetUserImageURL(){return USER_PROFILE.USER_IMAGE_URL;}
   public boolean darkModeIsOn = false;
   //Timer
   private Intent timerIntent;
   private ServiceConnection timerServiceConnection;
   protected TimerService timerService;
 
-
-  //Reminder
-  public LinkedList<ReminderData> reminderDataList = new LinkedList<ReminderData>();
-  //ReminderTaskDB taskDb;
-  //========
 
   private DrawerLayout drawerLayout;
   private NavigationView sideNavView;
@@ -124,8 +121,6 @@ public class MainActivity extends AppCompatActivity {
     InitLogin();
   }
 
-
-
   @Override
   protected void onDestroy() {
     ReminderTaskFireBase.RemoveInstance();
@@ -141,15 +136,16 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
+
+  //Initializer============================================
   private void InitFragment(){
     Log.i("MAIN_ACTIVITY","INIT NEW FRAGMENT");
 
-    calendarFragment = CalendarFragment.newInstance(MainActivity.USER_ID);
-    timerFragment = TimerFragment.newInstance(MainActivity.USER_ID);
-    statisticFragment = StatisticFragment.newInstance(MainActivity.USER_ID);
-    historyFragment = HistoryFragment.newInstance(MainActivity.USER_ID);
+    calendarFragment = CalendarFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
+    timerFragment = TimerFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
+    statisticFragment = StatisticFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
+    historyFragment = HistoryFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
     auth0Fragment = Auth0Fragment.newInstance();
-
 
     fragmentManager
             .beginTransaction()
@@ -166,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             .create();
     dialog.show();
     Log.i("MAIN_ACTIVITY","Getting instance");
-    fireBase = ReminderTaskFireBase.GetInstance(USER_ID, () -> {
+    fireBase = ReminderTaskFireBase.GetInstance(USER_PROFILE.USER_ID, () -> {
       Log.i("MAIN_ACTIVITY","FINISH INIT DATA");
       dialog.dismiss();
       InitFragment();
@@ -179,11 +175,14 @@ public class MainActivity extends AppCompatActivity {
         return;
       }
       Log.i("MAIN_ACTIVITY","User email " + userProfile.getEmail());
-      MainActivity.USER_ID = userProfile.getEmail().replace(".",",");
+      MainActivity.USER_PROFILE.USER_ID = userProfile.getEmail().replace(".",",");
+
+      String imgUrl = userProfile.getPictureURL();
+      MainActivity.USER_PROFILE.USER_IMAGE_URL = imgUrl == null ? "" : imgUrl ;
       InitFireBase();
     });
   }
-
+  //=======================================================
 
 
   //Timer Service===========================================

@@ -44,7 +44,7 @@ dependencies {
 
     // Add the Auth0 Android SDK
     implementation 'com.auth0.android:auth0:2.+'
-
+    implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation platform('com.google.firebase:firebase-bom:31.5.0')
     implementation 'com.google.firebase:firebase-analytics'

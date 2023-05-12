@@ -20,18 +20,27 @@ import com.honaglam.scheduleproject.Auth0Fragment;
 public class MyAuthorizer {
   static Auth0 auth0Account = new Auth0("6auXenOyXE3RcK51Syb5hoeu55DAbfDy", "dev-j07rhfbc.us.auth0.com");
 
-  public interface OnLoginSuccess{
+  public interface OnLoginSuccess {
     void onLogin(@Nullable UserProfile userProfile);
   }
+
+  public interface OnLogout{
+    void onLogout(boolean isSuccess);
+  }
+
   public interface CredentialCallBack {
     void onCredential(Credentials credentials);
   }
-  private static void Login(@NonNull Context context, OnLoginSuccess loginCallBack ){
-    new Thread(new AuthThread(context,new UserInfoCallback(loginCallBack))).start();
+
+  private static void Login(@NonNull Context context, OnLoginSuccess loginCallBack) {
+    new Thread(new AuthThread(context, new UserInfoCallback(loginCallBack))).start();
   }
+
   private static class AuthThread implements Runnable {
     Context context;
-    @NonNull UserInfoCallback userInfoCallback;
+    @NonNull
+    UserInfoCallback userInfoCallback;
+
     AuthThread(Context context, @NonNull UserInfoCallback infoCallback) {
       this.context = context;
       userInfoCallback = infoCallback;
@@ -48,11 +57,14 @@ public class MyAuthorizer {
               }));
     }
   }
+
   static class UserInfoCallback implements Callback<UserProfile, AuthenticationException> {
     OnLoginSuccess loginCallBack;
-    UserInfoCallback(@NonNull OnLoginSuccess callback){
+
+    UserInfoCallback(@NonNull OnLoginSuccess callback) {
       loginCallBack = callback;
     }
+
     @Override
     public void onFailure(@NonNull AuthenticationException e) {
       Log.e("AUTH", e.getDescription());
@@ -64,11 +76,12 @@ public class MyAuthorizer {
       loginCallBack.onLogin(userProfile);
     }
   }
+
   static class UserLogInCallback implements Callback<Credentials, AuthenticationException> {
     CredentialCallBack callBack;
     Context context;
 
-    UserLogInCallback(@NonNull Context ctx ,@NonNull CredentialCallBack credentialCallBack) {
+    UserLogInCallback(@NonNull Context ctx, @NonNull CredentialCallBack credentialCallBack) {
       callBack = credentialCallBack;
       context = ctx;
     }
@@ -92,6 +105,7 @@ public class MyAuthorizer {
       Log.e("AUTH", e.getDescription());
     }
   }
+
   static class UserLogOutCallback implements Callback<Void, AuthenticationException> {
     @Override
     public void onSuccess(Void unused) {
@@ -104,11 +118,29 @@ public class MyAuthorizer {
     }
   }
 
-  @NonNull Context context;
-  public MyAuthorizer(@NonNull Context ctx){
+  @NonNull
+  Context context;
+
+  public MyAuthorizer(@NonNull Context ctx) {
     context = ctx;
   }
-  public void login(OnLoginSuccess loginCallBack){
-    MyAuthorizer.Login(context,loginCallBack);
+
+  public void login(OnLoginSuccess loginCallBack) {
+    MyAuthorizer.Login(context, loginCallBack);
+  }
+
+  public void logout(@NonNull OnLogout onLogout) {
+    WebAuthProvider.logout(auth0Account).withScheme("demo").start(context, new Callback<Void, AuthenticationException>() {
+      @Override
+      public void onSuccess(Void unused) {
+        onLogout.onLogout(true);
+      }
+
+      @Override
+      public void onFailure(@NonNull AuthenticationException e) {
+        e.printStackTrace();
+        onLogout.onLogout(false);
+      }
+    });
   }
 }
