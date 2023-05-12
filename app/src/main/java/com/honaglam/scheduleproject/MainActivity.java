@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     statisticFragment = StatisticFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
     historyFragment = HistoryFragment.newInstance(MainActivity.USER_PROFILE.USER_ID);
     auth0Fragment = Auth0Fragment.newInstance();
+    leaderboardFragment = LeaderboardFragment.newInstance();
 
     fragmentManager
             .beginTransaction()
@@ -178,18 +179,6 @@ public class MainActivity extends AppCompatActivity {
   }
   //=======================================================
 
-  // Switch to Leaderboard Fragment
-  public boolean switchFragment_Leaderboard() {
-    if (leaderboardFragment.isVisible()) {
-      return false;
-    }
-    fragmentManager
-            .beginTransaction()
-            .replace(R.id.fragmentContainerView, leaderboardFragment, FRAGMENT_TAG_LEADERBOARD)
-            .addToBackStack(FRAGMENT_TAG_LEADERBOARD)
-            .commit();
-    return true;
-  }
 
 
   //Timer Service===========================================
@@ -270,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
   //=====================================================
 
 
+
   class DarkThemeSwitch implements CompoundButton.OnCheckedChangeListener {
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
@@ -290,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
   public static final String FRAGMENT_TAG_STATISTIC = "statstic";
   public static final String FRAGMENT_TAG_HISTORY = "history";
   public static final String FRAGMENT_TAG_AUTH = "auth";
+  public static final String FRAGMENT_TAG_LEADERBOARD = "leaderboard";
 
   private FragmentManager fragmentManager;
   private CalendarFragment calendarFragment;
@@ -297,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
   private StatisticFragment statisticFragment;
   private HistoryFragment historyFragment;
   private Auth0Fragment auth0Fragment;
+  private LeaderboardFragment leaderboardFragment;
 
   static final int IS_CALENDAR_FRAGMENT = 1;
   static final int IS_TIMER_FRAGMENT = 2;
@@ -312,6 +304,17 @@ public class MainActivity extends AppCompatActivity {
             .beginTransaction()
             .replace(R.id.fragmentContainerView, timerFragment, FRAGMENT_TAG_TIMER)
             .addToBackStack(FRAGMENT_TAG_TIMER)
+            .commit();
+    return true;
+  }
+  public boolean switchFragment_Leaderboard() {
+    if (leaderboardFragment.isVisible()) {
+      return false;
+    }
+    fragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, leaderboardFragment, FRAGMENT_TAG_LEADERBOARD)
+            .addToBackStack(FRAGMENT_TAG_LEADERBOARD)
             .commit();
     return true;
   }
@@ -391,6 +394,8 @@ public class MainActivity extends AppCompatActivity {
         return switchFragment_History();
       } else if (id == R.id.nav_auth) {
         return switchFragment_Auth();
+      }else if(id == R.id.nav_leaderboard){
+        return switchFragment_Leaderboard();
       }
       return false;
     }
