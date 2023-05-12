@@ -1,8 +1,14 @@
 package com.honaglam.scheduleproject;
 
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -55,6 +61,7 @@ public class TimerFragment extends Fragment {
   private TimerFloatingButton btnTimerSetReminder;
 
 
+  boolean spotifyIsRunning = false;
   private Button btnAddTask;
   public TextView txtPomodoro;
   public TextView txtShortBreak;
@@ -431,6 +438,31 @@ public class TimerFragment extends Fragment {
       currentPomodoroState = newState;
       UpdateTimerBackground(newState);
       statsRepository.addTimeTodayTask(oldState,prevTimeState);
+      if (newState == TimerService.LONG_BREAK_STATE) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle("Open Spotify for relaxing? \ud83d\ude09");
+        builder.setMessage("You have done so good! \ud83e\udd70 \nIt's time relax! \nDo you want to open Spotify?");
+        builder.setIcon(R.drawable.spotify_color_svgrepo_com);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialogInterface, int i) {
+            openSpotify();
+          }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialogInterface, int i) {
+            // do nothing
+            dialogInterface.dismiss();
+          }
+        });
+//        TODO: upgrade chua nghi ra tieng anh de viet
+//        if (!spotifyIsRunning) {
+//          // show dialog when spotify is not running and skip is spotify is running
+//          builder.show();
+//        }
+        builder.show();
+      }
     }
   }
 
@@ -471,6 +503,27 @@ public class TimerFragment extends Fragment {
       UserTimerSettings settings = (UserTimerSettings) result.getSerializable(TimerSetting.TIMER_SETTING_RESULT_KEY);
       setThemeId(settings.prefTheme);
       activity.saveTimerSettingPref(settings);
+    }
+  }
+
+  public void openSpotify() {
+    try {
+      Intent intent = new Intent();
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      intent.setComponent(new ComponentName("com.spotify.music", "com.spotify.music.MainActivity"));
+
+      if (intent != null && !spotifyIsRunning) {
+        spotifyIsRunning = true;
+        startActivity(intent);
+      }
+      spotifyIsRunning = false;
+    }
+    catch (ActivityNotFoundException e){
+      // If Spotify app is not installed, notify the user to install it
+      Toast.makeText(getContext(), "Please install Spotify", Toast.LENGTH_LONG).show();
+      // Open the Play Store for user to install the app
+      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.spotify.music"));
+      startActivity(intent);
     }
   }
 }
