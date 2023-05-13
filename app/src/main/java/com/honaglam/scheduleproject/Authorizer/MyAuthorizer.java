@@ -17,6 +17,9 @@ import com.auth0.android.result.Credentials;
 import com.auth0.android.result.UserProfile;
 import com.honaglam.scheduleproject.Auth0Fragment;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MyAuthorizer {
   static Auth0 auth0Account = new Auth0("6auXenOyXE3RcK51Syb5hoeu55DAbfDy", "dev-j07rhfbc.us.auth0.com");
 
@@ -48,7 +51,13 @@ public class MyAuthorizer {
 
     @Override
     public void run() {
-      WebAuthProvider.login(auth0Account).withScheme("demo").withScope("openid profile email")
+      Map<String,Object> params = new HashMap<>();
+      params.put("prompt","select_account");
+
+      WebAuthProvider.login(auth0Account)
+              .withParameters(params)
+              .withScheme("demo")
+              .withScope("openid profile email")
               .start(context, new UserLogInCallback(context, credentials -> {
                 Log.i("AUTH", "Log in credential: " + credentials);
                 new AuthenticationAPIClient(auth0Account)

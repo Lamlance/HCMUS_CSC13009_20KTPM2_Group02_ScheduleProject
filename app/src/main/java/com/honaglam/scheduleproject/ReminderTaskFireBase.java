@@ -73,6 +73,8 @@ public class ReminderTaskFireBase {
     public static final String SINGLE_REMINDER_NAME = "Single";
     public static final String WEEKLY_REMINDER_NAME = "Weekly";
 
+    public static final String WEEK_DATE_COL = "weekDates";
+
     public String title;
     public long reminderTime = -1;
     public String id;
@@ -183,6 +185,7 @@ public class ReminderTaskFireBase {
   }
 
 
+  //Task===================================================
   static private void AddTaskToMap(@NonNull Task t){
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(t.reminder.reminderTime);
@@ -194,7 +197,7 @@ public class ReminderTaskFireBase {
   }
   static private void AddNormalOrWeeklyTask(@NonNull Task t){
     if(t.reminder.weekDates == null){
-      Log.i("FIREBASE","NORMAL TASK");
+      //Log.i("FIREBASE","NORMAL TASK");
       NORMAL_TASK.add(t);
       return;
     }
@@ -216,12 +219,38 @@ public class ReminderTaskFireBase {
   static private void RemoveTask(@NonNull Task task){
     if(task.reminder == Task.DEFAULT_REMINDER){
       NORMAL_TASK.remove(task);
-    }else{
+      return;
+    }
+    if(task.reminder.weekDates == null){
       Calendar calendar = Calendar.getInstance();
       calendar.setTimeInMillis(task.reminder.reminderTime);
       TASKS_BY_MONTH.get(calendar.get(Calendar.MONTH)).remove(task);
+    }else{
+      for (Integer wd:task.reminder.weekDates) {
+        WEEKLY_TASKS.get(wd).remove(task);
+      }
     }
   }
+  static private void UpdateTask(@NonNull Task task){
+    if(task.reminder == Task.DEFAULT_REMINDER){
+      int id = NORMAL_TASK.indexOf(task);
+      if(id >= 0){
+        NORMAL_TASK.set(id,task);
+      }
+      return;
+    }
+  }
+  static private void ChangeNormalTaskToReminder(@NonNull Task task){
+    NORMAL_TASK.remove(task);
+    ReminderTaskFireBase.AddNormalOrWeeklyTask(task);
+  }
+  static private void ChangeManyNormalTaskToReminder(@NonNull List<Task> taskList){
+    for (Task t:taskList) {
+      ChangeNormalTaskToReminder(t);
+    }
+  }
+  //========================================================
+
 
   static public @NonNull List<Reminder> GetRemindersInMonth(int month){
     List<Reminder> reminders = SINGLE_REMINDER_BY_MONTH.get(month);
@@ -306,38 +335,6 @@ public class ReminderTaskFireBase {
 
 
   //Initialize ==========================
-  class InitializeThread implements Runnable{
-    OnCompleted onCompleted;
-    InitializeThread(OnCompleted completed){
-      this.onCompleted = completed;
-    }
-    @Override
-    public void run() {
-      Log.i("FIREBASE","Starting Initializing thread");
-
-      Calendar calendar = Calendar.getInstance();
-      calendar.set(Calendar.HOUR_OF_DAY, 0);
-      calendar.set(Calendar.MINUTE, 0);
-      calendar.set(Calendar.SECOND, 0);
-      calendar.set(Calendar.MILLISECOND, 0);
-      todayTime = calendar.getTimeInMillis();
-
-      todayStats = new TimerStats();
-      todayStats.createDate = calendar.getTimeInMillis();
-      createTodayStats(todayStats);
-
-      getRemindersInAYear(calendar.get(Calendar.YEAR), () -> {
-        Log.i("FIREBASE","Finish getting reminders in a year");
-        getTasksInAYear(calendar.get(Calendar.YEAR), () -> {
-          Log.i("FIREBASE","Finish getting Task in a year");
-          getNormalAndWeeklyTask(() -> {
-            Log.i("FIREBASE","Finish getting normal and weekly task");
-            onCompleted.onCompleted();
-          });
-        });
-      });
-    }
-  }
 
   private ReminderTaskFireBase(String deviceUUID,OnCompleted onCompleted) {
     userUID = deviceUUID;
@@ -430,7 +427,7 @@ public class ReminderTaskFireBase {
     databaseReference.child(this.userUID)
             .child(Task.TABLE_NAME)
             .orderByChild(Task.TASK_REMINDER_NAME + "/" + Reminder.REMINDER_TIME_NAME)
-            .equalTo(-1)
+            .endAt(0)
             .addListenerForSingleValueEvent(new NormalTaskQueryListener(onCompleted));
   }
   static class ReminderTasksQueryListener implements com.google.firebase.database.ValueEventListener{
@@ -476,6 +473,7 @@ public class ReminderTaskFireBase {
       for (DataSnapshot data: dataList) {
         Task task = data.getValue(Task.class);
         if(task != null){
+          Log.i("FIREBASE","FOUND " + task.title);
           AddNormalOrWeeklyTask(task);
         }
       }
@@ -545,10 +543,11 @@ public class ReminderTaskFireBase {
   }
 
   @Nullable
-  public Reminder addWeeklyReminder(String title, List<Integer> weekDates) {
+  public Reminder addWeeklyReminder(String title,List<Integer> weekDates,long remindTime) {
     Reminder reminder = new Reminder();
     reminder.title = title;
     reminder.weekDates = weekDates;
+    reminder.reminderTime = remindTime * -1;
 
     DatabaseReference weeklyReminderRef = databaseReference.child(userUID)
             .child(Reminder.TABLE_NAME)
@@ -580,7 +579,6 @@ public class ReminderTaskFireBase {
       RemoveWeeklyReminder(reminder);
     }
   }
-
 
   public void searchReminder(long startTime,long endTime,@NonNull ReminderResultCallBack callBack){
     databaseReference.child(userUID)
@@ -646,8 +644,9 @@ public class ReminderTaskFireBase {
             .child(Task.TABLE_NAME)
             .child(taskData.id)
             .setValue(taskData)
-            .addOnCompleteListener(task1 -> {
+            .addOnCompleteListener(t -> {
               onCompleted.onCompleted(taskData);
+              UpdateTask(taskData);
             });
   }
 
@@ -661,8 +660,9 @@ public class ReminderTaskFireBase {
     String taskId = taskRef.push().getKey();
     if (taskId != null) {
       taskData.id = taskId;
-      taskRef.child(taskId).setValue(taskData).addOnCompleteListener(task1 -> {
+      taskRef.child(taskId).setValue(taskData).addOnCompleteListener(t -> {
         onCompleted.onCompleted(taskData);
+        ReminderTaskFireBase.AddNormalOrWeeklyTask(taskData);
       });
       return;
     }
@@ -690,6 +690,7 @@ public class ReminderTaskFireBase {
             .updateChildren(taskMap, (error, ref) -> {
               if(error == null){
                 completed.onComplete(reminder,tasks);
+                ChangeManyNormalTaskToReminder(tasks);
               }else{
                 Log.e("FIREBASE", error.getDetails());
               }
@@ -697,10 +698,10 @@ public class ReminderTaskFireBase {
   }
 
   public void makeTaskWeeklyReminder(
-          String title, List<Integer> weekDates, List<Task> tasks,
+          String title, List<Integer> weekDates,long remindTime, List<Task> tasks,
           OnTaskSetReminderCompleted completed) {
 
-    Reminder reminder = addWeeklyReminder(title, weekDates);
+    Reminder reminder = addWeeklyReminder(title, weekDates,remindTime);
     if (reminder == null) {
       return;
     }
@@ -716,6 +717,7 @@ public class ReminderTaskFireBase {
             .updateChildren(taskMap, (error, ref) -> {
               if(error == null){
                 completed.onComplete(reminder,tasks);
+                ChangeManyNormalTaskToReminder(tasks);
               }
               else{
                 Log.e("FIREBASE", error.getDetails());
@@ -730,6 +732,7 @@ public class ReminderTaskFireBase {
             .removeValue()
             .addOnCompleteListener(task -> {
               onCompleted.onCompleted(taskData);
+              ReminderTaskFireBase.RemoveTask(taskData);
             });
   }
 
