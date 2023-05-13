@@ -115,7 +115,7 @@ public class MyAlarmManager {
 
       alarmManager.setInexactRepeating(
               AlarmManager.RTC,
-              reminder.reminderTime,
+              calendar.getTimeInMillis(),
               AlarmManager.INTERVAL_DAY * 7,
               pendingIntent
       );

@@ -65,6 +65,7 @@ public class TaskRepository {
 
   public void updateTask(ReminderTaskFireBase.Task task) {
     ReminderTaskFireBase.GetInstance(userId,"Task").updateTask(task, newTask -> {
+
     });
   }
 
@@ -85,10 +86,10 @@ public class TaskRepository {
             });
   }
 
-  public void setTaskWeeklyReminder(String reminderTitle, List<Integer> remindWeekDays, List<ReminderTaskFireBase.Task> tasks) {
+  public void setTaskWeeklyReminder(String reminderTitle, List<Integer> remindWeekDays,long remindTime, List<ReminderTaskFireBase.Task> tasks) {
     ReminderTaskFireBase
             .GetInstance(userId,"Task")
-            .makeTaskWeeklyReminder(reminderTitle, remindWeekDays, tasks, (reminder, taskList) -> {
+            .makeTaskWeeklyReminder(reminderTitle, remindWeekDays,remindTime, tasks, (reminder, taskList) -> {
               if (onTasksSetReminder != null) {
                 onTasksSetReminder.onAction(taskList, reminder);
               }

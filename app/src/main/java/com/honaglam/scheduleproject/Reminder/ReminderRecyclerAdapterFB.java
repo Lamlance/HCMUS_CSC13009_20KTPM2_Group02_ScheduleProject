@@ -33,7 +33,7 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
   }
 
 
-  int selectedPos = -1;
+  int selectedPos = 0;
   Context context;
   ItemAction itemClickAction;
   ItemAction deleteClickAction;
@@ -73,8 +73,11 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
             LayoutInflater.from(parent.getContext()).inflate(R.layout.reminder_recycler_item, parent, false)
     );
     viewHolder.setSelectItemCallback((pos) -> {
+      int prevPos = selectedPos;
       selectedPos = pos;
       callItemAction(itemClickAction,null);
+      notifyItemChanged(prevPos);
+      notifyItemChanged(selectedPos);
     });
     return viewHolder;
   }
@@ -100,6 +103,8 @@ public class ReminderRecyclerAdapterFB extends RecyclerView.Adapter<ReminderView
         weekDateNames += WEEK_DAY_NAMES_SHORT[wD-1] + "-";
       }
       weekDateNames = weekDateNames.substring(0,weekDateNames.length() - 1);
+      weekDateNames += " \n " + DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(data.reminderTime*-1));
+
       holder.txtId.setText(String.format(Locale.getDefault(),"Weekly: %s",weekDateNames));
     } else {
       String dateFormat = DateFormat.getDateTimeInstance().format(new Date(data.reminderTime));

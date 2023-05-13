@@ -43,6 +43,7 @@ public class ReminderBroadcastReceiver extends BroadcastReceiver {
       @Override
       public void onFinish() {
         mediaPlayer.stop();
+        mediaPlayer.release();
       }
     };
     timer.start();

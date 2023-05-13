@@ -77,10 +77,10 @@ public class CalendarFragment extends Fragment {
   ConstraintLayout layoutCalendarAll;
 
 
-  List<ReminderTaskFireBase.Reminder> reminderInMonth;
-  Map<Integer, LinkedList<ReminderTaskFireBase.Reminder>> singleReminderMapByDate;
+  final List<ReminderTaskFireBase.Reminder> reminderInMonth = new LinkedList<>();
+  final Map<Integer, LinkedList<ReminderTaskFireBase.Reminder>> singleReminderMapByDate = new HashMap<>();
 
-  HashMap<Integer, List<ReminderTaskFireBase.Reminder>> reminderMapByWeekDay;
+  final HashMap<Integer, List<ReminderTaskFireBase.Reminder>> reminderMapByWeekDay = new HashMap<>();
 
   public class ReminderInDateGetter{
     private static boolean returnSearchResult = false;
@@ -95,16 +95,15 @@ public class CalendarFragment extends Fragment {
       calendar.set(selectedYear,selectedMonth,date);
 
       List<ReminderTaskFireBase.Reminder> singleReminders = singleReminderMapByDate.get(date);
-      //Log.i("CALENDAR_FRAGMENT","single reminder size " + (singleReminders == null ? 0 : singleReminders.size()));
+      //Log.i("CALENDAR_FRAGMENT",date + " single reminder size " + (singleReminders == null ? 0 : singleReminders.size()));
 
       List<ReminderTaskFireBase.Reminder> weeklyReminder = getWeeklyReminder(calendar.get(Calendar.DAY_OF_WEEK));
-      //Log.i("CALENDAR_FRAGMENT","weekly reminder size " + weeklyReminder.size());
+      //Log.i("CALENDAR_FRAGMENT",date + " weekly reminder size " + weeklyReminder.size());
 
       if(singleReminders != null){
         remindersInDate.addAll(singleReminders);
       }
       remindersInDate.addAll(weeklyReminder);
-
 
       return remindersInDate;
     }
@@ -148,20 +147,7 @@ public class CalendarFragment extends Fragment {
   public CalendarFragment(){
   }
 
-  private void MapReminderMothToDateMap() {
-    Calendar calendar = Calendar.getInstance();
-    Map<Integer, List<ReminderTaskFireBase.Reminder>> reminderByDate = reminderInMonth.stream().collect(
-            Collectors.groupingBy(r -> {
-              calendar.setTimeInMillis(r.reminderTime);
-              return calendar.get(Calendar.DATE);
-            })
-    );
 
-    singleReminderMapByDate = new HashMap<>();
-    reminderByDate.forEach((k,v)->{
-      singleReminderMapByDate.put(k,new LinkedList<>(v));
-    });
-  }
 
 
 
@@ -181,8 +167,6 @@ public class CalendarFragment extends Fragment {
     reminderRepository.SetSearchResultCallBack(new SearchReminderCallBack());
   }
 
-
-
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
@@ -194,10 +178,6 @@ public class CalendarFragment extends Fragment {
 
     context = getContext();
     mainActivity = (MainActivity) getActivity();
-
-    reminderInMonth = ReminderTaskFireBase.GetRemindersInMonth(selectedMonth);
-    reminderMapByWeekDay = ReminderTaskFireBase.GetWeeklyReminderByWeekDay();
-    MapReminderMothToDateMap();
 
     layoutCalendarAll = view.findViewById(R.id.layoutCalendarAll);
 
@@ -212,7 +192,7 @@ public class CalendarFragment extends Fragment {
     ani_month_r2l = AnimationUtils.loadAnimation(context, R.anim.calendar_month_change_r2l);
     ani_month_l2r = AnimationUtils.loadAnimation(context, R.anim.calendar_month_change_l2r);
 
-    calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapterFB(context,new ReminderInDateGetter());
+    calendarRecyclerViewAdapter = new CalendarRecyclerViewAdapterFB(context,reminderInDateGetter);
     calendarRecyclerViewAdapter.setSelectDateCallBack((d,m,y,w)->{
       int oldDate = selectedDate;
       selectedDate = d;
@@ -241,9 +221,6 @@ public class CalendarFragment extends Fragment {
       txtBigWeekDate.setText(WEEK_DAY_NAMES[w-1]);
       txtSelectDate.setText(String.format(Locale.getDefault(),"%d/%d/%d",d,m,y));
 
-      reminderInMonth = ReminderTaskFireBase.GetRemindersInMonth(selectedMonth);
-      MapReminderMothToDateMap();
-
       if(reminderRecyclerAdapter != null){
         reminderRecyclerAdapter.notifyDataSetChanged();
       }
@@ -261,7 +238,7 @@ public class CalendarFragment extends Fragment {
     });
 
     RecyclerView reminderRecycler = view.findViewById(R.id.recyclerReminders);
-    reminderRecyclerAdapter = new ReminderRecyclerAdapterFB(context,new ReminderInDateGetter());
+    reminderRecyclerAdapter = new ReminderRecyclerAdapterFB(context,reminderInDateGetter);
     reminderRecyclerAdapter.setDeleteClickAction((pos,reminder)->{
       RemoveReminder(reminder);
     });
@@ -297,8 +274,35 @@ public class CalendarFragment extends Fragment {
     ((AppCompatToggleButton) view.findViewById(R.id.btnToggleCalendar)).setOnCheckedChangeListener(
             (compoundButton, isOn) -> layoutCalendarAll.setVisibility(isOn ? View.GONE : View.VISIBLE)
     );
+
+    InitData();
   }
 
+
+
+  private void InitData(){
+    reminderInMonth.clear();
+    reminderInMonth.addAll(ReminderTaskFireBase.GetRemindersInMonth(selectedMonth));
+
+    reminderMapByWeekDay.clear();
+    reminderMapByWeekDay.putAll(ReminderTaskFireBase.GetWeeklyReminderByWeekDay());
+
+    MapReminderMothToDateMap();
+  }
+  private void MapReminderMothToDateMap() {
+    Calendar calendar = Calendar.getInstance();
+    Map<Integer, List<ReminderTaskFireBase.Reminder>> reminderByDate = reminderInMonth.stream().collect(
+            Collectors.groupingBy(r -> {
+              calendar.setTimeInMillis(r.reminderTime);
+              return calendar.get(Calendar.DATE);
+            })
+    );
+
+    singleReminderMapByDate.clear();
+    reminderByDate.forEach((k,v)->{
+      singleReminderMapByDate.put(k,new LinkedList<>(v));
+    });
+  }
 
 
   private void AddReminder(String name) {
@@ -315,7 +319,7 @@ public class CalendarFragment extends Fragment {
     long remindTime = calendar.getTimeInMillis();
 
     //TODO Firebase Add Reminder Weekly
-    reminderRepository.addWeeklyReminder(name, new LinkedList<>(weekly));
+    reminderRepository.addWeeklyReminder(name, new LinkedList<>(weekly),remindTime);
   }
 
   private void RemoveReminder(ReminderTaskFireBase.Reminder reminder){
@@ -336,6 +340,7 @@ public class CalendarFragment extends Fragment {
         return;
       }
       //TODO ENABLE ALARM MANAGER
+      reminderInMonth.add(reminder);
 
       if(reminder.weekDates == null){
         MyAlarmManager.SetSingleReminderAlarm(context,reminder);
@@ -351,22 +356,23 @@ public class CalendarFragment extends Fragment {
         int pos = calendarRecyclerViewAdapter.dateToPos(date);
         calendarRecyclerViewAdapter.notifyItemChanged(pos);
         reminderRecyclerAdapter.notifyItemInserted(0);
+
+        Log.i("CALENDAR_FRAGMENT",calendar.get(Calendar.DATE) + "Add single " + reminder.title);
         return;
       }
 
       for (Integer wd: reminder.weekDates) {
         if(!reminderMapByWeekDay.containsKey(wd)){
           reminderMapByWeekDay.put(wd,new LinkedList<>());
+          reminderMapByWeekDay.get(wd).add(reminder);
+          Log.i("CALENDAR_FRAGMENT","ADD REMINDER TO " + WEEK_DAY_NAMES[wd-1]);
         }
-        Log.i("CALENDAR_FRAGMENT","ADD REMINDER TO " + WEEK_DAY_NAMES[wd-1]);
+        Log.i("CALENDAR_FRAGMENT","ADD REMINDER TO ALREADY" + WEEK_DAY_NAMES[wd-1]);
         //reminderMapByWeekDay.get(wd).add(reminder);
       }
 
       MyAlarmManager.SetWeeklyReminderAlarm(context,reminder);
       calendarRecyclerViewAdapter.notifyDataSetChanged();
-
-      int newSize = reminderInDateGetter.getReminder().size();
-      //Log.i("CALENDAR_FRAGMENT","NEW REMINDER SIZE" + newSize);
 
       if(reminder.weekDates.contains(selectedWeekDay)){
           reminderRecyclerAdapter.notifyItemInserted(reminderInDateGetter.getReminder().size() - 1);
@@ -398,11 +404,11 @@ public class CalendarFragment extends Fragment {
         reminderMapByWeekDay.get(wd).remove(reminder);
       }
 
-      MapReminderMothToDateMap();
+      //MapReminderMothToDateMap();
+      MyAlarmManager.CancelWeeklyReminderAlarm(context,reminder);
 
       reminderRecyclerAdapter.notifyDataSetChanged();
       calendarRecyclerViewAdapter.notifyDataSetChanged();
-      MyAlarmManager.CancelSingleReminderAlarm(context,reminder);
     }
 
     private void removeSingle(ReminderTaskFireBase.Reminder reminder){
@@ -422,6 +428,7 @@ public class CalendarFragment extends Fragment {
       boolean removeResult = singleReminderMapByDate
               .get(calendar.get(Calendar.DATE))
               .remove(reminder);
+      reminderInMonth.remove(reminder);
 
       //Log.i("CALENDAR_FRAGMENT","REMOVE RESULT " + (removeResult ? "TRUE" : "FALSE"));
 
@@ -429,7 +436,7 @@ public class CalendarFragment extends Fragment {
         int pos = calendarRecyclerViewAdapter.dateToPos(calendar.get(Calendar.DATE));
         calendarRecyclerViewAdapter.notifyItemChanged(pos);
         reminderRecyclerAdapter.notifyDataSetChanged();
-        MyAlarmManager.CancelWeeklyReminderAlarm(context,reminder);
+        MyAlarmManager.CancelSingleReminderAlarm(context,reminder);
       }
     }
   }

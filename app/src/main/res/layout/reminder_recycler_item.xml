@@ -46,6 +46,7 @@
           tools:text="1001" />
 
       <TextView
+          android:maxLines="2"
           android:id="@+id/txtRecyclerRemindersTime"
           style="@style/TEXT"
           android:layout_width="wrap_content"

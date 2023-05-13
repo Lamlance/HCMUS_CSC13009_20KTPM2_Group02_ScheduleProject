@@ -59,8 +59,10 @@ public class ReminderRepository {
     callReminderAction(OnAddReminder, reminder);
   }
 
-  public void addWeeklyReminder(String title, List<Integer> weekDates) {
-    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase.GetInstance(userId,"Reminder").addWeeklyReminder(title, weekDates);
+  public void addWeeklyReminder(String title, List<Integer> weekDates,long remindTime) {
+    ReminderTaskFireBase.Reminder reminder = ReminderTaskFireBase
+            .GetInstance(userId,"Reminder")
+            .addWeeklyReminder(title, weekDates,remindTime);
     callReminderAction(OnAddReminder, reminder);
   }
 

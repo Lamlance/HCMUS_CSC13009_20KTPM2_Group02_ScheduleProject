@@ -93,8 +93,8 @@ public class TimerFragment extends Fragment {
   }
 
 
-  Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> taskMapByReminder;
-  HashSet<ReminderTaskFireBase.Reminder> reminderList;
+  final Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> taskMapByReminder = new HashMap<>();
+  final HashSet<ReminderTaskFireBase.Reminder> reminderList = new HashSet<>();
   TaskExpandableListAdapterFB expandableListAdapter;
 
 
@@ -138,21 +138,6 @@ public class TimerFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    Calendar calendar = Calendar.getInstance();
-    List<ReminderTaskFireBase.Task> taskList = ReminderTaskFireBase.GetTasksInDate(
-            calendar.get(Calendar.DATE),calendar.get(Calendar.MONTH)
-    );
-
-    Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> map = taskList.stream()
-            .collect(Collectors.groupingBy(t -> t.reminder));
-
-    taskMapByReminder = new HashMap<>();
-    map.forEach((k,v)->{
-      taskMapByReminder.put(k,new LinkedList<>(v));
-    });
-    reminderList = new HashSet<>(map.keySet());
-
-
     recyclerTask = view.findViewById(R.id.recyclerTask);
 
     expandableListAdapter = new TaskExpandableListAdapterFB(
@@ -174,28 +159,13 @@ public class TimerFragment extends Fragment {
     txtTimer.setTextSize(50);
 
     btnTimerStart = (TimerFloatingButton) view.findViewById(R.id.btnTimerStart);
-    btnTimerStart.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        activity.startTimer();
-      }
-    });
+    btnTimerStart.setOnClickListener(clickedView -> activity.startTimer());
 
     btnGiveUp = (TimerFloatingButton) view.findViewById(R.id.btnTimerGiveUp);
-    btnGiveUp.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        activity.pauseTimer();
-      }
-    });
+    btnGiveUp.setOnClickListener(clickedView -> activity.pauseTimer());
 
     btnAddTask = view.findViewById(R.id.btnAddTask);
-    btnAddTask.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        new AddTaskDialog(context, new AddTaskDialogListener()).show();
-      }
-    });
+    btnAddTask.setOnClickListener(clickedView -> new AddTaskDialog(context, new AddTaskDialogListener()).show());
 
     activity.setTimerOnTickCallBack(new TimerTickCallBack());
     activity.setTimerStateChangeCallBack(new TimerStateChangeCallBack());
@@ -207,7 +177,7 @@ public class TimerFragment extends Fragment {
     timerSetting.setOnClickListener(new TimerSettingFragmentClick());
 
     btnSkip = (TimerFloatingButton) view.findViewById((R.id.btnSkip));
-    btnSkip.setOnClickListener(view12 -> {
+    btnSkip.setOnClickListener(clickedView -> {
       try {
         activity.skip();
       } catch (Exception e) {
@@ -227,6 +197,7 @@ public class TimerFragment extends Fragment {
     setThemeId(activity.loadTimerSettingPref().prefTheme);
     Log.i("DRAW_POMODORO_STATE", "FRAGMENT VIEW CREATED");
 
+    initData();
   }
 
   @Override
@@ -235,6 +206,26 @@ public class TimerFragment extends Fragment {
 
     //activity.updateTodayTask();
     expandableListAdapter.notifyDataSetChanged();
+  }
+
+
+
+  public void initData(){
+    Calendar calendar = Calendar.getInstance();
+    List<ReminderTaskFireBase.Task> taskList = ReminderTaskFireBase.GetTasksInDate(
+            calendar.get(Calendar.DATE),calendar.get(Calendar.MONTH)
+    );
+
+    Map<ReminderTaskFireBase.Reminder, List<ReminderTaskFireBase.Task>> map = taskList.stream()
+            .collect(Collectors.groupingBy(t -> t.reminder));
+
+    taskMapByReminder.clear();
+    map.forEach((k,v)->{
+      taskMapByReminder.put(k,new LinkedList<>(v));
+    });
+
+    reminderList.clear();
+    reminderList.addAll(map.keySet());
   }
 
 
@@ -323,6 +314,8 @@ public class TimerFragment extends Fragment {
       }else{
         MyAlarmManager.SetWeeklyReminderAlarm(context,reminder);
       }
+
+      checkedTask.clear();
     }
   }
   class TaskRemovedReminderCallBack implements TaskRepository.OnTaskAction{
@@ -360,7 +353,11 @@ public class TimerFragment extends Fragment {
       if(checkedTask.size() <= 0){
         return;
       }
-      taskRepository.setTaskWeeklyReminder(name,new LinkedList<>(dailyReminder),new LinkedList<>(checkedTask));
+      taskRepository.setTaskWeeklyReminder(
+              name,
+              new LinkedList<>(dailyReminder),
+              setDate.getTimeInMillis(),
+              new LinkedList<>(checkedTask));
     }
 
     @Override
