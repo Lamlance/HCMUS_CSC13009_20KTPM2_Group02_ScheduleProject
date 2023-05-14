@@ -95,6 +95,7 @@ public class Auth0Fragment extends DialogFragment {
       }
       new MyAuthorizer(context).logout(isSuccess -> {
        if(isSuccess){
+         MainActivity.USER_PROFILE.USER_ID = "";
          requireActivity().finish();
        }
       });

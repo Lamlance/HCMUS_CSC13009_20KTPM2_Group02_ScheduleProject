@@ -36,7 +36,7 @@ import com.honaglam.scheduleproject.UserSetting.UserTimerSettings;
 
 public class MainActivity extends AppCompatActivity {
 
-  @NonNull static UserAuthData USER_PROFILE = UserAuthData.GetInstance();
+  @NonNull static public UserAuthData USER_PROFILE = UserAuthData.GetInstance();
   public static String GetUserId(){
     return USER_PROFILE.USER_ID;
   }
@@ -117,11 +117,14 @@ public class MainActivity extends AppCompatActivity {
     super.onDestroy();
     Log.i("ON_DESTROY", "ACTIVITY DESTROYING");
     if (timerServiceConnection != null) {
-      Log.i("ON_DESTROY", "ACTIVITY UNBINDING SERVICE");
-      unbindService(timerServiceConnection);
+      if(USER_PROFILE.USER_ID.isBlank()){
+        timerService.stopForeground(true);
+        timerService.stopSelf();
+      }else{
+        Log.i("ON_DESTROY", "ACTIVITY UNBINDING SERVICE");
+        unbindService(timerServiceConnection);
+      }
     }
-
-
   }
 
 
@@ -161,6 +164,10 @@ public class MainActivity extends AppCompatActivity {
   private void InitLogin(){
     new MyAuthorizer(this).login(userProfile -> {
       if(userProfile == null || userProfile.getEmail() == null){
+        if(timerService != null){
+          timerService.stopForeground(true);
+          timerService.stopSelf();
+        }
         return;
       }
       Log.i("MAIN_ACTIVITY","User email " + userProfile.getEmail());

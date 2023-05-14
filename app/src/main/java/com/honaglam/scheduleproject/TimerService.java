@@ -120,7 +120,9 @@ public class TimerService extends Service {
 
   @Override
   public void onDestroy() {
-    timer.cancel();
+    if(timer != null){
+      timer.cancel();
+    }
     unregisterReceiver(receiver);
     super.onDestroy();
   }
