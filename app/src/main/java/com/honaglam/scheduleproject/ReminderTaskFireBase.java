@@ -335,7 +335,6 @@ public class ReminderTaskFireBase {
 
 
   //Initialize ==========================
-
   private ReminderTaskFireBase(String deviceUUID,OnCompleted onCompleted) {
     userUID = deviceUUID;
     Log.i("FIREBASE","Create Initialize thread");
@@ -364,7 +363,6 @@ public class ReminderTaskFireBase {
     });
 
   }
-
   public void getRemindersInAYear(int year,@NonNull OnCompleted onCompletedInitial) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.YEAR, year);
@@ -517,7 +515,6 @@ public class ReminderTaskFireBase {
 
     }
   }
-
   //=========================================
 
 

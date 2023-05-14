@@ -211,7 +211,6 @@ public class CalendarFragment extends Fragment {
       }
     });
     calendarRecyclerViewAdapter.setOnMonthChangeCallBack((d,m,y,w)->{
-      int oldDate = selectedDate;
       selectedDate = d;
       selectedMonth = m;
       selectedYear = y;
@@ -220,6 +219,8 @@ public class CalendarFragment extends Fragment {
       txtBigDate.setText(String.valueOf(d));
       txtBigWeekDate.setText(WEEK_DAY_NAMES[w-1]);
       txtSelectDate.setText(String.format(Locale.getDefault(),"%d/%d/%d",d,m,y));
+
+      InitData();
 
       if(reminderRecyclerAdapter != null){
         reminderRecyclerAdapter.notifyDataSetChanged();
